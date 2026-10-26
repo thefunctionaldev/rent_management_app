@@ -1,0 +1,93 @@
+{
+ "actions": [],
+ "creation": "2026-10-26 23:30:00.000000",
+ "description": "The SaaS subscription of this site. Changed only by paying for a plan (or by Administrator).",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "plan_section",
+  "status",
+  "plan",
+  "billing_cycle",
+  "column_break_plan",
+  "trial_ends_on",
+  "current_period_start",
+  "current_period_end",
+  "last_reminder_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "plan_section",
+   "fieldtype": "Section Break",
+   "label": "Plan"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Trial\nActive\nPast Due\nExpired",
+   "read_only": 1
+  },
+  {
+   "description": "Plan key from the plan catalogue (starter, growth, pro...).",
+   "fieldname": "plan",
+   "fieldtype": "Data",
+   "label": "Plan"
+  },
+  {
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "\nMonthly\nYearly"
+  },
+  {
+   "fieldname": "column_break_plan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trial_ends_on",
+   "fieldtype": "Date",
+   "label": "Trial Ends On"
+  },
+  {
+   "fieldname": "current_period_start",
+   "fieldtype": "Date",
+   "label": "Current Period Start"
+  },
+  {
+   "description": "The site stays usable for a few grace days after this date, then becomes read-only.",
+   "fieldname": "current_period_end",
+   "fieldtype": "Date",
+   "label": "Paid Until"
+  },
+  {
+   "fieldname": "last_reminder_on",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Last Reminder On"
+  }
+ ],
+ "grid_page_length": 50,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-26 23:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Subscription",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "System Manager"
+  },
+  {
+   "read": 1,
+   "role": "Rent Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

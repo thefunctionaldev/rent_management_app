@@ -10,6 +10,11 @@ from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_r
 
 def generate_monthly_invoices():
 	"""Scheduler (monthly): create rent invoices for the current month."""
+	from rent_management.subscription import skip_if_lapsed
+
+	if skip_if_lapsed():
+		return
+
 	settings = frappe.get_single("Rent Management Settings")
 	if not settings.auto_generate_invoices:
 		return

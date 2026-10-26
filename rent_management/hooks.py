@@ -100,6 +100,7 @@ add_to_apps_screen = [
 
 # before_install = "rent_management.install.before_install"
 # after_install = "rent_management.install.after_install"
+after_install = "rent_management.subscription.after_install"
 
 # Uninstallation
 # ------------
@@ -153,11 +154,36 @@ add_to_apps_screen = [
 # 	}
 # }
 
+# a lapsed subscription makes the app read-only, see rent_management/subscription.py
+_subscription_check = {
+	"validate": "rent_management.subscription.check_writable",
+	"before_cancel": "rent_management.subscription.check_writable",
+	"on_trash": "rent_management.subscription.check_writable",
+}
+doc_events = {
+	doctype: dict(_subscription_check)
+	for doctype in (
+		"Tenant",
+		"Tenant Space Type",
+		"Tenant Space",
+		"Tenant Space Allotment",
+		"Tenant Rent Invoice",
+		"Rent Payment",
+		"Security Deposit Settlement",
+		"Rent Management Settings",
+	)
+}
+doc_events["Tenant Space"]["before_insert"] = "rent_management.subscription.check_room_limit"
+doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
+
 # Scheduled Tasks
 # ---------------
 
 scheduler_events = {
-	"daily": ["rent_management.rent_management_system.billing.mark_overdue_invoices"],
+	"daily": [
+		"rent_management.rent_management_system.billing.mark_overdue_invoices",
+		"rent_management.subscription.daily",
+	],
 	"monthly": ["rent_management.rent_management_system.billing.generate_monthly_invoices"],
 }
 

@@ -37,6 +37,9 @@ const colors = {
 	Draft: "slate",
 	Inactive: "slate",
 	"Under Renovation": "slate",
+	Trial: "sky",
+	"Past Due": "amber",
+	Expired: "rose",
 };
 
 const tone = computed(() => palette[colors[props.status] || "slate"]);

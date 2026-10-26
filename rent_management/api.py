@@ -14,6 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
+from rent_management import razorpay, subscription
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
@@ -106,6 +107,7 @@ def get_boot():
 		"site_name": frappe.local.site,
 		"months": MONTHS,
 		"today": nowdate(),
+		"subscription": subscription.get_state(),
 	}
 
 
@@ -739,3 +741,62 @@ def get_outstanding_by(field):
 	):
 		totals[str(row[field])] += flt(row.outstanding_amount)
 	return totals
+
+
+# ---------------------------------------------------------------- subscription
+
+
+@frappe.whitelist()
+def get_billing():
+	check_access()
+	plans = [
+		{
+			"key": key,
+			"title": plan.get("title", key),
+			"description": plan.get("description"),
+			"monthly": flt(plan.get("monthly")),
+			"yearly": flt(plan.get("yearly")),
+			"max_rooms": cint(plan.get("max_rooms")),
+			"max_users": cint(plan.get("max_users")),
+			"features": plan.get("features") or [],
+		}
+		for key, plan in subscription.get_plans().items()
+	]
+	payments = frappe.get_all(
+		subscription.PAYMENT,
+		filters={"status": "Paid"},
+		fields=[
+			"name",
+			"plan_title",
+			"billing_cycle",
+			"amount",
+			"currency",
+			"payment_method",
+			"paid_on",
+			"period_start",
+			"period_end",
+			"bonus_days",
+			"razorpay_payment_id",
+		],
+		order_by="paid_on desc",
+		limit=50,
+	)
+	return {
+		"subscription": subscription.get_state(),
+		"plans": plans,
+		"payments": payments,
+		"online_payments": razorpay.is_configured(),
+		"support_email": frappe.conf.get("rent_support_email"),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def create_subscription_checkout(plan, billing_cycle):
+	check_access()
+	return subscription.create_checkout(plan, billing_cycle)
+
+
+@frappe.whitelist(methods=["POST"])
+def verify_subscription_payment(razorpay_order_id, razorpay_payment_id, razorpay_signature):
+	check_access()
+	return subscription.verify_checkout(razorpay_order_id, razorpay_payment_id, razorpay_signature)

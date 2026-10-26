@@ -2,11 +2,11 @@ import { boot } from "./store";
 
 const locale = () => (boot.currency === "INR" ? "en-IN" : undefined);
 
-export function money(value, { compact = false } = {}) {
+export function money(value, { compact = false, currency } = {}) {
 	const amount = Number(value || 0);
 	return new Intl.NumberFormat(locale(), {
 		style: "currency",
-		currency: boot.currency || "INR",
+		currency: currency || boot.currency || "INR",
 		notation: compact ? "compact" : "standard",
 		// whole amounts without decimals, anything with paise always as .xx
 		maximumFractionDigits: compact ? 1 : amount % 1 ? 2 : 0,

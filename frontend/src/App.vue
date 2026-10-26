@@ -91,6 +91,18 @@
 		</header>
 
 		<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+			<div
+				v-if="banner && $route.name !== 'billing'"
+				class="mb-6 flex flex-col gap-3 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+				:class="bannerTones[banner.tone]"
+			>
+				<p class="flex items-center gap-2">
+					<component :is="banner.icon" class="size-4 shrink-0" />{{ banner.text }}
+				</p>
+				<RouterLink to="/billing" class="font-semibold whitespace-nowrap underline">
+					{{ banner.cta }}
+				</RouterLink>
+			</div>
 			<RouterView v-slot="{ Component }">
 				<Transition
 					mode="out-in"
@@ -122,23 +134,28 @@
 
 <script setup>
 import {
+	AlertTriangle,
 	BarChart3,
+	CreditCard,
 	DoorOpen,
 	ExternalLink,
 	FileText,
 	LayoutDashboard,
+	Lock,
 	LogOut,
 	Menu,
 	ShieldCheck,
+	Sparkles,
 	Users,
 	Wallet,
 } from "lucide-vue-next";
-import { defineAsyncComponent, ref } from "vue";
+import { computed, defineAsyncComponent, ref } from "vue";
 
 import Avatar from "./components/Avatar.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";
 import { boot } from "./store";
+import { date } from "./utils";
 
 const logo = `${import.meta.env.BASE_URL}favicon.svg`;
 const menuOpen = ref(false);
@@ -164,7 +181,53 @@ const nav = [
 			{ to: "/outstanding", label: "Outstanding", icon: BarChart3 },
 		],
 	},
+	{
+		label: "Account",
+		items: [{ to: "/billing", label: "Subscription", icon: CreditCard }],
+	},
 ];
+
+const bannerTones = {
+	sky: "border-sky-200 bg-sky-50 text-sky-800",
+	amber: "border-amber-200 bg-amber-50 text-amber-800",
+	rose: "border-rose-200 bg-rose-50 text-rose-800",
+};
+const banner = computed(() => {
+	const s = boot.subscription;
+	if (!s?.enforced) return null;
+	const days = (n) => `${n} day${n === 1 ? "" : "s"}`;
+	if (s.status === "Expired")
+		return {
+			tone: "rose",
+			icon: Lock,
+			text: "Your subscription has expired, so the app is read-only. Renew to add or change anything.",
+			cta: "Renew now",
+		};
+	if (s.status === "Past Due")
+		return {
+			tone: "amber",
+			icon: AlertTriangle,
+			text: `Your plan ended on ${date(s.current_period_end)}. Renew by ${date(
+				s.grace_ends_on
+			)} to keep using the app.`,
+			cta: "Renew",
+		};
+	if (s.status === "Trial")
+		return {
+			tone: s.days_left <= 3 ? "amber" : "sky",
+			icon: Sparkles,
+			text: `${days(s.days_left)} left in your free trial of the ${s.plan_title} plan.`,
+			cta: "Choose a plan",
+		};
+	if (s.days_left <= 7)
+		return {
+			tone: "amber",
+			icon: AlertTriangle,
+			text: `Your ${s.plan_title} plan ends in ${days(s.days_left)}.`,
+			cta: "Renew",
+		};
+	return null;
+});
 
 const lazy = (name) => defineAsyncComponent(() => import(`./dialogs/${name}.vue`));
 const dialogs = {

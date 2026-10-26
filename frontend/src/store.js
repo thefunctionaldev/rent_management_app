@@ -11,6 +11,7 @@ export const boot = reactive({
 	currency_symbol: "₹",
 	months: [],
 	today: new Date().toISOString().slice(0, 10),
+	subscription: null,
 });
 
 export async function loadBoot() {

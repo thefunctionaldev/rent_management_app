@@ -55,6 +55,74 @@ yarn dev   # http://localhost:8080/rent/, proxies API calls to the Frappe server
 Log in on the Frappe server first. The dev server can't inject a CSRF token, so set `"ignore_csrf": 1` in the
 site's `site_config.json` while developing (never in production).
 
+### Subscriptions (selling it as SaaS)
+
+The app is sold as a hosted service: every customer gets their own site on your bench, starts on a
+free trial and then pays monthly or yearly through Razorpay from **`/rent/billing`**.
+
+- **Trial** - a new site (or an existing one after `bench migrate`) gets a 14-day trial of the Growth plan.
+- **Plans** - Starter (15 rooms, 2 logins), Growth (60 rooms, 5 logins) and Pro (unlimited), monthly or
+  yearly. Room and Rent Manager user limits are enforced; a downgrade below current usage is refused.
+- **Paying** - Razorpay Checkout (UPI, cards, netbanking). The payment is verified on the server
+  (signature, captured status and amount) before the subscription is extended. Paying early adds the new
+  period after the current one; switching plan starts the new plan today and turns the unused days of the
+  old plan into extra days on the new one.
+- **Lapsing** - after the paid period there are 3 grace days (*Past Due*), then the site is **read-only**:
+  everything stays visible, but nothing can be created, changed or deleted, and monthly invoicing pauses.
+  Rent Managers get reminder emails 7, 3 and 1 days before the end.
+- **Records** - every payment is a **Rent Subscription Payment**; the current state is the
+  **Rent Subscription** single. Neither can be edited by customers, only by Administrator.
+
+#### Setting up the bench (once)
+
+```bash
+# Razorpay keys, shared by all customer sites (Dashboard > Account & Settings > API Keys)
+bench set-config -g razorpay_key_id rzp_live_xxxxxxxx
+bench set-config -g razorpay_key_secret xxxxxxxx
+bench set-config -g rent_support_email support@yourdomain.com
+```
+
+Payments are confirmed by the checkout callback, and a daily job also checks Razorpay for orders whose
+browser tab was closed before the callback ran, so a webhook is optional. To add one anyway (events
+`order.paid` and `payment.captured`), point it at
+`https://<customer-site>/api/method/rent_management.subscription.razorpay_webhook` and set
+`bench set-config -g razorpay_webhook_secret xxxx`. Orders from other sites are ignored.
+
+Optional overrides in `common_site_config.json` (or per site): `rent_trial_days` (14), `rent_trial_plan`
+(`growth`), `rent_grace_days` (3), `rent_subscription_currency` (`INR`), `rent_subscription_brand`
+(name in the payment window) and `rent_subscription_plans` to change plans and prices without a release:
+
+```json
+"rent_subscription_plans": {
+  "starter": {"title": "Starter", "monthly": 499, "yearly": 4990, "max_rooms": 15, "max_users": 2,
+              "description": "For a single PG", "features": ["Up to 15 rooms", "2 manager logins"]},
+  "pro": {"title": "Pro", "monthly": 3999, "yearly": 39990, "max_rooms": 0, "max_users": 0}
+}
+```
+
+`0` means unlimited. Set `rent_subscription_enabled` to `0` on a site to switch subscriptions off
+there (e.g. your own demo site).
+
+#### Onboarding a customer
+
+```bash
+bench new-site pg-sharma.yourdomain.com --install-app rent_management
+bench --site pg-sharma.yourdomain.com rent-add-manager owner@sharma.com --first-name Ravi
+```
+
+The customer gets an email to set their password and logs in at `/rent`. Give customers the
+**Rent Manager** role only, never System Manager or the Administrator password, so they can't change
+their own subscription.
+
+#### Managing subscriptions
+
+```bash
+bench --site <site> rent-subscription                     # status, plan, usage
+bench --site <site> rent-subscription --plan growth --cycle Yearly --amount 14990 --reference NEFT123
+bench --site <site> rent-subscription --plan pro --until 2027-03-31    # custom or free deal
+bench --site <site> rent-subscription --restart-trial
+```
+
 ### Workflow
 
 1. Create **Tenant Space Types** and **Tenant Spaces** (rooms).
