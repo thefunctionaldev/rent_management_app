@@ -11,7 +11,6 @@ import frappe
 from frappe.tests import IntegrationTestCase
 
 from rent_management import api, razorpay, rent_collection, subscription
-from rent_management.tests.test_api import make_user
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.test_tenant_rent_invoice import (
 	make_invoice,
 )
@@ -19,6 +18,7 @@ from rent_management.rent_management_system.doctype.tenant_space_allotment.test_
 	make_allotment,
 	make_room,
 )
+from rent_management.tests.test_api import make_user
 
 
 class FakeLandlordRazorpay:

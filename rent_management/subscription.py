@@ -241,11 +241,13 @@ def start_trial(force=False):
 
 
 def after_install():
+	from rent_management.patches.v1_4 import set_settings_defaults
 	from rent_management.rent_management_system.doctype.rent_property.rent_property import (
 		get_default_property,
 	)
 
 	get_default_property()
+	set_settings_defaults.execute()
 	start_trial()
 
 

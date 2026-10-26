@@ -188,6 +188,7 @@ doc_events["Rent Property"]["validate"] = [
 	"rent_management.subscription.check_writable",
 	"rent_management.subscription.check_property_limit",
 ]
+doc_events["Rent Payment"]["on_submit"] = "rent_management.notifications.on_payment_submit"
 doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
 
 # Scheduled Tasks
@@ -198,6 +199,7 @@ scheduler_events = {
 		"rent_management.rent_management_system.billing.mark_overdue_invoices",
 		"rent_management.subscription.daily",
 		"rent_management.rent_collection.reconcile_payment_links",
+		"rent_management.notifications.send_due_reminders",
 	],
 	"monthly": ["rent_management.rent_management_system.billing.generate_monthly_invoices"],
 }

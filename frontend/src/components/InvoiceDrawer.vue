@@ -234,11 +234,20 @@
 					>Record payment</Button
 				>
 				<Button
+					v-if="inv.outstanding_amount > 0"
+					:icon="BellRing"
+					:loading="reminding.loading.value"
+					@click="remind"
+					>Send reminder</Button
+				>
+				<Button
 					v-if="reminder && inv.outstanding_amount > 0"
+					variant="ghost"
 					:href="reminder"
 					target="_blank"
 					:icon="MessageCircle"
-					>Remind on WhatsApp</Button
+					title="Open WhatsApp with a reminder you can edit"
+					>WhatsApp</Button
 				>
 			</template>
 			<Button
@@ -255,6 +264,7 @@
 
 <script setup>
 import {
+	BellRing,
 	Check,
 	Copy,
 	Link2,
@@ -302,6 +312,11 @@ const checking = useAction(() => post("check_online_payment", { name: props.name
 	success: (recorded) => (recorded.length ? "Online payment recorded" : "No new payment yet"),
 });
 const checkPayment = () => checking.run();
+const reminding = useAction(() => post("send_rent_reminder", { name: props.name }), {
+	success: (statuses) =>
+		statuses.includes("Sent") ? "Reminder sent" : "Reminder could not be sent, see Settings",
+});
+const remind = () => reminding.run();
 async function copyLink() {
 	try {
 		await navigator.clipboard.writeText(link.value);

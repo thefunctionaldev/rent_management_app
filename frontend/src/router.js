@@ -20,6 +20,7 @@ const routes = [
 	},
 	{ path: "/buildings", name: "buildings", component: () => import("./pages/Buildings.vue") },
 	{ path: "/import", name: "import", component: () => import("./pages/Import.vue") },
+	{ path: "/settings", name: "settings", component: () => import("./pages/Settings.vue") },
 	{ path: "/billing", name: "billing", component: () => import("./pages/Billing.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];

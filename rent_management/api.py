@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import data_import, gst, razorpay, rent_collection, subscription
+from rent_management import data_import, gst, notifications, razorpay, rent_collection, subscription
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
@@ -871,6 +871,99 @@ def get_outstanding_by(field):
 	):
 		totals[str(row[field])] += flt(row.outstanding_amount)
 	return totals
+
+
+# ---------------------------------------------------------------- settings
+
+SETTINGS_FIELDS = (
+	"auto_generate_invoices",
+	"auto_submit_invoices",
+	"rent_due_day",
+	"upi_id",
+	"upi_payee_name",
+	"razorpay_enabled",
+	"razorpay_key_id",
+	"send_reminders",
+	"remind_days_before",
+	"remind_on_due_date",
+	"overdue_reminder_interval",
+	"overdue_reminder_limit",
+	"send_receipts",
+	"notify_by_whatsapp",
+	"notify_by_email",
+	"whatsapp_phone_number_id",
+)
+# write-only: the browser only learns whether they are set
+SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
+
+
+@frappe.whitelist()
+def get_settings():
+	check_access()
+	settings = frappe.get_single("Rent Management Settings")
+	values = {field: settings.get(field) for field in SETTINGS_FIELDS}
+	for field in SECRET_FIELDS:
+		values[f"{field}_set"] = bool(settings.get_password(field, raise_exception=False))
+	own_whatsapp = bool(settings.whatsapp_phone_number_id and values["whatsapp_token_set"])
+	return {
+		"settings": values,
+		"whatsapp": {
+			"available": bool(notifications.get_whatsapp_account()),
+			"source": "own" if own_whatsapp else ("plan" if notifications.get_whatsapp_account() else None),
+			"in_plan": subscription.has_feature("whatsapp"),
+		},
+		"email_configured": notifications.email_configured(),
+		"webhook_url": frappe.utils.get_url("/api/method/rent_management.rent_collection.razorpay_webhook"),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_settings(data):
+	check_access()
+	data = frappe.parse_json(data)
+	settings = frappe.get_single("Rent Management Settings")
+	settings.update(pick(data, SETTINGS_FIELDS))
+	for field in SECRET_FIELDS:
+		if data.get(field):
+			settings.set(field, data[field])
+		elif data.get(f"clear_{field}"):
+			settings.set(field, None)
+	settings.save()
+	return get_settings()
+
+
+@frappe.whitelist()
+def get_message_log(start=0, page_length=50):
+	check_access()
+	return frappe.get_all(
+		"Rent Message Log",
+		fields=[
+			"name",
+			"creation",
+			"message_type",
+			"channel",
+			"status",
+			"recipient",
+			"tenant",
+			"tenant_name",
+			"rent_invoice",
+			"error",
+		],
+		order_by="creation desc",
+		start=cint(start),
+		page_length=cint(page_length),
+	)
+
+
+@frappe.whitelist(methods=["POST"])
+def send_rent_reminder(name):
+	check_access()
+	statuses = notifications.send_reminder(name)
+	if not statuses:
+		frappe.throw(
+			_("Nothing was sent: the tenant has no WhatsApp number or email, or both channels are off.")
+		)
+	return statuses
 
 
 # ---------------------------------------------------------------- import

@@ -165,6 +165,7 @@ import {
 	Lock,
 	LogOut,
 	Menu,
+	Settings,
 	ShieldCheck,
 	Sparkles,
 	Users,
@@ -207,7 +208,10 @@ const nav = [
 	},
 	{
 		label: "Account",
-		items: [{ to: "/billing", label: "Subscription", icon: CreditCard }],
+		items: [
+			{ to: "/settings", label: "Settings", icon: Settings },
+			{ to: "/billing", label: "Subscription", icon: CreditCard },
+		],
 	},
 ];
 

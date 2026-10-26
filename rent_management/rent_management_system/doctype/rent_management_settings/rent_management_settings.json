@@ -18,7 +18,21 @@
   "razorpay_enabled",
   "razorpay_key_id",
   "razorpay_key_secret",
-  "razorpay_webhook_secret"
+  "razorpay_webhook_secret",
+  "reminders_section",
+  "send_reminders",
+  "remind_days_before",
+  "remind_on_due_date",
+  "overdue_reminder_interval",
+  "overdue_reminder_limit",
+  "column_break_reminders",
+  "send_receipts",
+  "notify_by_whatsapp",
+  "notify_by_email",
+  "whatsapp_section",
+  "whatsapp_phone_number_id",
+  "column_break_whatsapp",
+  "whatsapp_token"
  ],
  "fields": [
   {
@@ -102,13 +116,103 @@
    "fieldname": "razorpay_webhook_secret",
    "fieldtype": "Password",
    "label": "Razorpay Webhook Secret"
+  },
+  {
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Reminders & Receipts"
+  },
+  {
+   "default": "1",
+   "description": "Automatic reminders for unpaid rent, with the payment link when there is one.",
+   "fieldname": "send_reminders",
+   "fieldtype": "Check",
+   "label": "Send Rent Reminders"
+  },
+  {
+   "default": "3",
+   "depends_on": "send_reminders",
+   "description": "0 to skip",
+   "fieldname": "remind_days_before",
+   "fieldtype": "Int",
+   "label": "Remind Days Before Due Date",
+   "non_negative": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "send_reminders",
+   "fieldname": "remind_on_due_date",
+   "fieldtype": "Check",
+   "label": "Remind on the Due Date"
+  },
+  {
+   "default": "3",
+   "depends_on": "send_reminders",
+   "description": "0 to skip overdue reminders",
+   "fieldname": "overdue_reminder_interval",
+   "fieldtype": "Int",
+   "label": "Overdue: Remind Every (Days)",
+   "non_negative": 1
+  },
+  {
+   "default": "3",
+   "depends_on": "send_reminders",
+   "fieldname": "overdue_reminder_limit",
+   "fieldtype": "Int",
+   "label": "Overdue: At Most (Reminders)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_reminders",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_receipts",
+   "fieldtype": "Check",
+   "label": "Send Payment Receipts"
+  },
+  {
+   "default": "1",
+   "description": "Included in Growth and Pro, or on any plan with your own WhatsApp Business account below.",
+   "fieldname": "notify_by_whatsapp",
+   "fieldtype": "Check",
+   "label": "Send on WhatsApp"
+  },
+  {
+   "default": "1",
+   "fieldname": "notify_by_email",
+   "fieldtype": "Check",
+   "label": "Send by Email"
+  },
+  {
+   "collapsible": 1,
+   "description": "WhatsApp Cloud API credentials from Meta. Messages then come from your own number.",
+   "fieldname": "whatsapp_section",
+   "fieldtype": "Section Break",
+   "label": "Own WhatsApp Business Account (optional)"
+  },
+  {
+   "fieldname": "whatsapp_phone_number_id",
+   "fieldtype": "Data",
+   "label": "Phone Number ID"
+  },
+  {
+   "fieldname": "column_break_whatsapp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "whatsapp_token",
+   "fieldtype": "Password",
+   "label": "Access Token",
+   "length": 512
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 19:22:06.337102",
+ "modified": "2026-10-26 19:26:01.628074",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",
