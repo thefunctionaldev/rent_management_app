@@ -2,6 +2,12 @@
 	<div>
 		<PageHeader title="Settings" subtitle="Invoicing, online rent collection and reminders">
 			<Button
+				:icon="Download"
+				href="/api/method/rent_management.api.export_data"
+				title="Every building, room, tenant, invoice, payment and expense as an Excel file"
+				>Download all data</Button
+			>
+			<Button
 				variant="primary"
 				:icon="Save"
 				:loading="saving"
@@ -297,7 +303,7 @@
 </template>
 
 <script setup>
-import { MessageCircle, Save } from "lucide-vue-next";
+import { Download, MessageCircle, Save } from "lucide-vue-next";
 import { computed, reactive, ref, watch } from "vue";
 
 import { get, post } from "@/api";

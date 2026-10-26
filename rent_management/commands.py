@@ -98,4 +98,53 @@ def rent_add_manager(context, email, first_name="Manager", last_name="", no_welc
 		frappe.destroy()
 
 
-commands = [rent_subscription, rent_add_manager]
+@click.command("rent-backup-all")
+@click.option("--with-files", is_flag=True, help="Include uploaded files (Aadhaar scans, bills...).")
+@click.option(
+	"--remote", help="rclone remote to copy backups to, e.g. b2:my-bucket/rent. Default: rent_backup_remote."
+)
+@click.option(
+	"--keep-days", type=int, default=7, show_default=True, help="Local backups older than this are removed."
+)
+def rent_backup_all(with_files=False, remote=None, keep_days=7):
+	"""Back up every site on this bench, and copy the backups off the server with rclone.
+
+	Schedule it from cron, e.g. every night at 2 am:
+	0 2 * * * cd /home/frappe/frappe-bench && bench rent-backup-all --with-files >> logs/rent-backup.log 2>&1
+	"""
+	import shutil
+	import subprocess
+
+	import frappe
+	from frappe.utils import get_sites
+	from frappe.utils.backups import new_backup
+
+	failed = []
+	for site in get_sites():
+		frappe.init(site=site)
+		frappe.connect()
+		try:
+			odb = new_backup(
+				older_than=keep_days * 24, ignore_files=not with_files, compress=True, force=True
+			)
+			target = remote or frappe.conf.get("rent_backup_remote")
+			click.echo(f"{site}: {odb.backup_path_db}")
+			if target:
+				if not shutil.which("rclone"):
+					raise click.ClickException("rclone is not installed (https://rclone.org/install/)")
+				backup_dir = frappe.utils.get_site_path("private", "backups")
+				subprocess.run(
+					["rclone", "copy", backup_dir, f"{target.rstrip('/')}/{site}", "--max-age", "48h"],
+					check=True,
+				)
+				click.echo(f"{site}: copied to {target}/{site}")
+		except Exception as e:
+			failed.append(site)
+			click.echo(f"{site}: backup FAILED: {e}", err=True)
+		finally:
+			frappe.destroy()
+	if failed:
+		raise click.ClickException(f"Backups failed for {', '.join(failed)}")
+
+
+commands = [rent_subscription, rent_add_manager, rent_backup_all]

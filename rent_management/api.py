@@ -1384,6 +1384,17 @@ def send_rent_reminder(name):
 	return statuses
 
 
+@frappe.whitelist()
+def export_data():
+	"""All the landlord's data as an Excel workbook."""
+	check_access()
+	from frappe.desk.utils import provide_binary_file
+
+	from rent_management import export
+
+	provide_binary_file(f"rent-management-{frappe.local.site}-{nowdate()}", "xlsx", export.get_workbook())
+
+
 # ---------------------------------------------------------------- import
 
 
