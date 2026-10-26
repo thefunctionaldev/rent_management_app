@@ -11,7 +11,7 @@ a tenant app, and everything needed to sell it as a hosted subscription service 
 - [Reminders and receipts (WhatsApp and email)](#reminders-and-receipts-whatsapp-and-email)
 - [Selling it as SaaS](#selling-it-as-saas)
 - [Configuration reference](#configuration-reference)
-- [Workflow](#workflow) · [Installation](#installation) · [Contributing](#contributing)
+- [Demo data](#demo-data) · [Workflow](#workflow) · [Installation](#installation) · [Contributing](#contributing)
 
 ### Features
 
@@ -302,6 +302,22 @@ All keys go in `common_site_config.json` (`bench set-config -g`) or a site's `si
 | `whatsapp_phone_number_id`, `whatsapp_token` | all sites | Your WhatsApp number for customers whose plan includes WhatsApp |
 | `whatsapp_templates`, `whatsapp_language`, `whatsapp_api_version` | all sites | Template names, language (`en`), Graph API version (`v21.0`) |
 | `rent_backup_remote` | bench | rclone remote for `rent-backup-all` |
+
+### Demo data
+
+To see the app with realistic data, make a demo site and fill it:
+
+```bash
+bench new-site demo.localhost --install-app rent_management
+bench --site demo.localhost rent-demo-data          # --password to choose the demo password
+bench --site demo.localhost serve --port 8001       # or add it to your nginx / hosts file
+```
+
+It creates a PG business in Bengaluru with six months of history, dated up to today: 3 buildings,
+16 rooms with shared beds, about 25 tenants, monthly invoices with electricity, payments (and a few
+overdue), move-outs with deposit settlements, a tenant on notice, a rent increase, expenses, requests
+and reminder messages. It prints two logins (password `demo@1234`): a Rent Manager for `/rent` and a
+tenant for `/tenant`. It refuses to run on a site that already has rooms or tenants.
 
 ### Workflow
 

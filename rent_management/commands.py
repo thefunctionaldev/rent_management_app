@@ -8,6 +8,7 @@ bench --site <site> rent-subscription --plan growth --cycle Yearly --amount 1499
 bench --site <site> rent-subscription --plan pro --until 2027-03-31    # free / custom deal
 bench --site <site> rent-subscription --restart-trial
 bench --site <site> rent-add-manager owner@example.com --first-name Ravi
+bench --site demo.localhost rent-demo-data                  # demo data on a new site
 """
 
 import click
@@ -181,4 +182,27 @@ def rent_onboard(
 		frappe.destroy()
 
 
-commands = [rent_subscription, rent_add_manager, rent_backup_all, rent_onboard]
+@click.command("rent-demo-data")
+@click.option("--password", default="demo@1234", show_default=True, help="Password of the demo logins.")
+@pass_context
+def rent_demo_data(context, password="demo@1234"):
+	"""Fill a new, empty site with demo data: 3 buildings, tenants and 6 months of history."""
+	frappe = connect(context)
+	try:
+		from rent_management.demo import make_demo_data
+
+		frappe.set_user("Administrator")
+		summary = make_demo_data(password)
+		frappe.db.commit()
+		click.echo(
+			f"Made {summary['buildings']} buildings, {summary['rooms']} rooms, {summary['tenants']} tenants, "
+			f"{summary['invoices']} invoices and {summary['payments']} payments."
+		)
+		click.echo(f"Manager app: {frappe.utils.get_url('/rent')}  {summary['manager_login']} / {password}")
+		click.echo(f"Tenant app:  {frappe.utils.get_url('/tenant')}  {summary['tenant_login']} / {password}")
+		click.echo("Administrator can see everything too.")
+	finally:
+		frappe.destroy()
+
+
+commands = [rent_subscription, rent_add_manager, rent_backup_all, rent_onboard, rent_demo_data]
