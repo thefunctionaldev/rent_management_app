@@ -37,7 +37,63 @@ class IntegrationTestTenant(IntegrationTestCase):
 		tenant = frappe.get_doc(
 			{"doctype": "Tenant", "first_name": "Asha", "aadhar_card_number": f"{aadhaar[:4]} {aadhaar[4:]}"}
 		).insert()
-		self.assertEqual(tenant.aadhar_card_number, aadhaar)
+		self.assertEqual(tenant.get_password("aadhar_card_number"), aadhaar)
+		self.assertEqual(tenant.aadhar_last4, aadhaar[-4:])
+
+	def test_aadhaar_is_encrypted(self):
+		aadhaar = make_aadhaar("34567890123")
+		tenant = frappe.get_doc(
+			{"doctype": "Tenant", "first_name": "Enc", "aadhar_card_number": aadhaar}
+		).insert()
+		# the table holds only asterisks, the number is in the encrypted __Auth store
+		self.assertEqual(frappe.db.get_value("Tenant", tenant.name, "aadhar_card_number"), "*" * 12)
+
+		# saving the form again (with the masked value) keeps the number
+		tenant.reload()
+		tenant.occupation = "Engineer"
+		tenant.save()
+		self.assertEqual(tenant.get_password("aadhar_card_number"), aadhaar)
+
+		self.assertEqual(tenant.reveal_aadhar(), f"{aadhaar[:4]} {aadhaar[4:8]} {aadhaar[8:]}")
+		self.assertTrue(
+			frappe.db.exists(
+				"Comment",
+				{
+					"reference_doctype": "Tenant",
+					"reference_name": tenant.name,
+					"content": ("like", "%Aadhaar%viewed%"),
+				},
+			)
+		)
+
+	def test_aadhaar_card_is_private(self):
+		tenant = frappe.get_doc({"doctype": "Tenant", "first_name": "Scan"}).insert()
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"aadhaar-{tenant.name}.txt",
+				"content": b"scan",
+				"is_private": 0,
+				"attached_to_doctype": "Tenant",
+				"attached_to_name": tenant.name,
+			}
+		).insert()
+		tenant.aadhar_card = file.file_url
+		tenant.save()
+		self.assertTrue(tenant.aadhar_card.startswith("/private/files/"))
+		self.assertEqual(frappe.db.get_value("File", file.name, "is_private"), 1)
+
+	def test_encrypt_patch(self):
+		from rent_management.patches.v1_3 import encrypt_aadhaar
+
+		aadhaar = make_aadhaar("45678901234")
+		tenant = frappe.get_doc({"doctype": "Tenant", "first_name": "Old"}).insert()
+		frappe.db.set_value("Tenant", tenant.name, "aadhar_card_number", aadhaar)  # as stored before
+		encrypt_aadhaar.execute()
+		tenant.reload()
+		self.assertEqual(tenant.aadhar_card_number, "*" * 12)
+		self.assertEqual(tenant.aadhar_last4, aadhaar[-4:])
+		self.assertEqual(tenant.get_password("aadhar_card_number"), aadhaar)
 
 	def test_invalid_aadhaar(self):
 		valid = make_aadhaar("23456789012")

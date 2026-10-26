@@ -189,7 +189,16 @@
 								class="flex justify-between gap-4"
 							>
 								<dt class="text-slate-500">{{ row.label }}</dt>
-								<dd class="text-right text-slate-900">{{ row.value || "—" }}</dd>
+								<dd class="text-right text-slate-900">
+									{{ row.value || "—" }}
+									<button
+										v-if="row.reveal"
+										class="ml-1 text-xs font-medium text-brand-600 hover:underline"
+										@click="row.reveal"
+									>
+										{{ aadhaar ? "Hide" : "Show" }}
+									</button>
+								</dd>
 							</div>
 						</dl>
 					</div>
@@ -335,7 +344,7 @@ import {
 } from "lucide-vue-next";
 import { computed, ref } from "vue";
 
-import { get } from "@/api";
+import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
 import EmptyState from "@/components/EmptyState.vue";
@@ -343,6 +352,7 @@ import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import Tabs from "@/components/Tabs.vue";
 import { openDialog } from "@/dialogs";
+import { toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money } from "@/utils";
 
@@ -350,6 +360,23 @@ const props = defineProps({ name: { type: String, required: true } });
 const { data } = useResource(() => get("get_tenant", { name: props.name }));
 
 const tenant = computed(() => data.value.tenant);
+
+// the full number is fetched on demand (the view is logged) and hidden again after a minute
+const aadhaar = ref("");
+let hideTimer;
+async function toggleAadhaar() {
+	clearTimeout(hideTimer);
+	if (aadhaar.value) {
+		aadhaar.value = "";
+		return;
+	}
+	try {
+		aadhaar.value = await post("reveal_aadhaar", { name: props.name });
+		hideTimer = setTimeout(() => (aadhaar.value = ""), 60000);
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 const current = computed(() => data.value.allotments.find((a) => a.status === "Active"));
 const tab = ref("invoices");
 const tabs = computed(() => [
@@ -371,8 +398,9 @@ const details = computed(() => [
 	{
 		label: "Aadhaar",
 		value:
-			tenant.value.aadhar_card_number &&
-			`•••• •••• ${tenant.value.aadhar_card_number.slice(-4)}`,
+			aadhaar.value ||
+			(tenant.value.aadhar_last4 && `•••• •••• ${tenant.value.aadhar_last4}`),
+		reveal: tenant.value.aadhar_last4 ? toggleAadhaar : null,
 	},
 	{ label: "Workplace", value: tenant.value.workspace },
 	{ label: "Monthly income", value: tenant.value.salary ? money(tenant.value.salary) : "" },

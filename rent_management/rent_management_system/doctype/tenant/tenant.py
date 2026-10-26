@@ -34,14 +34,20 @@ class Tenant(Document):
 	def validate(self):
 		self.set_full_name()
 		self.check_aadhar()
+		self.make_aadhar_card_private()
 
 	def set_full_name(self):
 		parts = [self.first_name, self.middle_name, self.last_name]
 		self.full_name = " ".join(filter(None, parts)).strip()
 
 	def check_aadhar(self):
+		"""Validate a newly entered Aadhaar number. Frappe encrypts the field right after validate
+		and keeps only '*' in the table, so only the last 4 digits are stored in the clear."""
 		if not self.aadhar_card_number:
+			self.aadhar_last4 = None
 			return
+		if self.is_dummy_password(self.aadhar_card_number):
+			return  # unchanged
 
 		aadhar = str(self.aadhar_card_number).replace(" ", "")
 
@@ -55,13 +61,34 @@ class Tenant(Document):
 			frappe.throw(_("Aadhaar validation failed. The checksum is incorrect."))
 
 		self.aadhar_card_number = aadhar
+		self.aadhar_last4 = aadhar[-4:]
+		frappe.msgprint(
+			msg=_("Aadhaar has been successfully verified against the Verhoeff checksum."),
+			title=_("Verification Success"),
+			indicator="green",
+		)
 
-		if self.has_value_changed("aadhar_card_number"):
-			frappe.msgprint(
-				msg=_("Aadhaar has been successfully verified against the Verhoeff checksum."),
-				title=_("Verification Success"),
-				indicator="green",
-			)
+	def make_aadhar_card_private(self):
+		"""The scan of the Aadhaar card must never be reachable at a public /files/ URL."""
+		if not self.aadhar_card or not self.aadhar_card.startswith("/files/"):
+			return
+		file = frappe.db.get_value("File", {"file_url": self.aadhar_card, "is_private": 0})
+		if not file:
+			return
+		file = frappe.get_doc("File", file)
+		file.is_private = 1
+		file.flags.ignore_permissions = True
+		file.save()
+		self.aadhar_card = file.file_url
+
+	def reveal_aadhar(self) -> str:
+		"""The full Aadhaar number, for police verification forms. Every view is logged."""
+		self.check_permission("write")
+		number = self.get_password("aadhar_card_number", raise_exception=False)
+		if not number:
+			return ""
+		self.add_comment("Info", _("Aadhaar number viewed by {0}").format(frappe.session.user))
+		return f"{number[:4]} {number[4:8]} {number[8:]}"
 
 
 def is_valid_verhoeff(number: str) -> bool:

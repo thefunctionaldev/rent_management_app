@@ -20,6 +20,7 @@
   "personal_details_section",
   "gender",
   "aadhar_card_number",
+  "aadhar_last4",
   "aadhar_card",
   "column_break_bcda",
   "display_picture",
@@ -69,12 +70,13 @@
    "label": "Display Picture"
   },
   {
+   "description": "Stored encrypted. Only the last 4 digits are shown; viewing the full number is logged.",
    "fieldname": "aadhar_card_number",
-   "fieldtype": "Data",
-   "label": "Aadhaar Card Number",
-   "length": 14
+   "fieldtype": "Password",
+   "label": "Aadhaar Card Number"
   },
   {
+   "description": "Kept as a private file.",
    "fieldname": "aadhar_card",
    "fieldtype": "Attach",
    "label": "Aadhaar Card"
@@ -148,6 +150,13 @@
    "fieldname": "permanent_address",
    "fieldtype": "Small Text",
    "label": "Permanent Address"
+  },
+  {
+   "fieldname": "aadhar_last4",
+   "fieldtype": "Data",
+   "label": "Aadhaar (last 4 digits)",
+   "length": 4,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -175,7 +184,7 @@
    "link_fieldname": "tenant"
   }
  ],
- "modified": "2026-10-26 22:18:04.387964",
+ "modified": "2026-10-26 19:09:28.878468",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant",

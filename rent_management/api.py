@@ -414,8 +414,10 @@ def get_tenant(name):
 		order_by="payment_date desc",
 	)
 	submitted = [inv for inv in invoices if inv.docstatus == 1]
+	tenant_data = tenant.as_dict()
+	tenant_data.pop("aadhar_card_number", None)  # '*****'; see reveal_aadhaar
 	return {
-		"tenant": tenant.as_dict(),
+		"tenant": tenant_data,
 		"allotments": allotments,
 		"invoices": invoices,
 		"payments": payments,
@@ -433,11 +435,20 @@ def save_tenant(data):
 	data = frappe.parse_json(data)
 	if data.get("name"):
 		doc = frappe.get_doc("Tenant", data["name"])
-		doc.update(pick(data, TENANT_FIELDS))
+		values = pick(data, TENANT_FIELDS)
+		if not values.get("aadhar_card_number") and not data.get("clear_aadhaar"):
+			values.pop("aadhar_card_number", None)  # left blank in the form: keep the saved number
+		doc.update(values)
 		doc.save()
 	else:
 		doc = frappe.get_doc({"doctype": "Tenant", **pick(data, TENANT_FIELDS)}).insert()
 	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def reveal_aadhaar(name):
+	check_access()
+	return frappe.get_doc("Tenant", name).reveal_aadhar()
 
 
 # ---------------------------------------------------------------- allotments

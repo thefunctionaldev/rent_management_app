@@ -38,12 +38,20 @@
 				</Field>
 				<Field
 					label="Aadhaar number"
-					hint="12 digits, validated with the Verhoeff checksum"
+					:hint="
+						tenant?.aadhar_last4
+							? 'Saved and encrypted. Leave blank to keep it.'
+							: 'Stored encrypted; only the last 4 digits are shown'
+					"
 				>
 					<input
 						v-model="form.aadhar_card_number"
 						class="input tabular"
 						inputmode="numeric"
+						autocomplete="off"
+						:placeholder="
+							tenant?.aadhar_last4 ? `•••• •••• ${tenant.aadhar_last4}` : ''
+						"
 					/>
 				</Field>
 				<Field label="Occupation"><input v-model="form.occupation" class="input" /></Field>
@@ -100,6 +108,7 @@ const fields = [
 	"permanent_address",
 ];
 const form = reactive(Object.fromEntries(fields.map((f) => [f, props.tenant?.[f] ?? ""])));
+form.aadhar_card_number = ""; // never prefilled: the saved number stays on the server
 
 const { loading, run } = useAction((data) => post("save_tenant", { data }), {
 	success: props.tenant ? "Tenant updated" : "Tenant added",
