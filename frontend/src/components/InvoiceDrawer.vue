@@ -137,6 +137,69 @@
 					</li>
 				</ul>
 			</div>
+			<!-- online payment -->
+			<div
+				v-if="
+					inv.docstatus === 1 &&
+					inv.outstanding_amount > 0 &&
+					(data.upi_qr || data.online.razorpay)
+				"
+				class="mt-6 rounded-xl border border-dashed border-slate-300 p-4"
+			>
+				<h3 class="text-sm font-semibold">Collect online</h3>
+				<div class="mt-3 flex gap-4">
+					<img
+						v-if="data.upi_qr"
+						:src="data.upi_qr"
+						alt="UPI QR code"
+						class="size-28 shrink-0 rounded-lg border border-slate-100"
+					/>
+					<div class="min-w-0 flex-1 space-y-2 text-sm">
+						<p v-if="data.upi_qr" class="text-slate-600">
+							The tenant scans this with any UPI app;
+							{{ money(inv.outstanding_amount) }}
+							is filled in. It's also printed on the invoice.
+						</p>
+						<template v-if="data.online.razorpay">
+							<div v-if="link" class="flex items-center gap-2">
+								<a
+									:href="link"
+									target="_blank"
+									class="truncate font-medium text-brand-600 hover:underline"
+									>{{ link }}</a
+								>
+								<button
+									class="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+									title="Copy link"
+									@click="copyLink"
+								>
+									<Copy class="size-4" />
+								</button>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								<Button
+									v-if="!link"
+									size="sm"
+									:icon="Link2"
+									:loading="linking.loading.value"
+									@click="makeLink"
+									>Create payment link</Button
+								>
+								<Button
+									v-if="inv.payment_link_id"
+									size="sm"
+									variant="ghost"
+									:icon="RefreshCw"
+									:loading="checking.loading.value"
+									@click="checkPayment"
+									>Check payment</Button
+								>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+
 			<p v-if="inv.remarks" class="mt-6 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
 				{{ inv.remarks }}
 			</p>
@@ -191,7 +254,18 @@
 </template>
 
 <script setup>
-import { Check, MessageCircle, Printer, Send, Trash2, Wallet, X } from "lucide-vue-next";
+import {
+	Check,
+	Copy,
+	Link2,
+	MessageCircle,
+	Printer,
+	RefreshCw,
+	Send,
+	Trash2,
+	Wallet,
+	X,
+} from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 import { get, post } from "@/api";
@@ -210,7 +284,32 @@ const emit = defineEmits(["close"]);
 
 const data = ref(null);
 const inv = computed(() => data.value?.invoice);
-const reminder = computed(() => inv.value && whatsappReminder(data.value.mobile_no, inv.value));
+// a payment link is only offered when it is for the current balance
+const link = computed(() =>
+	inv.value?.payment_link_url && inv.value.payment_link_amount === inv.value.outstanding_amount
+		? inv.value.payment_link_url
+		: null
+);
+const reminder = computed(
+	() => inv.value && whatsappReminder(data.value.mobile_no, inv.value, link.value)
+);
+
+const linking = useAction(() => post("get_payment_link", { name: props.name }), {
+	success: "Payment link ready",
+});
+const makeLink = () => linking.run();
+const checking = useAction(() => post("check_online_payment", { name: props.name }), {
+	success: (recorded) => (recorded.length ? "Online payment recorded" : "No new payment yet"),
+});
+const checkPayment = () => checking.run();
+async function copyLink() {
+	try {
+		await navigator.clipboard.writeText(link.value);
+		toast("Link copied");
+	} catch {
+		toast("Couldn't copy, select the link instead", "error");
+	}
+}
 
 async function load() {
 	if (!props.name) return;

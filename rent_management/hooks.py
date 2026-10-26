@@ -94,7 +94,12 @@ add_to_apps_screen = [
 # 	"methods": "rent_management.utils.jinja_methods",
 # 	"filters": "rent_management.utils.jinja_filters"
 # }
-jinja = {"methods": ["rent_management.gst.get_rent_vendor"]}
+jinja = {
+	"methods": [
+		"rent_management.gst.get_rent_vendor",
+		"rent_management.rent_collection.get_rent_payment_options",
+	]
+}
 
 # Installation
 # ------------
@@ -192,6 +197,7 @@ scheduler_events = {
 	"daily": [
 		"rent_management.rent_management_system.billing.mark_overdue_invoices",
 		"rent_management.subscription.daily",
+		"rent_management.rent_collection.reconcile_payment_links",
 	],
 	"monthly": ["rent_management.rent_management_system.billing.generate_monthly_invoices"],
 }

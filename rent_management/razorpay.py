@@ -1,10 +1,16 @@
 # Copyright (c) 2026, Shashank Dixit and contributors
 # For license information, please see license.txt
 
-"""Minimal Razorpay REST client for subscription payments.
+"""Minimal Razorpay REST client.
 
-Keys are read from the site / common site config (never from the database, so customers
-can't see them):
+Two Razorpay accounts are involved:
+
+- yours, which collects subscription payments. Its keys are read from the site / common
+  site config (never from the database, so customers can't see them);
+- each landlord's own, which collects rent from their tenants (see rent_collection.py).
+  Those calls pass `auth=(key_id, key_secret)`.
+
+Your keys:
 
     bench set-config -g razorpay_key_id rzp_live_xxx
     bench set-config -g razorpay_key_secret xxx
@@ -40,16 +46,18 @@ def to_subunits(amount) -> int:
 	return round(flt(amount) * 100)
 
 
-def request(method: str, path: str, data=None, params=None) -> dict:
-	if not is_configured():
-		frappe.throw(_("Online payments are not set up yet. Please contact support to renew your plan."))
+def request(method: str, path: str, data=None, params=None, auth=None) -> dict:
+	if auth is None:
+		if not is_configured():
+			frappe.throw(_("Online payments are not set up yet. Please contact support to renew your plan."))
+		auth = (get_key_id(), get_key_secret())
 	try:
 		response = requests.request(
 			method,
 			f"{API_URL}{path}",
 			json=data,
 			params=params,
-			auth=(get_key_id(), get_key_secret()),
+			auth=auth,
 			timeout=TIMEOUT,
 		)
 	except requests.RequestException:
@@ -72,16 +80,30 @@ def create_order(amount, currency: str, receipt: str, notes=None) -> dict:
 	)
 
 
-def get_payment(payment_id: str) -> dict:
-	return request("GET", f"/payments/{payment_id}")
+def get_payment(payment_id: str, auth=None) -> dict:
+	return request("GET", f"/payments/{payment_id}", auth=auth)
 
 
-def capture_payment(payment_id: str, amount: int, currency: str) -> dict:
-	return request("POST", f"/payments/{payment_id}/capture", {"amount": amount, "currency": currency})
+def capture_payment(payment_id: str, amount: int, currency: str, auth=None) -> dict:
+	return request(
+		"POST", f"/payments/{payment_id}/capture", {"amount": amount, "currency": currency}, auth=auth
+	)
 
 
-def get_order_payments(order_id: str) -> list[dict]:
-	return request("GET", f"/orders/{order_id}/payments").get("items", [])
+def get_order_payments(order_id: str, auth=None) -> list[dict]:
+	return request("GET", f"/orders/{order_id}/payments", auth=auth).get("items", [])
+
+
+def create_payment_link(payload: dict, auth) -> dict:
+	return request("POST", "/payment_links", payload, auth=auth)
+
+
+def get_payment_link(link_id: str, auth) -> dict:
+	return request("GET", f"/payment_links/{link_id}", auth=auth)
+
+
+def cancel_payment_link(link_id: str, auth) -> dict:
+	return request("POST", f"/payment_links/{link_id}/cancel", auth=auth)
 
 
 def signature_matches(message: bytes, signature: str, secret: str) -> bool:
@@ -96,5 +118,5 @@ def verify_payment_signature(order_id: str, payment_id: str, signature: str) -> 
 	return signature_matches(f"{order_id}|{payment_id}".encode(), signature, get_key_secret())
 
 
-def verify_webhook_signature(body: bytes, signature: str) -> bool:
-	return signature_matches(body, signature, frappe.conf.get("razorpay_webhook_secret") or "")
+def verify_webhook_signature(body: bytes, signature: str, secret=None) -> bool:
+	return signature_matches(body, signature, secret or frappe.conf.get("razorpay_webhook_secret") or "")

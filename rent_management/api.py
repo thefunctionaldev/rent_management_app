@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import data_import, gst, razorpay, subscription
+from rent_management import data_import, gst, razorpay, rent_collection, subscription
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
@@ -571,8 +571,12 @@ def get_invoice(name):
 	check_access()
 	doc = frappe.get_doc("Tenant Rent Invoice", name)
 	doc.check_permission("read")
+	upi_link = rent_collection.get_upi_link(doc)
 	return {
 		"invoice": doc.as_dict(),
+		"online": rent_collection.get_payment_options(),
+		"upi_link": upi_link,
+		"upi_qr": rent_collection.qr_data_uri(upi_link) if upi_link else None,
 		"payments": frappe.get_all(
 			"Rent Payment",
 			filters={"rent_invoice": name, "docstatus": 1},
@@ -618,6 +622,19 @@ def create_invoice(
 	if cint(submit):
 		doc.submit()
 	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def get_payment_link(name):
+	check_access()
+	return rent_collection.get_payment_link(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def check_online_payment(name):
+	"""Look up the invoice's payment link on Razorpay and record what was paid."""
+	check_access()
+	return rent_collection.sync_payment_link(frappe.get_doc("Tenant Rent Invoice", name))
 
 
 @frappe.whitelist(methods=["POST"])

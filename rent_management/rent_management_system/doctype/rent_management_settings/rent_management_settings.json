@@ -10,7 +10,15 @@
   "auto_generate_invoices",
   "auto_submit_invoices",
   "column_break_due",
-  "rent_due_day"
+  "rent_due_day",
+  "online_section",
+  "upi_id",
+  "upi_payee_name",
+  "column_break_online",
+  "razorpay_enabled",
+  "razorpay_key_id",
+  "razorpay_key_secret",
+  "razorpay_webhook_secret"
  ],
  "fields": [
   {
@@ -44,13 +52,63 @@
    "fieldtype": "Int",
    "label": "Rent Due Day of Month",
    "non_negative": 1
+  },
+  {
+   "description": "Rent goes straight to your own UPI ID or Razorpay account.",
+   "fieldname": "online_section",
+   "fieldtype": "Section Break",
+   "label": "Online Rent Collection"
+  },
+  {
+   "description": "e.g. sharmapg@okhdfcbank. A UPI QR code for the exact amount is printed on every rent invoice.",
+   "fieldname": "upi_id",
+   "fieldtype": "Data",
+   "label": "UPI ID"
+  },
+  {
+   "depends_on": "upi_id",
+   "fieldname": "upi_payee_name",
+   "fieldtype": "Data",
+   "label": "UPI Payee Name"
+  },
+  {
+   "fieldname": "column_break_online",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Payment links for each invoice (UPI, cards, netbanking). Payments are recorded automatically.",
+   "fieldname": "razorpay_enabled",
+   "fieldtype": "Check",
+   "label": "Collect Rent with Razorpay"
+  },
+  {
+   "depends_on": "razorpay_enabled",
+   "fieldname": "razorpay_key_id",
+   "fieldtype": "Data",
+   "label": "Razorpay Key ID",
+   "mandatory_depends_on": "razorpay_enabled"
+  },
+  {
+   "depends_on": "razorpay_enabled",
+   "fieldname": "razorpay_key_secret",
+   "fieldtype": "Password",
+   "label": "Razorpay Key Secret",
+   "mandatory_depends_on": "razorpay_enabled"
+  },
+  {
+   "depends_on": "razorpay_enabled",
+   "description": "Optional. Webhook URL: https://<your site>/api/method/rent_management.rent_collection.razorpay_webhook (event payment_link.paid).",
+   "fieldname": "razorpay_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Razorpay Webhook Secret"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 22:18:03.671510",
+ "modified": "2026-10-26 19:22:06.337102",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

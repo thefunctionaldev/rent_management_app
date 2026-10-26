@@ -44,7 +44,7 @@ export function currentMonth() {
 	return { month: boot.months[today.getMonth()], year: today.getFullYear() };
 }
 
-export function whatsappReminder(mobile, invoice) {
+export function whatsappReminder(mobile, invoice, payLink = null) {
 	if (!mobile) return null;
 	const digits = mobile.replace(/[^\d]/g, "");
 	const text =
@@ -53,7 +53,9 @@ export function whatsappReminder(mobile, invoice) {
 		)} ` +
 		`for ${invoice.billing_month} ${invoice.billing_year} (room ${invoice.room}) is due` +
 		(invoice.due_date ? ` on ${date(invoice.due_date)}` : "") +
-		". Thank you!";
+		"." +
+		(payLink ? ` Pay online: ${payLink}` : "") +
+		" Thank you!";
 	return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 

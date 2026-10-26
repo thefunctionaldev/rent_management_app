@@ -260,6 +260,7 @@ def skip_enforcement() -> bool:
 		or flags.in_migrate
 		or flags.in_patch
 		or flags.in_fixtures
+		or flags.recording_online_payment  # money already received; see rent_collection.py
 		or frappe.session.user == "Administrator"
 	)
 
