@@ -22,7 +22,23 @@
   "column_break_ref",
   "razorpay_order_id",
   "razorpay_payment_id",
-  "reference"
+  "reference",
+  "invoice_section",
+  "invoice_number",
+  "invoice_date",
+  "place_of_supply",
+  "billing_name",
+  "billing_gstin",
+  "billing_email",
+  "billing_address",
+  "billing_state",
+  "column_break_tax",
+  "gst_rate",
+  "taxable_value",
+  "cgst_amount",
+  "sgst_amount",
+  "igst_amount",
+  "tax_amount"
  ],
  "fields": [
   {
@@ -66,7 +82,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount",
+   "label": "Amount Paid (incl. GST)",
    "options": "currency",
    "read_only": 1
   },
@@ -144,12 +160,113 @@
    "fieldtype": "Data",
    "label": "Reference",
    "read_only": 1
+  },
+  {
+   "fieldname": "invoice_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Invoice"
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice Number",
+   "no_copy": 1,
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "place_of_supply",
+   "fieldtype": "Data",
+   "label": "Place of Supply",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_name",
+   "fieldtype": "Data",
+   "label": "Billed To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_gstin",
+   "fieldtype": "Data",
+   "label": "Customer GSTIN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_email",
+   "fieldtype": "Data",
+   "label": "Billing Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Small Text",
+   "label": "Billing Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_state",
+   "fieldtype": "Data",
+   "label": "Customer State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tax",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gst_rate",
+   "fieldtype": "Percent",
+   "label": "GST Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxable_value",
+   "fieldtype": "Currency",
+   "label": "Taxable Value",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cgst_amount",
+   "fieldtype": "Currency",
+   "label": "CGST",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sgst_amount",
+   "fieldtype": "Currency",
+   "label": "SGST",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "igst_amount",
+   "fieldtype": "Currency",
+   "label": "IGST",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Total Tax",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "links": [],
- "modified": "2026-10-26 23:30:00.000000",
+ "modified": "2026-10-26 19:12:19.620994",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Subscription Payment",

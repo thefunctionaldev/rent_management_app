@@ -12,11 +12,14 @@ Plans, prices, trial length and grace days can be overridden for the whole bench
 common_site_config.json (see README), so prices can change without a code release.
 """
 
+import re
+
 import frappe
 from frappe import _
+from frappe.model.naming import make_autoname
 from frappe.utils import add_days, add_months, cint, date_diff, flt, getdate, now_datetime, nowdate
 
-from rent_management import razorpay
+from rent_management import gst, razorpay
 
 SUBSCRIPTION = "Rent Subscription"
 PAYMENT = "Rent Subscription Payment"
@@ -412,7 +415,7 @@ def cycle_days(start, billing_cycle: str) -> int:
 
 def create_checkout(plan: str, billing_cycle: str) -> dict:
 	"""Create a Razorpay order for a plan and return the options for Razorpay Checkout."""
-	amount = get_price(plan, billing_cycle)
+	amount = gst.payable_amount(get_price(plan, billing_cycle))
 	check_plan_fits(plan)
 	if amount <= 0:
 		frappe.throw(_("This plan has no price set."))
@@ -506,12 +509,16 @@ def apply_payment(payment, payment_id=None, start=None, end=None):
 			"paid_on": now_datetime(),
 		}
 	)
+	if flt(payment.amount) > 0:
+		set_tax_invoice(payment)
 	payment.flags.ignore_permissions = True
 	frappe.flags.updating_rent_subscription = True
 	try:
 		payment.save()
 	finally:
 		frappe.flags.updating_rent_subscription = False
+	if payment.invoice_number:
+		frappe.enqueue(email_invoice, payment=payment.name, enqueue_after_commit=True)
 
 	sub = frappe.get_single(SUBSCRIPTION)
 	update_subscription(
@@ -523,6 +530,105 @@ def apply_payment(payment, payment_id=None, start=None, end=None):
 		current_period_end=end,
 	)
 	return payment
+
+
+# ---------------------------------------------------------------- tax invoices
+
+INVOICE_PRINT_FORMAT = "Subscription Tax Invoice"
+
+
+def invoice_prefix() -> str:
+	"""Per-site invoice series, e.g. SHARMA/2627/0001. Invoice numbers must be unique for your
+	GSTIN, so every customer site needs its own prefix (set at signup, or derived from the site)."""
+	prefix = frappe.conf.get("rent_invoice_prefix") or re.sub(r"[^A-Za-z0-9]", "", frappe.local.site)[:6]
+	return prefix.upper()[:6]
+
+
+def financial_year(date) -> str:
+	date = getdate(date)
+	start = date.year if date.month >= 4 else date.year - 1
+	return f"{start % 100:02d}{(start + 1) % 100:02d}"
+
+
+def set_tax_invoice(payment):
+	"""Give a paid subscription payment its invoice number and GST breakup."""
+	if payment.invoice_number:
+		return
+	sub = frappe.get_single(SUBSCRIPTION)
+	invoice_date = getdate(nowdate())
+	payment.update(
+		{
+			"invoice_date": invoice_date,
+			"billing_name": sub.billing_name or frappe.local.site,
+			"billing_gstin": sub.billing_gstin,
+			"billing_email": sub.billing_email,
+			"billing_address": sub.billing_address,
+			"billing_state": sub.billing_state,
+			"place_of_supply": sub.billing_state or gst.get_vendor().state,
+			**gst.get_breakup(payment.amount, sub.billing_state),
+		}
+	)
+	payment.invoice_number = make_autoname(f"{invoice_prefix()}/{financial_year(invoice_date)}/.####")
+
+
+def email_invoice(payment: str):
+	payment = frappe.get_doc(PAYMENT, payment)
+	recipients = [payment.billing_email] if payment.billing_email else get_manager_users()
+	if not recipients:
+		return
+	try:
+		attachments = [
+			frappe.attach_print(
+				PAYMENT,
+				payment.name,
+				print_format=INVOICE_PRINT_FORMAT,
+				file_name=payment.invoice_number.replace("/", "-"),
+			)
+		]
+	except Exception:
+		frappe.log_error(title=f"Could not render invoice {payment.invoice_number}")
+		attachments = None
+	frappe.sendmail(
+		recipients=recipients,
+		subject=_("Invoice {0} for your Rent Management subscription").format(payment.invoice_number),
+		message=_(
+			"<p>Thank you for your payment of {0} for the {1} plan ({2} to {3}).</p>"
+			"<p>Your invoice is attached. You can also download it any time from "
+			"<a href='{4}'>Subscription & Billing</a>.</p>"
+		).format(
+			frappe.format_value(payment.amount, {"fieldtype": "Currency", "options": "currency"}, payment),
+			payment.plan_title,
+			frappe.utils.formatdate(payment.period_start),
+			frappe.utils.formatdate(payment.period_end),
+			frappe.utils.get_url("/rent/billing"),
+		),
+		attachments=attachments,
+	)
+
+
+def save_billing_details(data: dict):
+	gstin = gst.validate_gstin(data.get("billing_gstin"))
+	state = data.get("billing_state") or None
+	if gstin:
+		state = gst.state_from_gstin(gstin)
+	email = (data.get("billing_email") or "").strip()
+	if email:
+		frappe.utils.validate_email_address(email, throw=True)
+	update_subscription(
+		billing_name=(data.get("billing_name") or "").strip() or None,
+		billing_gstin=gstin or None,
+		billing_email=email or None,
+		billing_address=data.get("billing_address") or None,
+		billing_state=state,
+	)
+
+
+def get_billing_details() -> dict:
+	sub = frappe.get_single(SUBSCRIPTION)
+	return {
+		field: sub.get(field)
+		for field in ("billing_name", "billing_gstin", "billing_email", "billing_address", "billing_state")
+	}
 
 
 def record_manual_payment(plan, billing_cycle, amount=0, reference=None, start=None, end=None):

@@ -94,6 +94,7 @@ add_to_apps_screen = [
 # 	"methods": "rent_management.utils.jinja_methods",
 # 	"filters": "rent_management.utils.jinja_filters"
 # }
+jinja = {"methods": ["rent_management.gst.get_rent_vendor"]}
 
 # Installation
 # ------------

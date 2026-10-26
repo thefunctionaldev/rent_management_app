@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import razorpay, subscription
+from rent_management import gst, razorpay, subscription
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
@@ -889,17 +889,47 @@ def get_billing():
 			"period_end",
 			"bonus_days",
 			"razorpay_payment_id",
+			"invoice_number",
 		],
 		order_by="paid_on desc",
 		limit=50,
 	)
+	vendor = gst.get_vendor()
 	return {
 		"subscription": subscription.get_state(),
 		"plans": plans,
 		"payments": payments,
+		"billing_details": subscription.get_billing_details(),
+		"gst": {
+			"registered": bool(vendor.gstin),
+			"rate": gst.gst_rate(),
+			"included": gst.prices_include_gst(),
+			"states": sorted(set(gst.STATE_CODES.values())),
+		},
 		"online_payments": razorpay.is_configured(),
 		"support_email": frappe.conf.get("rent_support_email"),
 	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_billing_details(data):
+	check_access()
+	subscription.save_billing_details(frappe.parse_json(data))
+	return subscription.get_billing_details()
+
+
+@frappe.whitelist()
+def download_subscription_invoice(name):
+	"""PDF of a subscription tax invoice (Rent Managers can't open the desk print view)."""
+	check_access()
+	payment = frappe.get_doc(subscription.PAYMENT, name)
+	if not payment.invoice_number:
+		frappe.throw(_("This payment has no invoice."))
+	frappe.local.response.filename = payment.invoice_number.replace("/", "-") + ".pdf"
+	frappe.local.response.filecontent = frappe.get_print(
+		subscription.PAYMENT, name, print_format=subscription.INVOICE_PRINT_FORMAT, as_pdf=True
+	)
+	frappe.local.response.type = "pdf"
 
 
 @frappe.whitelist(methods=["POST"])

@@ -13,7 +13,14 @@
   "trial_ends_on",
   "current_period_start",
   "current_period_end",
-  "last_reminder_on"
+  "last_reminder_on",
+  "billing_section",
+  "billing_name",
+  "billing_gstin",
+  "billing_email",
+  "column_break_billing",
+  "billing_address",
+  "billing_state"
  ],
  "fields": [
   {
@@ -66,12 +73,49 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Last Reminder On"
+  },
+  {
+   "description": "Printed on GST invoices. Customers can change these from Subscription & Billing.",
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing Details"
+  },
+  {
+   "fieldname": "billing_name",
+   "fieldtype": "Data",
+   "label": "Billing Name"
+  },
+  {
+   "fieldname": "billing_gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN",
+   "length": 15
+  },
+  {
+   "fieldname": "billing_email",
+   "fieldtype": "Data",
+   "label": "Billing Email",
+   "options": "Email"
+  },
+  {
+   "fieldname": "column_break_billing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Small Text",
+   "label": "Billing Address"
+  },
+  {
+   "fieldname": "billing_state",
+   "fieldtype": "Data",
+   "label": "State"
   }
  ],
  "grid_page_length": 50,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 23:30:00.000000",
+ "modified": "2026-10-26 19:12:19.619230",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Subscription",

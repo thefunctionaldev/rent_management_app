@@ -102,6 +102,9 @@
 							/ {{ cycle === "Monthly" ? "month" : "year" }}</span
 						>
 					</p>
+					<p v-if="data.gst.registered" class="mt-0.5 text-xs text-slate-500">
+						{{ data.gst.included ? "incl." : "+" }} {{ data.gst.rate }}% GST
+					</p>
 					<ul class="mt-5 flex-1 space-y-2 text-sm text-slate-600">
 						<li v-for="f in plan.features" :key="f" class="flex gap-2">
 							<Check class="mt-0.5 size-4 shrink-0 text-emerald-600" />{{ f }}
@@ -128,6 +131,70 @@
 				</div>
 			</div>
 
+			<!-- billing details -->
+			<div class="card mb-6">
+				<button
+					class="flex w-full items-center justify-between px-5 py-4 text-left"
+					@click="showDetails = !showDetails"
+				>
+					<div>
+						<h2 class="font-semibold">Billing details</h2>
+						<p class="text-sm text-slate-500">
+							{{ detailsSummary || "Add your business name and GSTIN for invoices" }}
+						</p>
+					</div>
+					<ChevronDown
+						class="size-5 text-slate-400 transition"
+						:class="showDetails && 'rotate-180'"
+					/>
+				</button>
+				<form
+					v-if="showDetails"
+					class="grid gap-4 border-t border-slate-100 p-5 sm:grid-cols-2"
+					@submit.prevent="saveDetails"
+				>
+					<Field label="Business name">
+						<input
+							v-model="details.billing_name"
+							class="input"
+							placeholder="Sharma PG"
+						/>
+					</Field>
+					<Field label="GSTIN" hint="Optional. Sets the state automatically.">
+						<input
+							v-model="details.billing_gstin"
+							class="input uppercase"
+							maxlength="15"
+							placeholder="27ABCDE1234F1Z5"
+						/>
+					</Field>
+					<Field label="Invoice email">
+						<input v-model="details.billing_email" class="input" type="email" />
+					</Field>
+					<Field label="State">
+						<select
+							v-model="details.billing_state"
+							class="input"
+							:disabled="!!details.billing_gstin"
+						>
+							<option value="">—</option>
+							<option v-for="st in data.gst.states" :key="st">{{ st }}</option>
+						</select>
+					</Field>
+					<Field label="Address" class="sm:col-span-2">
+						<textarea v-model="details.billing_address" class="input" rows="2" />
+					</Field>
+					<div class="flex justify-end sm:col-span-2">
+						<Button
+							variant="primary"
+							type="submit"
+							:loading="savingDetails.loading.value"
+							>Save details</Button
+						>
+					</div>
+				</form>
+			</div>
+
 			<!-- history -->
 			<div class="card">
 				<div class="border-b border-slate-100 px-5 py-4">
@@ -143,6 +210,7 @@
 								<th class="table-head">Period</th>
 								<th class="table-head">Reference</th>
 								<th class="table-head text-right">Amount</th>
+								<th class="table-head" />
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-slate-100">
@@ -166,6 +234,16 @@
 								<td class="table-cell tabular text-right font-semibold">
 									{{ money(p.amount, { currency: p.currency }) }}
 								</td>
+								<td class="table-cell text-right">
+									<a
+										v-if="p.invoice_number"
+										:href="invoiceUrl(p)"
+										class="inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:underline"
+										:title="p.invoice_number"
+									>
+										<Download class="size-4" /> Invoice
+									</a>
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -176,24 +254,65 @@
 </template>
 
 <script setup>
-import { BedDouble, Building2, Check, Receipt, Users } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import {
+	BedDouble,
+	Building2,
+	Check,
+	ChevronDown,
+	Download,
+	Receipt,
+	Users,
+} from "lucide-vue-next";
+import { computed, reactive, ref, watch } from "vue";
 
 import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import Field from "@/components/Field.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import UsageMeter from "@/components/UsageMeter.vue";
 import { boot, toast } from "@/store";
-import { useResource } from "@/useResource";
+import { useAction, useResource } from "@/useResource";
 import { date, money } from "@/utils";
 
 const { data, loading, reload } = useResource(() => get("get_billing"));
 const sub = computed(() => data.value.subscription);
 const cycle = ref(boot.subscription?.billing_cycle || "Monthly");
 const paying = ref(null);
+
+// billing details printed on GST invoices
+const showDetails = ref(false);
+const details = reactive({
+	billing_name: "",
+	billing_gstin: "",
+	billing_email: "",
+	billing_address: "",
+	billing_state: "",
+});
+watch(
+	() => data.value?.billing_details,
+	(saved) => saved && Object.keys(details).forEach((k) => (details[k] = saved[k] || "")),
+	{ immediate: true }
+);
+const detailsSummary = computed(() => {
+	const saved = data.value?.billing_details || {};
+	return [saved.billing_name, saved.billing_gstin, saved.billing_state]
+		.filter(Boolean)
+		.join(" · ");
+});
+const savingDetails = useAction(() => post("save_billing_details", { data: { ...details } }), {
+	success: "Billing details saved",
+});
+async function saveDetails() {
+	await savingDetails.run();
+	showDetails.value = false;
+}
+const invoiceUrl = (p) =>
+	`/api/method/rent_management.api.download_subscription_invoice?name=${encodeURIComponent(
+		p.name
+	)}`;
 
 const price = (plan) => (cycle.value === "Monthly" ? plan.monthly : plan.yearly);
 // billing_cycle is only set once a plan has been paid for
