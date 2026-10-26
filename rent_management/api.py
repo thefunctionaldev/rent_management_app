@@ -22,6 +22,7 @@ from rent_management import (
 	profit,
 	razorpay,
 	rent_collection,
+	saas,
 	subscription,
 )
 from rent_management.rent_management_system import billing
@@ -139,6 +140,7 @@ def get_boot():
 		"months": MONTHS,
 		"today": nowdate(),
 		"properties": get_properties(),
+		"is_control_site": saas.is_control_site() and "System Manager" in frappe.get_roles(),
 		"agreement_defaults": {
 			field: frappe.db.get_single_value("Rent Management Settings", f"default_{key}")
 			for field, key in (

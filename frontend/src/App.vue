@@ -155,6 +155,7 @@
 import {
 	AlertTriangle,
 	BarChart3,
+	Briefcase,
 	Building2,
 	CreditCard,
 	DoorOpen,
@@ -187,7 +188,15 @@ const logo = `${import.meta.env.BASE_URL}favicon.svg`;
 const menuOpen = ref(false);
 const buildings = computed(() => activeProperties());
 
-const nav = [
+const nav = computed(() => [
+	...(boot.is_control_site
+		? [
+				{
+					label: "Your business",
+					items: [{ to: "/saas", label: "Customers", icon: Briefcase }],
+				},
+		  ]
+		: []),
 	{
 		label: "Overview",
 		items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard }],
@@ -221,7 +230,7 @@ const nav = [
 			{ to: "/billing", label: "Subscription", icon: CreditCard },
 		],
 	},
-];
+]);
 
 const bannerTones = {
 	sky: "border-sky-200 bg-sky-50 text-sky-800",

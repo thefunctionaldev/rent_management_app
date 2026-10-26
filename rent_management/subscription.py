@@ -530,6 +530,8 @@ def apply_payment(payment, payment_id=None, start=None, end=None):
 		frappe.flags.updating_rent_subscription = False
 	if payment.invoice_number:
 		frappe.enqueue(email_invoice, payment=payment.name, enqueue_after_commit=True)
+	if not frappe.flags.in_test:
+		frappe.enqueue("rent_management.saas.send_heartbeat", enqueue_after_commit=True)
 
 	sub = frappe.get_single(SUBSCRIPTION)
 	update_subscription(

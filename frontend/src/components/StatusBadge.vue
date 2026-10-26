@@ -39,6 +39,7 @@ const colors = {
 	Inactive: "slate",
 	"Under Renovation": "slate",
 	Trial: "sky",
+	Unknown: "slate",
 	Open: "amber",
 	"In Progress": "sky",
 	Resolved: "green",
