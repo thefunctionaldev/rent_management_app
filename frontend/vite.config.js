@@ -19,6 +19,7 @@ function copyIndexToWww() {
 			for (const [page, route] of [
 				["index.html", "rent.html"],
 				["tenant.html", "tenant.html"],
+				["signup.html", "signup.html"],
 			]) {
 				copyFileSync(
 					path.join(appPath, "public/frontend", page),
@@ -43,6 +44,7 @@ export default defineConfig(({ command }) => ({
 			input: {
 				main: path.resolve(root, "index.html"),
 				tenant: path.resolve(root, "tenant.html"), // the tenant app
+				signup: path.resolve(root, "signup.html"), // self-serve signup on the control site
 			},
 		},
 	},

@@ -15,6 +15,7 @@
   "column_break_signup",
   "subdomain",
   "site",
+  "invoice_prefix",
   "status",
   "error",
   "private_section",
@@ -132,11 +133,19 @@
    "hidden": 1,
    "label": "Set Password Link",
    "read_only": 1
+  },
+  {
+   "fieldname": "invoice_prefix",
+   "fieldtype": "Data",
+   "label": "Invoice Prefix",
+   "length": 6,
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-26 20:04:06.941854",
+ "modified": "2026-10-26 20:08:15.474167",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "SaaS Signup",

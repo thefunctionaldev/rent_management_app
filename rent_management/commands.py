@@ -147,4 +147,38 @@ def rent_backup_all(with_files=False, remote=None, keep_days=7):
 		raise click.ClickException(f"Backups failed for {', '.join(failed)}")
 
 
-commands = [rent_subscription, rent_add_manager, rent_backup_all]
+@click.command("rent-onboard")
+@click.option("--email", required=True, help="The customer's login (Rent Manager).")
+@click.option("--full-name", default="Manager", show_default=True)
+@click.option("--business", help="Business name, for invoices and the first building.")
+@click.option("--phone")
+@click.option("--city")
+@click.option("--invoice-prefix", help="Prefix of your GST invoice numbers for this customer, e.g. SHARMA.")
+@click.option("--host-name", help="The site's public URL, e.g. https://sharma.rentapp.in")
+@pass_context
+def rent_onboard(
+	context,
+	email,
+	full_name="Manager",
+	business=None,
+	phone=None,
+	city=None,
+	invoice_prefix=None,
+	host_name=None,
+):
+	"""Set up a new customer site. Prints JSON with the set-password link on the last line."""
+	import json
+
+	frappe = connect(context)
+	try:
+		from rent_management.onboarding import onboard
+
+		frappe.set_user("Administrator")
+		result = onboard(email, full_name, business, phone, city, invoice_prefix, host_name)
+		frappe.db.commit()
+		click.echo(json.dumps(result))
+	finally:
+		frappe.destroy()
+
+
+commands = [rent_subscription, rent_add_manager, rent_backup_all, rent_onboard]

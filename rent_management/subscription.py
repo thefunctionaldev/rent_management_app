@@ -247,6 +247,7 @@ def start_trial(force=False):
 
 
 def after_install():
+	from rent_management.onboarding import extend_invite_links
 	from rent_management.patches.v1_4 import set_settings_defaults
 	from rent_management.portal import ensure_tenant_role
 	from rent_management.rent_management_system.doctype.rent_property.rent_property import (
@@ -256,6 +257,7 @@ def after_install():
 	get_default_property()
 	set_settings_defaults.execute()
 	ensure_tenant_role()
+	extend_invite_links()
 	start_trial()
 
 
