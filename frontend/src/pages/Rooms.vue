@@ -42,9 +42,12 @@
 				rooms.length ? 'Try a different filter.' : 'Add your first room to get started.'
 			"
 		>
-			<Button v-if="!rooms.length" variant="primary" :icon="Plus" @click="openDialog('room')"
-				>Add room</Button
-			>
+			<div v-if="!rooms.length" class="flex flex-wrap justify-center gap-2">
+				<Button variant="primary" :icon="Plus" @click="openDialog('room')"
+					>Add room</Button
+				>
+				<Button href="/rent/import">Import from Excel</Button>
+			</div>
 		</EmptyState>
 
 		<div v-for="group in groups" v-else :key="group.property" class="mb-8">

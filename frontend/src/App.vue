@@ -160,6 +160,7 @@ import {
 	DoorOpen,
 	ExternalLink,
 	FileText,
+	FileUp,
 	LayoutDashboard,
 	Lock,
 	LogOut,
@@ -192,6 +193,7 @@ const nav = [
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
 			{ to: "/buildings", label: "Buildings", icon: Building2 },
+			{ to: "/import", label: "Import", icon: FileUp },
 		],
 	},
 	{

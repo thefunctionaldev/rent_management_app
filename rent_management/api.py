@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import gst, razorpay, subscription
+from rent_management import data_import, gst, razorpay, subscription
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
@@ -854,6 +854,23 @@ def get_outstanding_by(field):
 	):
 		totals[str(row[field])] += flt(row.outstanding_amount)
 	return totals
+
+
+# ---------------------------------------------------------------- import
+
+
+@frappe.whitelist()
+def get_import_template(kind):
+	check_access()
+	from frappe.desk.utils import provide_binary_file
+
+	provide_binary_file(f"{kind}-import-template", "xlsx", data_import.get_template(kind))
+
+
+@frappe.whitelist(methods=["POST"])
+def import_data(kind, filename, content, dry_run=1):
+	check_access()
+	return data_import.run(kind, filename, content, dry_run=cint(dry_run))
 
 
 # ---------------------------------------------------------------- subscription
