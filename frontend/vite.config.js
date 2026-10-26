@@ -9,16 +9,22 @@ import { defineConfig } from "vite";
 const root = path.dirname(fileURLToPath(import.meta.url));
 const appPath = path.resolve(root, "../rent_management");
 
-// Frappe serves www/rent.html at /rent, so the built index.html is copied there.
+// Frappe serves www/rent.html at /rent and www/tenant.html at /tenant, so the built
+// pages are copied there.
 function copyIndexToWww() {
 	return {
 		name: "copy-index-to-www",
 		closeBundle() {
 			mkdirSync(path.join(appPath, "www"), { recursive: true });
-			copyFileSync(
-				path.join(appPath, "public/frontend/index.html"),
-				path.join(appPath, "www/rent.html")
-			);
+			for (const [page, route] of [
+				["index.html", "rent.html"],
+				["tenant.html", "tenant.html"],
+			]) {
+				copyFileSync(
+					path.join(appPath, "public/frontend", page),
+					path.join(appPath, "www", route)
+				);
+			}
 		},
 	};
 }
@@ -33,6 +39,12 @@ export default defineConfig(({ command }) => ({
 		outDir: path.join(appPath, "public/frontend"),
 		emptyOutDir: true,
 		target: "es2020",
+		rollupOptions: {
+			input: {
+				main: path.resolve(root, "index.html"),
+				tenant: path.resolve(root, "tenant.html"), // the tenant app
+			},
+		},
 	},
 	server: {
 		port: 8080,

@@ -58,3 +58,4 @@ jspm_packages/
 rent_management/public/frontend/
 rent_management/www/rent.html
 dump.rdb
+rent_management/www/tenant.html

@@ -54,7 +54,13 @@ app_license = "mit"
 # app_include_icons = "rent_management/public/icons.svg"
 
 # Frontend (Vue app in /frontend, served at /rent)
-website_route_rules = [{"from_route": "/rent/<path:app_path>", "to_route": "rent"}]
+website_route_rules = [
+	{"from_route": "/rent/<path:app_path>", "to_route": "rent"},
+	{"from_route": "/tenant/<path:app_path>", "to_route": "tenant"},
+]
+
+# tenants (website users) land in the tenant app after logging in
+role_home_page = {"Rent Tenant": "tenant"}
 
 add_to_apps_screen = [
 	{

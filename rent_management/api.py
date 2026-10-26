@@ -14,7 +14,16 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import data_import, gst, notifications, profit, razorpay, rent_collection, subscription
+from rent_management import (
+	data_import,
+	gst,
+	notifications,
+	portal,
+	profit,
+	razorpay,
+	rent_collection,
+	subscription,
+)
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.rent_property.rent_property import get_default_property
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
@@ -1091,6 +1100,113 @@ def get_meter_readings(property=None, room=None, limit=100):
 def delete_meter_reading(name):
 	check_access()
 	frappe.delete_doc("Meter Reading", name)
+
+
+# ---------------------------------------------------------------- tenant app
+
+
+@frappe.whitelist(methods=["POST"])
+def invite_tenant(name):
+	"""Give the tenant a login for the tenant app and email them a set-password link."""
+	check_access()
+	link = portal.invite_tenant(name)
+	# managers without email set up can share the link themselves (WhatsApp...)
+	return {"link": link, "emailed": notifications.email_configured()}
+
+
+REQUEST_LIST_FIELDS = [
+	"name",
+	"subject",
+	"category",
+	"priority",
+	"status",
+	"tenant",
+	"tenant_name",
+	"room",
+	"property",
+	"description",
+	"resolution",
+	"raised_via",
+	"creation",
+	"resolved_on",
+]
+
+
+@frappe.whitelist()
+def get_requests(status=None, property=None):
+	check_access()
+	filters = by_property({}, property)
+	if status == "open":
+		filters["status"] = ("in", ("Open", "In Progress"))
+	elif status:
+		filters["status"] = status
+	counts = defaultdict(int)
+	for row in frappe.get_all("Maintenance Request", filters=by_property({}, property), pluck="status"):
+		counts[row] += 1
+	requests = frappe.get_all(
+		"Maintenance Request",
+		filters=filters,
+		fields=REQUEST_LIST_FIELDS,
+		order_by="creation desc",
+		limit=300,
+	)
+	# open first, most urgent first, newest first within that
+	status_order = {"Open": 0, "In Progress": 1, "Resolved": 2, "Closed": 3}
+	priority_order = {"High": 0, "Medium": 1, "Low": 2}
+	requests.sort(key=lambda r: (status_order.get(r.status, 9), priority_order.get(r.priority, 9)))
+	return {"requests": requests, "counts": dict(counts)}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_request(data):
+	check_access()
+	data = frappe.parse_json(data)
+	fields = ("subject", "category", "priority", "status", "description", "resolution", "tenant")
+	if data.get("name"):
+		doc = frappe.get_doc("Maintenance Request", data["name"])
+		doc.update(pick(data, [f for f in fields if f != "tenant"]))
+		doc.save()
+	else:
+		doc = frappe.get_doc(
+			{"doctype": "Maintenance Request", **pick(data, fields), "raised_via": "Manager"}
+		).insert()
+	return doc.name
+
+
+@frappe.whitelist()
+def get_payments_to_confirm(property=None):
+	"""Payments tenants reported in the tenant app ("I've paid"), waiting for the landlord."""
+	check_access()
+	return frappe.get_all(
+		"Rent Payment",
+		filters=by_property({"docstatus": 0}, property),
+		fields=PAYMENT_LIST_FIELDS,
+		order_by="creation asc",
+	)
+
+
+@frappe.whitelist(methods=["POST"])
+def confirm_payment(name):
+	check_access()
+	doc = frappe.get_doc("Rent Payment", name)
+	doc.submit()
+	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def reject_payment(name, reason=None):
+	check_access()
+	doc = frappe.get_doc("Rent Payment", name)
+	if doc.docstatus != 0:
+		frappe.throw(_("Only unconfirmed payments can be rejected."))
+	invoice = frappe.get_doc("Tenant Rent Invoice", doc.rent_invoice)
+	invoice.add_comment(
+		"Info",
+		_("Payment of {0} reported by the tenant (ref {1}) was rejected{2}").format(
+			doc.amount, doc.reference_no or "-", f": {reason}" if reason else ""
+		),
+	)
+	frappe.delete_doc("Rent Payment", name)
 
 
 # ---------------------------------------------------------------- expenses

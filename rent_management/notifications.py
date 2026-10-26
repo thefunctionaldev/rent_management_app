@@ -13,6 +13,7 @@ Templates (create them in WhatsApp Manager, category Utility, language as config
 	rent_reminder  Hello {{1}}, your rent of {{2}} for {{3}} at {{4}} is due on {{5}}. {{6}}
 	rent_overdue   Hello {{1}}, your rent of {{2}} for {{3}} at {{4}} was due on {{5}} and is still unpaid. {{6}}
 	rent_receipt   Hello {{1}}, we have received {{2}} for your rent for {{3}} at {{4}}. Balance due: {{5}}. Thank you!
+	rent_request_update  Hello {{1}}, your request "{{2}}" is now {{3}}. {{4}}
 """
 
 import re
@@ -31,6 +32,7 @@ TEMPLATES = {
 	"Due Today": "rent_reminder",
 	"Overdue": "rent_overdue",
 	"Receipt": "rent_receipt",
+	"Request Update": "rent_request_update",
 }
 GRAPH_URL = "https://graph.facebook.com"
 
@@ -56,7 +58,11 @@ def get_whatsapp_account():
 
 
 def email_configured() -> bool:
-	return bool(frappe.db.exists("Email Account", {"enable_outgoing": 1}) or frappe.conf.get("mail_server"))
+	"""Frappe sends through the default outgoing Email Account, or the mail server in site config."""
+	return bool(
+		frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
+		or frappe.conf.get("mail_server")
+	)
 
 
 def whatsapp_number(mobile) -> str | None:
@@ -291,4 +297,21 @@ def send_receipt(payment: str) -> list[str]:
 		invoice=invoice.name,
 		payment=payment.name,
 		subject=_("Rent receipt: {0} for {1}").format(money(payment.amount), ctx.period),
+	)
+
+
+# ---------------------------------------------------------------- tenant requests
+
+
+def send_request_update(request: str) -> list[str]:
+	"""Tell the tenant their maintenance request moved on (In Progress, Resolved...)."""
+	request = frappe.get_doc("Maintenance Request", request)
+	tenant = frappe.db.get_value(
+		"Tenant", request.tenant, ["name", "first_name", "full_name", "mobile_no", "email_id"], as_dict=True
+	)
+	note = request.resolution or _("See the tenant app for details.")
+	params = [tenant.first_name or tenant.full_name, request.subject, _(request.status).lower(), note]
+	text = _('Hello {0}, your request "{1}" is now {2}. {3}').format(*params)
+	return send(
+		"Request Update", tenant, text, params, subject=_("Your request: {0}").format(request.subject)
 	)

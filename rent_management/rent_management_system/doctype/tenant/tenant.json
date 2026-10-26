@@ -15,6 +15,7 @@
   "contact_section",
   "mobile_no",
   "email_id",
+  "user",
   "column_break_contact",
   "permanent_address",
   "personal_details_section",
@@ -157,6 +158,16 @@
    "label": "Aadhaar (last 4 digits)",
    "length": 4,
    "read_only": 1
+  },
+  {
+   "description": "Set by Invite to Tenant App. The tenant sees their bills, pays online and raises requests at /tenant.",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "Tenant App Login",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -184,7 +195,7 @@
    "link_fieldname": "tenant"
   }
  ],
- "modified": "2026-10-26 19:09:28.878468",
+ "modified": "2026-10-26 19:52:37.683187",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant",

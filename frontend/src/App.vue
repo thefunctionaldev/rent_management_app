@@ -172,6 +172,7 @@ import {
 	TrendingUp,
 	Users,
 	Wallet,
+	Wrench,
 	Zap,
 } from "lucide-vue-next";
 import { computed, defineAsyncComponent, ref } from "vue";
@@ -196,6 +197,7 @@ const nav = [
 		items: [
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
+			{ to: "/requests", label: "Requests", icon: Wrench },
 			{ to: "/buildings", label: "Buildings", icon: Building2 },
 			{ to: "/import", label: "Import", icon: FileUp },
 		],
@@ -278,6 +280,7 @@ const dialogs = {
 	notice: lazy("NoticeDialog"),
 	changeRent: lazy("ChangeRentDialog"),
 	expense: lazy("ExpenseDialog"),
+	request: lazy("RequestDialog"),
 };
 
 function logout() {

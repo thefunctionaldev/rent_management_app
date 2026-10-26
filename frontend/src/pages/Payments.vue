@@ -6,6 +6,38 @@
 			>
 		</PageHeader>
 
+		<!-- reported by tenants in the tenant app -->
+		<div v-if="toConfirm.length" class="card mb-6 border-sky-200">
+			<div class="px-5 pt-4">
+				<h2 class="font-semibold">To confirm</h2>
+				<p class="text-sm text-slate-500">
+					Tenants say they paid these. Confirm once the money has reached you.
+				</p>
+			</div>
+			<ul class="mt-2 divide-y divide-slate-100">
+				<li
+					v-for="p in toConfirm"
+					:key="p.name"
+					class="flex flex-wrap items-center gap-3 px-5 py-3"
+				>
+					<div class="min-w-0 flex-1">
+						<p class="font-medium">
+							{{ p.tenant_name }} ·
+							<span class="tabular">{{ money(p.amount) }}</span>
+						</p>
+						<p class="text-xs text-slate-500">
+							{{ p.mode_of_payment }} · ref {{ p.reference_no || "—" }} ·
+							{{ date(p.payment_date) }} · {{ p.rent_invoice }}
+						</p>
+					</div>
+					<Button size="sm" variant="success" :icon="Check" @click="confirm(p)"
+						>Confirm</Button
+					>
+					<Button size="sm" variant="ghost" @click="reject(p)">Not received</Button>
+				</li>
+			</ul>
+		</div>
+
 		<div class="mb-6 grid gap-4 sm:grid-cols-3">
 			<StatCard
 				label="Total shown"
@@ -114,10 +146,10 @@
 </template>
 
 <script setup>
-import { Plus, Wallet } from "lucide-vue-next";
+import { Check, Plus, Wallet } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
-import { get } from "@/api";
+import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
@@ -125,7 +157,7 @@ import SearchInput from "@/components/SearchInput.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
-import { scope } from "@/store";
+import { bumpData, scope, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, debounce, money } from "@/utils";
 
@@ -145,6 +177,32 @@ const { data, loading, reload } = useResource(
 	{ initial: [] }
 );
 const payments = computed(() => data.value || []);
+
+const pending = useResource(() => get("get_payments_to_confirm", scope()), { initial: [] });
+const toConfirm = computed(() => pending.data.value || []);
+async function confirm(p) {
+	try {
+		await post("confirm_payment", { name: p.name });
+		toast(`Payment from ${p.tenant_name} confirmed`);
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
+async function reject(p) {
+	const reason = window.prompt(
+		`Why is ${p.tenant_name}'s payment rejected? (optional)`,
+		"Not received"
+	);
+	if (reason === null) return;
+	try {
+		await post("reject_payment", { name: p.name, reason });
+		toast("Marked as not received");
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 const total = computed(() => payments.value.reduce((s, p) => s + p.amount, 0));
 const byMode = computed(() =>
 	Object.keys(colors)

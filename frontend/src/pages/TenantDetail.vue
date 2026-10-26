@@ -252,6 +252,38 @@
 					</div>
 
 					<div class="card p-5">
+						<div class="flex items-center justify-between gap-3">
+							<div>
+								<h2 class="font-semibold">Tenant app</h2>
+								<p class="text-sm text-slate-500">
+									{{
+										tenant.user
+											? `Invited as ${tenant.user}`
+											: "Bills, online payment and requests on their phone"
+									}}
+								</p>
+							</div>
+							<Button
+								size="sm"
+								:icon="Smartphone"
+								:loading="inviting"
+								@click="invite"
+								>{{ tenant.user ? "Resend" : "Invite" }}</Button
+							>
+						</div>
+						<div v-if="inviteLink" class="mt-3 rounded-lg bg-slate-50 p-3 text-xs">
+							<p class="text-slate-600">
+								{{
+									inviteEmailed
+										? "Emailed. You can also send this link on WhatsApp:"
+										: "Email isn't set up, so send the tenant this link to set their password:"
+								}}
+							</p>
+							<p class="mt-1 font-mono break-all text-slate-800">{{ inviteLink }}</p>
+						</div>
+					</div>
+
+					<div class="card p-5">
 						<h2 class="font-semibold">Details</h2>
 						<dl class="mt-3 space-y-2.5 text-sm">
 							<div
@@ -408,6 +440,7 @@
 
 <script setup>
 import {
+	Smartphone,
 	ArrowDownLeft,
 	BellRing,
 	IndianRupee,
@@ -442,6 +475,28 @@ const props = defineProps({ name: { type: String, required: true } });
 const { data } = useResource(() => get("get_tenant", { name: props.name }));
 
 const tenant = computed(() => data.value.tenant);
+
+const inviting = ref(false);
+const inviteLink = ref("");
+const inviteEmailed = ref(false);
+async function invite() {
+	if (!tenant.value.email_id) {
+		toast("Add the tenant's email address first (Edit)", "error");
+		return;
+	}
+	inviting.value = true;
+	try {
+		const result = await post("invite_tenant", { name: props.name });
+		inviteLink.value = result.link;
+		inviteEmailed.value = result.emailed;
+		toast(result.emailed ? "Invite sent" : "Login created");
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	} finally {
+		inviting.value = false;
+	}
+}
 
 const agreementUrl = (a) =>
 	`/api/method/rent_management.api.download_agreement?allotment=${encodeURIComponent(a.name)}`;
