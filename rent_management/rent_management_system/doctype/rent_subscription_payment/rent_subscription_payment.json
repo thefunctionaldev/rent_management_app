@@ -22,6 +22,7 @@
   "column_break_ref",
   "razorpay_order_id",
   "razorpay_payment_id",
+  "razorpay_subscription_id",
   "reference",
   "invoice_section",
   "invoice_number",
@@ -97,7 +98,7 @@
    "fieldname": "payment_method",
    "fieldtype": "Select",
    "label": "Payment Method",
-   "options": "Razorpay\nManual",
+   "options": "Razorpay\nRazorpay AutoPay\nManual",
    "read_only": 1
   },
   {
@@ -153,7 +154,8 @@
    "fieldname": "razorpay_payment_id",
    "fieldtype": "Data",
    "label": "Razorpay Payment ID",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "reference",
@@ -261,12 +263,19 @@
    "label": "Total Tax",
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "razorpay_subscription_id",
+   "fieldtype": "Data",
+   "label": "Razorpay Subscription ID",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "in_create": 1,
  "links": [],
- "modified": "2026-10-26 19:12:19.620994",
+ "modified": "2026-10-26 20:24:33.153098",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Subscription Payment",

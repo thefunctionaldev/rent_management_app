@@ -11,7 +11,9 @@ frappe.ui.form.on("SaaS Signup", {
 			});
 		}
 		if (frm.doc.status === "Active") {
-			frm.add_custom_button(__("Open Site"), () => window.open(`https://${frm.doc.site}/rent`));
+			frm.add_custom_button(__("Open Site"), () =>
+				window.open(`https://${frm.doc.site}/rent`)
+			);
 		}
 	},
 });

@@ -106,6 +106,33 @@ def cancel_payment_link(link_id: str, auth) -> dict:
 	return request("POST", f"/payment_links/{link_id}/cancel", auth=auth)
 
 
+# Razorpay Subscriptions (automatic renewal of your plans)
+
+
+def create_plan(payload: dict) -> dict:
+	return request("POST", "/plans", payload)
+
+
+def create_subscription(payload: dict) -> dict:
+	return request("POST", "/subscriptions", payload)
+
+
+def get_subscription(subscription_id: str) -> dict:
+	return request("GET", f"/subscriptions/{subscription_id}")
+
+
+def cancel_subscription(subscription_id: str) -> dict:
+	"""Cancel now, which works in every state (a mandate that hasn't started can't be cancelled
+	at cycle end). Nothing is refunded and the app keeps the period already paid for."""
+	return request("POST", f"/subscriptions/{subscription_id}/cancel", {"cancel_at_cycle_end": 0})
+
+
+def get_subscription_invoices(subscription_id: str) -> list[dict]:
+	return request("GET", "/invoices", params={"subscription_id": subscription_id, "count": 100}).get(
+		"items", []
+	)
+
+
 def signature_matches(message: bytes, signature: str, secret: str) -> bool:
 	if not (secret and signature):
 		return False
@@ -116,6 +143,11 @@ def signature_matches(message: bytes, signature: str, secret: str) -> bool:
 def verify_payment_signature(order_id: str, payment_id: str, signature: str) -> bool:
 	"""Signature Razorpay Checkout returns to the browser: HMAC(order_id|payment_id, key secret)."""
 	return signature_matches(f"{order_id}|{payment_id}".encode(), signature, get_key_secret())
+
+
+def verify_subscription_signature(payment_id: str, subscription_id: str, signature: str) -> bool:
+	"""Signature Checkout returns for a subscription: HMAC(payment_id|subscription_id, key secret)."""
+	return signature_matches(f"{payment_id}|{subscription_id}".encode(), signature, get_key_secret())
 
 
 def verify_webhook_signature(body: bytes, signature: str, secret=None) -> bool:

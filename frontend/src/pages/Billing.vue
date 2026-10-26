@@ -23,6 +23,28 @@
 					<p v-if="sub.status === 'Expired'" class="mt-2 text-sm text-rose-700">
 						The app is read-only. Choose a plan below to continue.
 					</p>
+					<div
+						v-if="sub.auto_renew"
+						class="mt-3 flex items-center gap-2 text-sm text-emerald-700"
+					>
+						<RefreshCw class="size-4" /> Renews automatically
+						<button
+							class="text-xs text-slate-500 underline"
+							:disabled="!!paying"
+							@click="stopAutopay"
+						>
+							Turn off
+						</button>
+					</div>
+					<Button
+						v-else-if="sub.status === 'Active' && data.online_payments"
+						size="sm"
+						class="mt-3"
+						:icon="RefreshCw"
+						:loading="paying === 'autopay'"
+						@click="startAutopay"
+						>Renew automatically</Button
+					>
 				</div>
 				<div class="grid gap-4 sm:grid-cols-3 lg:col-span-2">
 					<UsageMeter
@@ -68,6 +90,28 @@
 					</button>
 				</div>
 			</div>
+
+			<label
+				v-if="data.online_payments"
+				class="mb-4 flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm"
+			>
+				<input
+					v-model="autoRenew"
+					type="checkbox"
+					class="mt-0.5 size-4 accent-brand-600"
+				/>
+				<span>
+					<span class="font-medium text-slate-900">Renew automatically</span>
+					<span class="block text-slate-500"
+						>With UPI AutoPay or your card, so the app never goes read-only. Turn it
+						off any time.</span
+					>
+					<span v-if="sub.auto_renew && !autoRenew" class="mt-1 block text-amber-700"
+						>Paying once for a different plan turns off the automatic renewal of
+						{{ sub.plan_title }}.</span
+					>
+				</span>
+			</label>
 
 			<div
 				v-if="!data.online_payments"
@@ -261,6 +305,7 @@ import {
 	ChevronDown,
 	Download,
 	Receipt,
+	RefreshCw,
 	Users,
 } from "lucide-vue-next";
 import { computed, reactive, ref, watch } from "vue";
@@ -281,6 +326,7 @@ const { data, loading, reload } = useResource(() => get("get_billing"));
 const sub = computed(() => data.value.subscription);
 const cycle = ref(boot.subscription?.billing_cycle || "Monthly");
 const paying = ref(null);
+const autoRenew = ref(true);
 
 // billing details printed on GST invoices
 const showDetails = ref(false);
@@ -371,45 +417,88 @@ function loadCheckout() {
 	return checkoutScript;
 }
 
+// Razorpay Checkout for a one-time order or, with auto-renew, a subscription (mandate)
+async function openCheckout(options, verifyMethod, onDone) {
+	await loadCheckout();
+	delete options.payment; // ours, not a Razorpay option
+	await new Promise((resolve) => {
+		const checkout = new window.Razorpay({
+			...options,
+			theme: { color: "#4f46e5" },
+			modal: { ondismiss: resolve },
+			handler: async (response) => {
+				try {
+					const state = await post(verifyMethod, response);
+					boot.subscription = state;
+					onDone(state);
+					reload();
+				} catch (e) {
+					toast(e.message, "error");
+				}
+				resolve();
+			},
+		});
+		checkout.on("payment.failed", (response) => {
+			toast(response.error?.description || "Payment failed", "error");
+		});
+		checkout.open();
+	});
+}
+
 async function pay(plan) {
 	paying.value = plan.key;
 	try {
-		await loadCheckout();
-		const options = await post("create_subscription_checkout", {
-			plan: plan.key,
-			billing_cycle: cycle.value,
-		});
-		delete options.payment; // ours, not a Razorpay option
-		await new Promise((resolve) => {
-			const checkout = new window.Razorpay({
-				...options,
-				theme: { color: "#4f46e5" },
-				modal: { ondismiss: resolve },
-				handler: async (response) => {
-					try {
-						const state = await post("verify_subscription_payment", response);
-						boot.subscription = state;
-						toast(
-							`Thank you! ${plan.title} is active until ${date(
-								state.current_period_end
-							)}.`
-						);
-						reload();
-					} catch (e) {
-						toast(e.message, "error");
-					}
-					resolve();
-				},
-			});
-			checkout.on("payment.failed", (response) => {
-				toast(response.error?.description || "Payment failed", "error");
-			});
-			checkout.open();
-		});
+		const args = { plan: plan.key, billing_cycle: cycle.value };
+		const thanks = (state) =>
+			toast(`Thank you! ${plan.title} is active until ${date(state.current_period_end)}.`);
+		if (autoRenew.value) {
+			await openCheckout(
+				await post("create_autopay_checkout", args),
+				"verify_autopay",
+				thanks
+			);
+		} else {
+			await openCheckout(
+				await post("create_subscription_checkout", args),
+				"verify_subscription_payment",
+				thanks
+			);
+		}
 	} catch (e) {
 		toast(e.message, "error");
 	} finally {
 		paying.value = null;
+	}
+}
+
+// auto-renew for the plan already paid for: the first charge is when the period ends
+async function startAutopay() {
+	paying.value = "autopay";
+	try {
+		const options = await post("create_autopay_checkout", {
+			plan: sub.value.plan,
+			billing_cycle: sub.value.billing_cycle,
+			start_later: 1,
+		});
+		await openCheckout(options, "verify_autopay", () =>
+			toast("Auto-renew is on. Nothing is charged until your plan ends.")
+		);
+	} catch (e) {
+		toast(e.message, "error");
+	} finally {
+		paying.value = null;
+	}
+}
+
+async function stopAutopay() {
+	if (!window.confirm("Turn off automatic renewal? Your plan stays active until it ends."))
+		return;
+	try {
+		boot.subscription = await post("cancel_autopay");
+		toast("Automatic renewal turned off");
+		reload();
+	} catch (e) {
+		toast(e.message, "error");
 	}
 }
 </script>

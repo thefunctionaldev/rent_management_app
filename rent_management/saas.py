@@ -242,3 +242,48 @@ def get_dashboard():
 		),
 		"list": customers,
 	}
+
+
+# ---------------------------------------------------------------- control site: Razorpay webhooks
+
+
+def find_site(event: dict) -> str | None:
+	"""The customer site an event belongs to: every order and subscription we create carries
+	notes.site."""
+	for entity in ("subscription", "order", "payment", "invoice"):
+		notes = ((event.get("payload") or {}).get(entity) or {}).get("entity", {}).get("notes") or {}
+		if isinstance(notes, dict) and notes.get("site"):
+			return str(notes["site"]).lower()
+	return None
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+def razorpay_webhook():
+	"""The webhook URL of your Razorpay account (subscriptions and orders of all customer sites).
+
+	Razorpay sends every event to one URL, so the control site checks the signature and passes
+	the event on, unchanged and with its signature, to the site it belongs to."""
+	only_control_site()
+	from rent_management import razorpay
+
+	body = frappe.request.get_data()
+	signature = frappe.get_request_header("X-Razorpay-Signature") or ""
+	if not razorpay.verify_webhook_signature(body, signature):
+		frappe.throw(_("Invalid signature"), frappe.AuthenticationError)
+
+	site = find_site(json.loads(body or b"{}"))
+	if not site or site == frappe.local.site or not frappe.db.exists(CUSTOMER, site):
+		return {"status": "ignored"}
+
+	path = "/api/method/rent_management.subscription.razorpay_webhook"
+	headers = {"Content-Type": "application/json", "X-Razorpay-Signature": signature}
+	base = frappe.conf.get("rent_webhook_forward_base")  # e.g. http://127.0.0.1:8000 on the same server
+	if base:
+		url, headers["Host"] = f"{base.rstrip('/')}{path}", site
+	else:
+		url = f"{frappe.conf.get('rent_signup_scheme') or 'https'}://{site}{path}"
+	response = requests.post(url, data=body, headers=headers, timeout=15)
+	if not response.ok:
+		# a failed response makes Razorpay retry the webhook later
+		frappe.throw(_("Forwarding to {0} failed ({1})").format(site, response.status_code))
+	return {"status": "forwarded", "site": site}

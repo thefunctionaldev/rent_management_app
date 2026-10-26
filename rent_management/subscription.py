@@ -211,6 +211,7 @@ def get_state() -> dict:
 		"days_left": date_diff(ends_on, nowdate()) if ends_on else 0,
 		"grace_ends_on": add_days(sub.current_period_end, grace_days()) if sub.current_period_end else None,
 		"limits": {key: cint(plan.get(limit)) for key, (limit, _label) in LIMITS.items()},
+		"auto_renew": bool(cint(sub.auto_renew)),
 		"features": {
 			"whatsapp": bool(cint(plan.get("whatsapp"))),
 			"profit_report": bool(cint(plan.get("profit_report"))),
@@ -220,8 +221,14 @@ def get_state() -> dict:
 	}
 
 
+def get_subscription_for_update():
+	"""The subscription as committed now, locked until this transaction ends. A plain read can
+	return an older snapshot in a transaction that waited for another payment to finish."""
+	return frappe.get_doc(SUBSCRIPTION, SUBSCRIPTION, for_update=True)
+
+
 def update_subscription(**values):
-	sub = frappe.get_single(SUBSCRIPTION)
+	sub = get_subscription_for_update()
 	sub.update(values)
 	sub.status = get_status(sub)
 	sub.flags.ignore_permissions = True
@@ -397,7 +404,7 @@ def get_new_period(plan: str, billing_cycle: str, today=None) -> tuple:
 	- Otherwise (trial, or lapsed) the new period starts today.
 	"""
 	today = getdate(today or nowdate())
-	sub = frappe.get_single(SUBSCRIPTION)
+	sub = get_subscription_for_update()
 	current_end = getdate(sub.current_period_end) if sub.current_period_end else None
 	running = current_end and current_end >= today
 
@@ -535,7 +542,12 @@ def apply_payment(payment, payment_id=None, start=None, end=None):
 	if not frappe.flags.in_test:
 		frappe.enqueue("rent_management.saas.send_heartbeat", enqueue_after_commit=True)
 
-	sub = frappe.get_single(SUBSCRIPTION)
+	sub = get_subscription_for_update()
+	stop_old_mandate = (
+		payment.payment_method != AUTOPAY
+		and cint(sub.auto_renew)
+		and (sub.plan, sub.billing_cycle) != (payment.plan, payment.billing_cycle)
+	)
 	update_subscription(
 		plan=payment.plan,
 		billing_cycle=payment.billing_cycle,
@@ -544,6 +556,13 @@ def apply_payment(payment, payment_id=None, start=None, end=None):
 		else sub.current_period_start or start,
 		current_period_end=end,
 	)
+	if stop_old_mandate:
+		# the mandate would go on charging for the old plan
+		try:
+			cancel_autopay()
+		except Exception:
+			frappe.clear_last_message()  # the payment itself went through
+			frappe.log_error(title="Could not stop automatic renewal of the old plan")
 	return payment
 
 
@@ -668,19 +687,296 @@ def record_manual_payment(plan, billing_cycle, amount=0, reference=None, start=N
 	return apply_payment(payment, start=start, end=end)
 
 
+# ---------------------------------------------------------------- automatic renewal (Razorpay Subscriptions)
+
+AUTOPAY = "Razorpay AutoPay"
+LIVE_STATES = ("authenticated", "active", "pending")  # pending: Razorpay is retrying a failed charge
+ENDED_STATES = ("cancelled", "completed", "expired", "halted")
+
+
+def get_razorpay_plan(plan: str, billing_cycle: str) -> str:
+	"""The Razorpay plan for one of our plans and cycles at today's price, made when first needed.
+
+	Set `rent_razorpay_plan_ids` ({"growth:Monthly": "plan_xxx", ...}) in common_site_config.json
+	to use plans you created in the Razorpay dashboard instead."""
+	configured = (frappe.conf.get("rent_razorpay_plan_ids") or {}).get(f"{plan}:{billing_cycle}")
+	if configured:
+		return configured
+	amount = razorpay.to_subunits(gst.payable_amount(get_price(plan, billing_cycle)))
+	key = f"rent:razorpay-plan:{plan}:{billing_cycle}:{amount}:{get_currency()}"
+	cached = frappe.cache.get_value(key)
+	if cached:
+		return cached
+	created = razorpay.create_plan(
+		{
+			"period": "monthly" if billing_cycle == "Monthly" else "yearly",
+			"interval": 1,
+			"item": {
+				"name": f"{get_plan(plan).get('title', plan)} ({billing_cycle})",
+				"amount": amount,
+				"currency": get_currency(),
+			},
+			"notes": {"plan": plan, "billing_cycle": billing_cycle},
+		}
+	)
+	frappe.cache.set_value(key, created["id"])
+	return created["id"]
+
+
+def create_autopay_checkout(plan: str, billing_cycle: str, start_later: bool = False) -> dict:
+	"""Checkout that sets up UPI AutoPay / a card mandate.
+
+	Normally the first period is charged now. With start_later (turning auto-renew on for the
+	plan already paid for) the mandate is only authorised now and the first charge is made
+	when the current period ends. Either way a Created payment waits for that first charge."""
+	check_plan_fits(plan)
+	sub = frappe.get_single(SUBSCRIPTION)
+	payload = {
+		"plan_id": get_razorpay_plan(plan, billing_cycle),
+		"total_count": 120 if billing_cycle == "Monthly" else 10,
+		"quantity": 1,
+		"customer_notify": 1,
+		"notes": {"site": frappe.local.site, "plan": plan, "billing_cycle": billing_cycle},
+	}
+	if start_later:
+		if not (sub.current_period_end and get_status(sub) == "Active"):
+			frappe.throw(_("There is no paid period to renew."))
+		if (sub.plan, sub.billing_cycle) != (plan, billing_cycle):
+			frappe.throw(_("Auto-renew can only be started later for your current plan."))
+		start = add_days(sub.current_period_end, 1)
+		payload["start_at"] = int(frappe.utils.get_datetime(start).timestamp())
+	rp_subscription = razorpay.create_subscription(payload)
+
+	payment = frappe.get_doc(
+		{
+			"doctype": PAYMENT,
+			"plan": plan,
+			"plan_title": get_plan(plan).get("title", plan),
+			"billing_cycle": billing_cycle,
+			"amount": gst.payable_amount(get_price(plan, billing_cycle)),
+			"currency": get_currency(),
+			"payment_method": AUTOPAY,
+			"status": "Created",
+			"razorpay_subscription_id": rp_subscription["id"],
+			"paid_by": frappe.session.user,
+		}
+	)
+	payment.flags.ignore_permissions = True
+	payment.insert()
+
+	user = frappe.get_cached_doc("User", frappe.session.user)
+	return {
+		"key": razorpay.get_key_id(),
+		"subscription_id": rp_subscription["id"],
+		"name": frappe.conf.get("rent_subscription_brand") or "Rent Management",
+		"description": _("{0} plan, renews {1}").format(
+			get_plan(plan).get("title", plan), billing_cycle.lower()
+		),
+		"prefill": {"name": user.full_name, "email": user.email},
+		"notes": {"site": frappe.local.site},
+		"payment": payment.name,
+	}
+
+
+def lock_autopay():
+	"""Checkout, the webhook and the daily job can all see the same charge: one at a time."""
+	return get_subscription_for_update()
+
+
+def verify_autopay(payment_id: str, subscription_id: str, signature: str) -> dict:
+	"""Checkout callback for a mandate: record the first charge and turn auto-renew on."""
+	if not razorpay.verify_subscription_signature(payment_id, subscription_id, signature):
+		frappe.throw(_("Payment could not be verified. If money was deducted, contact support."))
+	lock_autopay()
+
+	name = frappe.db.get_value(
+		PAYMENT, {"razorpay_subscription_id": subscription_id, "status": "Created"}, for_update=True
+	)
+	if name:
+		payment = frappe.get_doc(PAYMENT, name, for_update=True)
+		rp_payment = razorpay.get_payment(payment_id)
+		# a mandate that starts later is authorised with a small amount that Razorpay refunds:
+		# only a charge of the plan's amount pays for a period
+		if cint(rp_payment.get("amount")) == razorpay.to_subunits(payment.amount) and (
+			rp_payment.get("currency") == payment.currency
+		):
+			if rp_payment.get("status") == "authorized":
+				rp_payment = razorpay.capture_payment(
+					payment_id, rp_payment["amount"], rp_payment["currency"]
+				)
+			if rp_payment.get("status") != "captured":
+				frappe.throw(
+					_("Payment {0} is {1}, not captured.").format(payment_id, rp_payment.get("status"))
+				)
+			apply_payment(payment, payment_id=payment_id)
+
+	set_autopay(subscription_id)
+	return get_state()
+
+
+def record_paid_invoices(subscription_id: str, rp_subscription: dict) -> list[str]:
+	"""Record the charges Razorpay made on a mandate that aren't recorded yet. The first one
+	completes the mandate's Created payment; renewals get a payment of their own."""
+	notes = rp_subscription.get("notes") or {}
+	sub = lock_autopay()
+	plan = notes.get("plan") if notes.get("plan") in get_plans() else sub.plan
+	recorded = []
+	for invoice in razorpay.get_subscription_invoices(subscription_id):
+		payment_id = invoice.get("payment_id")
+		if invoice.get("status") != "paid" or not payment_id:
+			continue
+		# locking reads: they see a charge another request has just recorded
+		if frappe.db.get_value(PAYMENT, {"razorpay_payment_id": payment_id}, for_update=True):
+			continue
+		name = frappe.db.get_value(
+			PAYMENT, {"razorpay_subscription_id": subscription_id, "status": "Created"}, for_update=True
+		)
+		if name:
+			payment = frappe.get_doc(PAYMENT, name, for_update=True)
+		else:
+			payment = frappe.get_doc(
+				{
+					"doctype": PAYMENT,
+					"plan": plan,
+					"plan_title": get_plan(plan).get("title", plan),
+					"billing_cycle": notes.get("billing_cycle") or sub.billing_cycle,
+					"status": "Created",
+					"payment_method": AUTOPAY,
+					"razorpay_subscription_id": subscription_id,
+				}
+			)
+		payment.amount = flt(invoice.get("amount_paid") or invoice.get("amount")) / 100
+		payment.currency = invoice.get("currency") or get_currency()
+		payment.flags.ignore_permissions = True
+		if payment.is_new():
+			payment.insert()
+		apply_payment(payment, payment_id=payment_id)
+		recorded.append(payment.name)
+	return recorded
+
+
+def reconcile_mandate(subscription_id: str) -> list[str]:
+	"""Bring one mandate up to date: its charges, and whether auto-renew runs on it."""
+	rp_subscription = razorpay.get_subscription(subscription_id)
+	recorded = record_paid_invoices(subscription_id, rp_subscription)
+
+	status = rp_subscription.get("status")
+	current = lock_autopay().razorpay_subscription_id
+	if subscription_id == current:
+		if status in ENDED_STATES:
+			update_subscription(auto_renew=0)  # cancelled in the customer's UPI app, or charges failed
+	elif status in LIVE_STATES:
+		adopt_mandate(subscription_id, rp_subscription, current)
+	elif status in ENDED_STATES or (
+		status == "created"
+		and now_datetime().timestamp() - cint(rp_subscription.get("created_at")) > 2 * 86400
+	):
+		stop_watching(subscription_id)  # Checkout was closed without setting it up
+	return recorded
+
+
+def adopt_mandate(subscription_id: str, rp_subscription: dict, current: str | None):
+	"""A mandate set up in a Checkout whose callback never reached us (closed tab, lost network)."""
+	if current:
+		other = razorpay.get_subscription(current)
+		if other.get("status") in LIVE_STATES and cint(other.get("created_at")) > cint(
+			rp_subscription.get("created_at")
+		):
+			# an older Checkout finishing late: the newer mandate stays, this one stops
+			stop_razorpay_subscription(subscription_id)
+			stop_watching(subscription_id)
+			return
+	set_autopay(subscription_id)
+
+
+def set_autopay(subscription_id: str):
+	"""Auto-renew now runs on this Razorpay subscription; stop the one it replaces."""
+	previous = lock_autopay().razorpay_subscription_id
+	if previous and previous != subscription_id:
+		record_paid_invoices(previous, razorpay.get_subscription(previous))
+		stop_razorpay_subscription(previous)
+		stop_watching(previous)
+	update_subscription(auto_renew=1, razorpay_subscription_id=subscription_id)
+
+
+def stop_razorpay_subscription(subscription_id: str):
+	"""No more charges on this mandate. The period already paid for is kept."""
+	try:
+		razorpay.cancel_subscription(subscription_id)
+	except frappe.ValidationError:
+		if razorpay.get_subscription(subscription_id).get("status") not in ENDED_STATES:
+			raise
+		frappe.clear_last_message()  # it had already ended
+
+
+def stop_watching(subscription_id: str):
+	for name in frappe.get_all(
+		PAYMENT, filters={"razorpay_subscription_id": subscription_id, "status": "Created"}, pluck="name"
+	):
+		frappe.db.set_value(PAYMENT, name, "status", "Failed")
+
+
+def cancel_autopay():
+	current = lock_autopay().razorpay_subscription_id
+	if current:
+		stop_razorpay_subscription(current)
+		stop_watching(current)
+	update_subscription(auto_renew=0)
+
+
+def reconcile_autopay() -> list[str]:
+	"""Daily: record the charges of the mandate, and of mandates set up in a Checkout whose
+	callback never reached us."""
+	if not razorpay.is_configured():
+		return []
+	waiting = frappe.get_all(
+		PAYMENT,
+		filters={"status": "Created", "payment_method": AUTOPAY, "razorpay_subscription_id": ("is", "set")},
+		pluck="razorpay_subscription_id",
+	)
+	recorded = []
+	for subscription_id in dict.fromkeys(
+		[frappe.db.get_single_value(SUBSCRIPTION, "razorpay_subscription_id"), *waiting]
+	):
+		if not subscription_id:
+			continue
+		frappe.db.savepoint("reconcile_mandate")
+		try:
+			recorded += reconcile_mandate(subscription_id)
+		except Exception:
+			frappe.db.rollback(save_point="reconcile_mandate")
+			frappe.log_error(title=_("Could not reconcile Razorpay subscription {0}").format(subscription_id))
+	return recorded
+
+
 # ---------------------------------------------------------------- webhook & reconcile
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 def razorpay_webhook():
-	"""Razorpay webhook (events: order.paid, payment.captured). Backup for when the browser
-	closes before the checkout callback runs. Orders from other sites are ignored."""
+	"""Razorpay webhook (events: order.paid, payment.captured and subscription.*). Backup for when
+	the browser closes before the checkout callback runs, and how renewal charges arrive. Orders
+	and subscriptions of other sites are ignored."""
 	body = frappe.request.get_data()
 	signature = frappe.get_request_header("X-Razorpay-Signature") or ""
 	if not razorpay.verify_webhook_signature(body, signature):
 		frappe.throw(_("Invalid signature"), frappe.AuthenticationError)
 
 	event = frappe.parse_json(body.decode() or "{}")
+	if str(event.get("event") or "").startswith("subscription."):
+		rp_subscription = (event.get("payload") or {}).get("subscription", {}).get("entity") or {}
+		sub_id = rp_subscription.get("id")
+		ours = sub_id and (
+			sub_id == frappe.db.get_single_value(SUBSCRIPTION, "razorpay_subscription_id")
+			or frappe.db.exists(PAYMENT, {"razorpay_subscription_id": sub_id})
+			or (rp_subscription.get("notes") or {}).get("site") == frappe.local.site
+		)
+		if not ours:
+			return {"status": "ignored"}
+		frappe.set_user("Administrator")
+		reconcile_mandate(sub_id)
+		return {"status": "ok"}
+
 	payment = (event.get("payload") or {}).get("payment", {}).get("entity") or {}
 	order_id = payment.get("order_id")
 	if event.get("event") not in ("order.paid", "payment.captured") or not order_id:
@@ -728,6 +1024,10 @@ def reconcile_pending_orders():
 def daily():
 	"""Refresh the stored status, reconcile open orders and send renewal reminders."""
 	reconcile_pending_orders()
+	try:
+		reconcile_autopay()
+	except Exception:
+		frappe.log_error(title="Could not check automatic renewal")
 
 	sub = frappe.get_single(SUBSCRIPTION)
 	status = get_status(sub)
@@ -743,8 +1043,8 @@ def send_reminder(sub, status):
 		return
 
 	ends_on = sub.current_period_end or sub.trial_ends_on
-	if not ends_on:
-		return
+	if not ends_on or (cint(sub.auto_renew) and status == "Active"):
+		return  # renews by itself
 	days_left = date_diff(ends_on, today)
 	what = _("free trial") if status == "Trial" else _("subscription")
 

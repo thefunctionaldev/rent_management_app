@@ -1491,6 +1491,25 @@ def download_subscription_invoice(name):
 
 
 @frappe.whitelist(methods=["POST"])
+def create_autopay_checkout(plan, billing_cycle, start_later=0):
+	check_access()
+	return subscription.create_autopay_checkout(plan, billing_cycle, start_later=cint(start_later))
+
+
+@frappe.whitelist(methods=["POST"])
+def verify_autopay(razorpay_payment_id, razorpay_subscription_id, razorpay_signature):
+	check_access()
+	return subscription.verify_autopay(razorpay_payment_id, razorpay_subscription_id, razorpay_signature)
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_autopay():
+	check_access()
+	subscription.cancel_autopay()
+	return subscription.get_state()
+
+
+@frappe.whitelist(methods=["POST"])
 def create_subscription_checkout(plan, billing_cycle):
 	check_access()
 	return subscription.create_checkout(plan, billing_cycle)

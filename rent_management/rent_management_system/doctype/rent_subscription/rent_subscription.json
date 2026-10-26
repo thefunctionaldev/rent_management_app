@@ -14,6 +14,9 @@
   "current_period_start",
   "current_period_end",
   "last_reminder_on",
+  "autopay_section",
+  "auto_renew",
+  "razorpay_subscription_id",
   "billing_section",
   "billing_name",
   "billing_gstin",
@@ -110,12 +113,30 @@
    "fieldname": "billing_state",
    "fieldtype": "Data",
    "label": "State"
+  },
+  {
+   "fieldname": "autopay_section",
+   "fieldtype": "Section Break",
+   "label": "Automatic Renewal"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_renew",
+   "fieldtype": "Check",
+   "label": "Renews Automatically",
+   "read_only": 1
+  },
+  {
+   "fieldname": "razorpay_subscription_id",
+   "fieldtype": "Data",
+   "label": "Razorpay Subscription ID",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 19:12:19.619230",
+ "modified": "2026-10-26 20:24:33.152097",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Subscription",
