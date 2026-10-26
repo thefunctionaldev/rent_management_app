@@ -170,6 +170,7 @@ import {
 	Sparkles,
 	Users,
 	Wallet,
+	Zap,
 } from "lucide-vue-next";
 import { computed, defineAsyncComponent, ref } from "vue";
 
@@ -203,6 +204,7 @@ const nav = [
 			{ to: "/invoices", label: "Invoices", icon: FileText },
 			{ to: "/payments", label: "Payments", icon: Wallet },
 			{ to: "/deposits", label: "Deposits", icon: ShieldCheck },
+			{ to: "/electricity", label: "Electricity", icon: Zap },
 			{ to: "/outstanding", label: "Outstanding", icon: BarChart3 },
 		],
 	},

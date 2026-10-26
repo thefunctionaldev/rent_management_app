@@ -35,7 +35,17 @@ TENANT_FIELDS = (
 	"workspace",
 	"salary",
 )
-ROOM_FIELDS = ("room_number", "property", "floor", "status", "room_type", "room_rent", "capacity")
+ROOM_FIELDS = (
+	"room_number",
+	"property",
+	"floor",
+	"status",
+	"room_type",
+	"room_rent",
+	"capacity",
+	"has_meter",
+	"electricity_rate",
+)
 PROPERTY_FIELDS = ("property_name", "abbr", "address", "city", "state", "pincode", "is_active")
 ROOM_TYPE_FIELDS = (
 	"type",
@@ -226,6 +236,8 @@ def get_rooms(property=None):
 			"room_rent",
 			"capacity",
 			"occupied_beds",
+			"has_meter",
+			"electricity_rate",
 			"tenant",
 			"tenant_name",
 			"checkin_date",
@@ -508,7 +520,7 @@ def mark_deposit_collected(allotment, collected_on=None):
 def get_billable_allotments(property=None):
 	"""Allotments an invoice can be raised against: current tenants and those who moved out."""
 	check_access()
-	return frappe.get_all(
+	allotments = frappe.get_all(
 		"Tenant Space Allotment",
 		filters=by_property({"docstatus": 1, "status": ("in", ("Active", "Vacated"))}, property),
 		fields=[
@@ -524,6 +536,17 @@ def get_billable_allotments(property=None):
 		],
 		order_by="status asc, room asc",
 	)
+	electricity = defaultdict(float)
+	for row in frappe.get_all(
+		"Meter Reading Share",
+		filters={"parenttype": "Meter Reading", "rent_invoice": ("is", "not set")},
+		fields=["tenant_space_allotment", "amount"],
+	):
+		electricity[row.tenant_space_allotment] += flt(row.amount)
+	for allotment in allotments:
+		# added to the next invoice automatically
+		allotment.pending_electricity = electricity.get(allotment.name, 0)
+	return allotments
 
 
 # ---------------------------------------------------------------- invoices
@@ -873,12 +896,111 @@ def get_outstanding_by(field):
 	return totals
 
 
+# ---------------------------------------------------------------- electricity
+
+
+@frappe.whitelist()
+def get_meter_rooms(property=None):
+	"""Rooms with a meter and their last reading, for entering this month's readings."""
+	check_access()
+	rooms = frappe.get_all(
+		"Tenant Space",
+		filters=by_property({"has_meter": 1}, property),
+		fields=["name", "room_number", "property", "floor", "occupied_beds", "electricity_rate"],
+		order_by="property asc, room_number asc",
+	)
+	default_rate = frappe.db.get_single_value("Rent Management Settings", "electricity_rate")
+	for room in rooms:
+		last = frappe.get_all(
+			"Meter Reading",
+			filters={"room": room.name},
+			fields=["reading", "reading_date"],
+			order_by="reading_date desc",
+			limit=1,
+		)
+		room.last_reading = last[0].reading if last else None
+		room.last_reading_date = last[0].reading_date if last else None
+		room.rate = flt(room.electricity_rate) or flt(default_rate)
+	return {"rooms": rooms, "default_rate": flt(default_rate)}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_meter_readings(reading_date, readings):
+	"""Save several rooms' readings at once; each row is saved or reported on its own."""
+	check_access()
+	results = []
+	for row in frappe.parse_json(readings) or []:
+		if row.get("reading") in (None, ""):
+			continue
+		frappe.db.savepoint("meter_reading")
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Meter Reading",
+					"room": row["room"],
+					"reading_date": reading_date,
+					"reading": flt(row["reading"]),
+					"meter_replaced": cint(row.get("meter_replaced")),
+				}
+			).insert()
+			results.append({"room": row["room"], "name": doc.name, "units": doc.units, "amount": doc.amount})
+		except Exception as e:
+			frappe.db.rollback(save_point="meter_reading")
+			frappe.clear_last_message()
+			results.append({"room": row["room"], "error": data_import.strip_html(str(e))})
+	return results
+
+
+@frappe.whitelist()
+def get_meter_readings(property=None, room=None, limit=100):
+	check_access()
+	filters = by_property({}, property)
+	if room:
+		filters["room"] = room
+	readings = frappe.get_all(
+		"Meter Reading",
+		filters=filters,
+		fields=[
+			"name",
+			"room",
+			"property",
+			"reading_date",
+			"previous_reading",
+			"reading",
+			"units",
+			"rate",
+			"amount",
+			"status",
+		],
+		order_by="reading_date desc, room asc",
+		limit=cint(limit),
+	)
+	shares = defaultdict(list)
+	for share in frappe.get_all(
+		"Meter Reading Share",
+		filters={"parenttype": "Meter Reading", "parent": ("in", [r.name for r in readings] or [""])},
+		fields=["parent", "tenant_name", "units", "amount", "rent_invoice"],
+		order_by="idx asc",
+	):
+		shares[share.parent].append(share)
+	for reading in readings:
+		reading.shares = shares.get(reading.name, [])
+	return readings
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_meter_reading(name):
+	check_access()
+	frappe.delete_doc("Meter Reading", name)
+
+
 # ---------------------------------------------------------------- settings
 
 SETTINGS_FIELDS = (
 	"auto_generate_invoices",
 	"auto_submit_invoices",
 	"rent_due_day",
+	"electricity_rate",
 	"upi_id",
 	"upi_payee_name",
 	"razorpay_enabled",

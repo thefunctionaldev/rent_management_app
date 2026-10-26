@@ -9,7 +9,9 @@
  "field_order": [
   "charge_type",
   "description",
-  "amount"
+  "amount",
+  "meter_reading",
+  "meter_reading_share"
  ],
  "fields": [
   {
@@ -32,13 +34,27 @@
    "in_list_view": 1,
    "label": "Amount",
    "reqd": 1
+  },
+  {
+   "fieldname": "meter_reading",
+   "fieldtype": "Link",
+   "label": "Meter Reading",
+   "options": "Meter Reading",
+   "read_only": 1
+  },
+  {
+   "fieldname": "meter_reading_share",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Meter Reading Share",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-26 21:55:48.605496",
+ "modified": "2026-10-26 19:31:50.858125",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Rent Invoice Charge",

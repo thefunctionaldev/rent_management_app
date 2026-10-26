@@ -39,6 +39,11 @@ const colors = {
 	Inactive: "slate",
 	"Under Renovation": "slate",
 	Trial: "sky",
+	Opening: "slate",
+	Unbilled: "amber",
+	"Partly Billed": "sky",
+	Billed: "green",
+	"Not Billable": "slate",
 	"Past Due": "amber",
 	Expired: "rose",
 };

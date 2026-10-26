@@ -19,7 +19,10 @@
   "column_break_occupancy",
   "occupied_beds",
   "checkin_date",
-  "current_allotment"
+  "current_allotment",
+  "electricity_section",
+  "has_meter",
+  "electricity_rate"
  ],
  "fields": [
   {
@@ -125,6 +128,26 @@
    "fieldtype": "Int",
    "label": "Occupied Beds",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "electricity_section",
+   "fieldtype": "Section Break",
+   "label": "Electricity"
+  },
+  {
+   "default": "0",
+   "description": "Meter readings are billed to the tenants of the room.",
+   "fieldname": "has_meter",
+   "fieldtype": "Check",
+   "label": "Has Electricity Meter"
+  },
+  {
+   "depends_on": "has_meter",
+   "description": "Leave blank to use the rate in Rent Management Settings.",
+   "fieldname": "electricity_rate",
+   "fieldtype": "Currency",
+   "label": "Rate per Unit"
   }
  ],
  "grid_page_length": 50,
@@ -141,7 +164,7 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-10-26 18:58:16.110377",
+ "modified": "2026-10-26 19:31:50.856409",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space",

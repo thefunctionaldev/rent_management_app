@@ -133,6 +133,32 @@
 				</div>
 			</div>
 
+			<div class="rounded-xl border border-slate-200 px-4 py-1">
+				<label class="flex items-center gap-2 py-2.5 text-sm text-slate-700">
+					<input
+						v-model="form.has_meter"
+						type="checkbox"
+						class="size-4 accent-brand-600"
+					/>
+					Has its own electricity meter
+					<span class="text-slate-400">(billed to its tenants)</span>
+				</label>
+				<Field
+					v-if="form.has_meter"
+					label="Rate per unit"
+					hint="Blank: the rate in Settings"
+					class="pb-3"
+				>
+					<input
+						v-model="form.electricity_rate"
+						type="number"
+						min="0"
+						step="0.01"
+						class="input tabular"
+					/>
+				</Field>
+			</div>
+
 			<Field
 				:label="form.capacity > 1 ? 'Monthly rent per bed' : 'Monthly rent'"
 				hint="Leave blank to use the room type's standard rent"
@@ -179,6 +205,8 @@ const form = reactive({
 	status: props.room?.status || "Available",
 	room_type: props.room?.room_type || "",
 	room_rent: props.room?.room_rent || "",
+	has_meter: !!props.room?.has_meter,
+	electricity_rate: props.room?.electricity_rate || "",
 });
 const type = reactive({
 	type: "",
@@ -216,6 +244,8 @@ const { loading, run } = useAction(
 				room_type: roomType || null,
 				room_rent: form.room_rent || null,
 				property: form.property || null,
+				has_meter: form.has_meter ? 1 : 0,
+				electricity_rate: form.electricity_rate || null,
 				status: props.room ? form.status : "Available",
 			},
 		});

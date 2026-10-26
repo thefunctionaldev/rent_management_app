@@ -17,6 +17,13 @@
 					</option>
 				</select>
 			</Field>
+			<p
+				v-if="pendingElectricity"
+				class="-mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800"
+			>
+				<Zap class="size-4" /> {{ money(pendingElectricity) }} of electricity from meter
+				readings will be added.
+			</p>
 			<div class="grid gap-4 sm:grid-cols-3">
 				<Field label="Month" required>
 					<select v-model="form.billing_month" class="input" required>
@@ -112,8 +119,8 @@
 </template>
 
 <script setup>
-import { Trash2 } from "lucide-vue-next";
-import { reactive } from "vue";
+import { Trash2, Zap } from "lucide-vue-next";
+import { computed, reactive } from "vue";
 
 import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
@@ -139,6 +146,11 @@ const form = reactive({
 	submit: true,
 });
 const allotments = useResource(() => get("get_billable_allotments", scope()), { initial: [] });
+const pendingElectricity = computed(
+	() =>
+		allotments.data.value.find((a) => a.name === form.tenant_space_allotment)
+			?.pending_electricity || 0
+);
 
 function addCharge() {
 	form.charges.push({ charge_type: "Electricity", description: "", amount: "" });

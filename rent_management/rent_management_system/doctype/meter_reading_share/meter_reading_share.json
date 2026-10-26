@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2026-10-26 19:31:50.855821",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "tenant_space_allotment",
+  "tenant",
+  "tenant_name",
+  "days",
+  "units",
+  "amount",
+  "rent_invoice"
+ ],
+ "fields": [
+  {
+   "fieldname": "tenant_space_allotment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Allotment",
+   "options": "Tenant Space Allotment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Tenant",
+   "options": "Tenant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tenant Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "units",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Units",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rent_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Billed In",
+   "options": "Tenant Rent Invoice",
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-26 19:31:50.855821",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Meter Reading Share",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

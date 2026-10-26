@@ -11,6 +11,7 @@
   "auto_submit_invoices",
   "column_break_due",
   "rent_due_day",
+  "electricity_rate",
   "online_section",
   "upi_id",
   "upi_payee_name",
@@ -206,13 +207,19 @@
    "fieldtype": "Password",
    "label": "Access Token",
    "length": 512
+  },
+  {
+   "description": "For rooms with their own meter. Each room can override it.",
+   "fieldname": "electricity_rate",
+   "fieldtype": "Currency",
+   "label": "Electricity Rate per Unit"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 19:26:01.628074",
+ "modified": "2026-10-26 19:31:50.857479",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

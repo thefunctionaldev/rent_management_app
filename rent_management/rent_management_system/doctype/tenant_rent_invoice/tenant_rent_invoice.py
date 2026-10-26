@@ -9,6 +9,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, date_diff, flt, get_last_day, getdate, nowdate
 
+from rent_management.rent_management_system.doctype.meter_reading.meter_reading import (
+	add_meter_charges,
+	link_meter_charges,
+	unlink_meter_charges,
+)
+
 MONTHS = list(calendar.month_name)[1:]
 
 
@@ -24,11 +30,23 @@ class TenantRentInvoice(Document):
 		self.set_due_date()
 		self.set_status()
 
+	def before_insert(self):
+		# electricity from meter readings since the last invoice
+		if self.tenant_space_allotment and not self.flags.skip_meter_charges:
+			add_meter_charges(self)
+
+	def on_update(self):
+		link_meter_charges(self)
+
 	def on_submit(self):
 		self.set_status(update=True)
 
 	def on_cancel(self):
 		self.set_status(update=True)
+		unlink_meter_charges(self)
+
+	def on_trash(self):
+		unlink_meter_charges(self)
 
 	def set_allotment_details(self):
 		allotment = frappe.db.get_value(

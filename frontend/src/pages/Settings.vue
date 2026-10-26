@@ -34,6 +34,21 @@
 						/>
 						<div class="flex items-center justify-between gap-4 py-3">
 							<div>
+								<p class="text-sm font-medium">Electricity rate per unit</p>
+								<p class="text-xs text-slate-500">
+									For rooms with their own meter
+								</p>
+							</div>
+							<input
+								v-model.number="form.electricity_rate"
+								type="number"
+								min="0"
+								step="0.01"
+								class="input tabular w-28"
+							/>
+						</div>
+						<div class="flex items-center justify-between gap-4 py-3">
+							<div>
 								<p class="text-sm font-medium">Rent due day</p>
 								<p class="text-xs text-slate-500">Day of the month rent is due</p>
 							</div>
