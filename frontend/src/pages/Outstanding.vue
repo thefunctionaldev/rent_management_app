@@ -141,7 +141,7 @@ import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import { openDialog } from "@/dialogs";
-import { boot } from "@/store";
+import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money, whatsappReminder } from "@/utils";
 
@@ -150,7 +150,11 @@ const overdueOnly = ref(false);
 const bucket = ref("");
 
 const { data, loading, reload } = useResource(() =>
-	get("get_outstanding", { as_on_date: asOn.value, overdue_only: overdueOnly.value ? 1 : 0 })
+	get("get_outstanding", {
+		as_on_date: asOn.value,
+		overdue_only: overdueOnly.value ? 1 : 0,
+		...scope(),
+	})
 );
 watch([asOn, overdueOnly], reload);
 

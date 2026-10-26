@@ -119,7 +119,7 @@ import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
-import { boot } from "@/store";
+import { boot, scope } from "@/store";
 import { useAction, useResource } from "@/useResource";
 import { currentMonth, money } from "@/utils";
 
@@ -138,7 +138,7 @@ const form = reactive({
 	remarks: "",
 	submit: true,
 });
-const allotments = useResource(() => get("get_billable_allotments"), { initial: [] });
+const allotments = useResource(() => get("get_billable_allotments", scope()), { initial: [] });
 
 function addCharge() {
 	form.charges.push({ charge_type: "Electricity", description: "", amount: "" });

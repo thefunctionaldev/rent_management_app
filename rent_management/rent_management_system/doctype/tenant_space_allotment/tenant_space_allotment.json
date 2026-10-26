@@ -11,7 +11,9 @@
   "tenant",
   "tenant_name",
   "room",
+  "bed_no",
   "room_type",
+  "property",
   "column_break_prvq",
   "allotment_date",
   "status",
@@ -57,7 +59,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Room",
-   "link_filters": "[[\"Tenant Space\",\"status\",\"=\",\"Available\"]]",
+   "link_filters": "[[\"Tenant Space\",\"status\",\"in\",[\"Available\",\"Partly Occupied\",\"Reserved\"]]]",
    "options": "Tenant Space",
    "reqd": 1
   },
@@ -175,6 +177,23 @@
    "no_copy": 1,
    "options": "Security Deposit Settlement",
    "read_only": 1
+  },
+  {
+   "fetch_from": "room.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 0,
+   "description": "Left blank, the first free bed is used.",
+   "fieldname": "bed_no",
+   "fieldtype": "Int",
+   "label": "Bed No",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
@@ -192,7 +211,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-26 22:18:04.034359",
+ "modified": "2026-10-26 18:58:16.111510",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

@@ -200,10 +200,11 @@ import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
+import { scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money, shortDate } from "@/utils";
 
-const { data } = useResource(() => get("get_deposits"), {
+const { data } = useResource(() => get("get_deposits", scope()), {
 	initial: { pending: [], held: [], settlements: [] },
 });
 const pending = computed(() => data.value?.pending || []);

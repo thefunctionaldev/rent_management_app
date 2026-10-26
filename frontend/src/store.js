@@ -12,10 +12,44 @@ export const boot = reactive({
 	months: [],
 	today: new Date().toISOString().slice(0, 10),
 	subscription: null,
+	properties: [],
 });
+
+// --- building switcher ---------------------------------------------------------
+
+const PROPERTY_KEY = "rent:property";
+function storedProperty() {
+	try {
+		return localStorage.getItem(PROPERTY_KEY) || "";
+	} catch {
+		return "";
+	}
+}
+
+// the building every list is narrowed to ("" = all buildings)
+export const ui = reactive({ property: storedProperty() });
+
+export function setProperty(property) {
+	ui.property = property || "";
+	try {
+		localStorage.setItem(PROPERTY_KEY, ui.property);
+	} catch {
+		// private mode: the choice just isn't remembered
+	}
+}
+
+// spread into API args of lists that can be narrowed to a building
+export const scope = () => (ui.property ? { property: ui.property } : {});
+
+export const activeProperties = () => boot.properties.filter((p) => p.is_active);
 
 export async function loadBoot() {
 	Object.assign(boot, await get("get_boot"), { loaded: true });
+	if (ui.property && !boot.properties.some((p) => p.name === ui.property)) setProperty("");
+}
+
+export async function reloadProperties() {
+	boot.properties = await get("get_properties");
 }
 
 // --- toasts ---------------------------------------------------------------

@@ -66,7 +66,10 @@
 									v-if="t.room"
 									class="inline-flex items-center gap-1.5 rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700"
 								>
-									<DoorOpen class="size-3.5" />{{ t.room }}
+									<DoorOpen class="size-3.5" />{{ t.room
+									}}<template v-if="t.bed_no > 1">
+										· Bed {{ t.bed_no }}</template
+									>
 								</span>
 								<span v-else class="text-sm text-slate-400">—</span>
 							</td>
@@ -98,13 +101,14 @@ import SearchInput from "@/components/SearchInput.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import { openDialog } from "@/dialogs";
+import { scope } from "@/store";
 import { useResource } from "@/useResource";
 import { debounce, money } from "@/utils";
 
 const search = ref("");
 const status = ref("");
 const { data, loading, reload } = useResource(
-	() => get("get_tenants", { search: search.value, status: status.value }),
+	() => get("get_tenants", { search: search.value, status: status.value, ...scope() }),
 	{ initial: [] }
 );
 const tenants = computed(() => data.value || []);

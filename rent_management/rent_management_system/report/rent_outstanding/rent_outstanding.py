@@ -59,7 +59,7 @@ def get_data(filters, as_on_date) -> list[dict]:
 		"outstanding_amount": (">", 0),
 		"posting_date": ("<=", as_on_date),
 	}
-	for field in ("tenant", "room"):
+	for field in ("tenant", "room", "property"):
 		if filters.get(field):
 			invoice_filters[field] = filters.get(field)
 	if filters.overdue_only:

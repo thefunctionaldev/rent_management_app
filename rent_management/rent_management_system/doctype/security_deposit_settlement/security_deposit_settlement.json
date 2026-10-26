@@ -13,6 +13,7 @@
   "tenant",
   "tenant_name",
   "room",
+  "property",
   "column_break_dates",
   "settlement_date",
   "vacate_date",
@@ -212,13 +213,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "tenant_space_allotment.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 22:18:03.421593",
+ "modified": "2026-10-26 18:58:16.113970",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Security Deposit Settlement",

@@ -28,6 +28,7 @@ const colors = {
 	Active: "green",
 	Settled: "green",
 	Occupied: "indigo",
+	"Partly Occupied": "sky",
 	Reserved: "amber",
 	Unpaid: "amber",
 	"Partly Paid": "sky",

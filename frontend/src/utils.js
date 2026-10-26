@@ -64,3 +64,22 @@ export function debounce(fn, wait = 300) {
 		timer = setTimeout(() => fn(...args), wait);
 	};
 }
+
+// floors are free text: "Ground", "First", "3", "Terrace"...
+const FLOOR_WORDS = ["basement", "ground", "first", "second", "third", "fourth", "fifth", "sixth"];
+
+export function floorLabel(floor) {
+	if (!floor) return "No floor";
+	if (/floor/i.test(floor)) return floor;
+	return /^\d+$/.test(floor) ? `Floor ${floor}` : `${floor} floor`;
+}
+
+export function sortFloors(floors) {
+	const rank = (f) => {
+		const word = FLOOR_WORDS.indexOf(String(f).toLowerCase());
+		if (word !== -1) return word - 1;
+		const n = parseInt(f, 10);
+		return Number.isNaN(n) ? 1000 : n;
+	};
+	return floors.filter(Boolean).sort((a, b) => rank(a) - rank(b) || String(a).localeCompare(b));
+}

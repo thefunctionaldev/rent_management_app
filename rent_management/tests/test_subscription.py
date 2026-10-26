@@ -12,6 +12,7 @@ from frappe.utils import add_days, add_months, getdate, nowdate
 
 from rent_management import api, razorpay, subscription
 from rent_management.rent_management_system.doctype.tenant_space_allotment.test_tenant_space_allotment import (
+	make_property,
 	make_room,
 	make_tenant,
 )
@@ -23,8 +24,22 @@ KEYS = {
 	"razorpay_webhook_secret": "whsec",
 }
 PLANS = {
-	"small": {"title": "Small", "monthly": 300, "yearly": 3000, "max_rooms": 2, "max_users": 1},
-	"big": {"title": "Big", "monthly": 900, "yearly": 9000, "max_rooms": 0, "max_users": 0},
+	"small": {
+		"title": "Small",
+		"monthly": 300,
+		"yearly": 3000,
+		"max_beds": 2,
+		"max_properties": 1,
+		"max_users": 1,
+	},
+	"big": {
+		"title": "Big",
+		"monthly": 900,
+		"yearly": 9000,
+		"max_beds": 0,
+		"max_properties": 0,
+		"max_users": 0,
+	},
 }
 
 
@@ -87,19 +102,17 @@ class TestSubscription(IntegrationTestCase):
 
 		frappe.db.delete(subscription.PAYMENT)
 		self.set_subscription(trial_ends_on=add_days(today(), 10))
-		self.set_limits(rooms=100, users=100)
+		self.set_limits(beds=100, properties=10, users=100)
 		frappe.set_user(self.manager)
 
-	def set_limits(self, plan="small", rooms=0, users=0):
-		"""Limits relative to what the test database already holds."""
+	def set_limits(self, plan="small", beds=0, properties=0, users=0):
+		"""Limits relative to what the test database already holds (0 = unlimited)."""
 		usage = subscription.get_usage()
+		extra = {"beds": beds, "properties": properties, "users": users}
 		self.enterContext(
 			patch.dict(
 				PLANS[plan],
-				{
-					"max_rooms": usage["rooms"] + rooms if rooms else 0,
-					"max_users": usage["users"] + users if users else 0,
-				},
+				{f"max_{key}": usage[key] + extra[key] if extra[key] else 0 for key in extra},
 			)
 		)
 
@@ -169,12 +182,27 @@ class TestSubscription(IntegrationTestCase):
 		self.assertEqual(subscription.get_state()["status"], "Past Due")
 		make_tenant()
 
-	def test_room_limit(self):
-		self.set_limits(rooms=2)
-		make_room()
+	def test_bed_limit(self):
+		self.set_limits(beds=3)
+		room = make_room(capacity=2)
 		make_room()
 		with self.assertRaises(subscription.PlanLimitError):
 			make_room()
+		# adding beds to a room counts too, keeping or removing them doesn't
+		room.capacity = 3
+		self.assertRaises(subscription.PlanLimitError, room.save)
+		room.reload()
+		room.capacity = 1
+		room.save()
+		make_room()
+
+	def test_building_limit(self):
+		self.set_limits(properties=1)
+		first = make_property()
+		self.assertRaises(subscription.PlanLimitError, make_property)
+		# an inactive building doesn't count
+		frappe.db.set_value("Rent Property", first, "is_active", 0)
+		make_property()
 
 	def test_user_limit(self):
 		frappe.set_user("Administrator")
@@ -274,7 +302,7 @@ class TestSubscription(IntegrationTestCase):
 		self.assertEqual(subscription.get_state()["plan"], "big")
 
 	def test_downgrade_blocked_when_over_limit(self):
-		self.set_limits(rooms=1)
+		self.set_limits(beds=1)
 		self.set_subscription(plan="big", trial_ends_on=add_days(today(), 5))
 		make_room()
 		make_room()

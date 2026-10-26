@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 rent_management.patches.v1_0.migrate_allotment_and_invoice_status
 rent_management.patches.v1_1.start_subscription_trial
+rent_management.patches.v1_2.add_buildings_and_beds

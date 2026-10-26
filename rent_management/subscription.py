@@ -23,20 +23,22 @@ PAYMENT = "Rent Subscription Payment"
 MANAGER_ROLE = "Rent Manager"
 CYCLES = {"Monthly": 1, "Yearly": 12}  # months per billing cycle
 
-# max_rooms / max_users: 0 means unlimited
+# limits: 0 means unlimited. Beds are what PGs and hostels price by, so plans are sized by beds.
 DEFAULT_PLANS = {
 	"starter": {
 		"title": "Starter",
 		"description": "For a single PG or a small building.",
 		"monthly": 499,
 		"yearly": 4990,
-		"max_rooms": 15,
+		"max_beds": 30,
+		"max_properties": 1,
 		"max_users": 2,
+		"whatsapp": 0,
 		"features": [
-			"Up to 15 rooms",
+			"Up to 30 beds in 1 building",
 			"2 manager logins",
-			"Rent invoices and payments",
-			"Deposit settlement",
+			"Rent invoices, online rent collection",
+			"Tenant app and email reminders",
 		],
 	},
 	"growth": {
@@ -44,13 +46,15 @@ DEFAULT_PLANS = {
 		"description": "For growing hostels and PGs.",
 		"monthly": 1499,
 		"yearly": 14990,
-		"max_rooms": 60,
+		"max_beds": 120,
+		"max_properties": 3,
 		"max_users": 5,
+		"whatsapp": 1,
 		"features": [
-			"Up to 60 rooms",
+			"Up to 120 beds in 3 buildings",
 			"5 manager logins",
-			"Everything in Starter",
-			"Outstanding and aging report",
+			"Automatic WhatsApp reminders and receipts",
+			"Expenses and profit report",
 		],
 	},
 	"pro": {
@@ -58,15 +62,24 @@ DEFAULT_PLANS = {
 		"description": "For large properties and multiple buildings.",
 		"monthly": 3999,
 		"yearly": 39990,
-		"max_rooms": 0,
+		"max_beds": 0,
+		"max_properties": 0,
 		"max_users": 0,
+		"whatsapp": 1,
 		"features": [
-			"Unlimited rooms",
+			"Unlimited beds and buildings",
 			"Unlimited manager logins",
 			"Everything in Growth",
 			"Priority support",
 		],
 	},
+}
+
+# usage key -> (plan limit key, label used in messages)
+LIMITS = {
+	"beds": ("max_beds", "beds"),
+	"properties": ("max_properties", "buildings"),
+	"users": ("max_users", "Rent Manager users"),
 }
 
 
@@ -145,7 +158,17 @@ def is_usable(status: str) -> bool:
 
 
 def get_usage() -> dict:
-	return {"rooms": frappe.db.count("Tenant Space"), "users": len(get_manager_users())}
+	return {
+		"beds": get_total_beds(),
+		"rooms": frappe.db.count("Tenant Space"),
+		"properties": frappe.db.count("Rent Property", {"is_active": 1}),
+		"users": len(get_manager_users()),
+	}
+
+
+def get_total_beds(exclude_room=None) -> int:
+	beds = frappe.get_all("Tenant Space", filters={"name": ("!=", exclude_room or "")}, pluck="capacity")
+	return sum(max(cint(b), 1) for b in beds)
 
 
 def get_manager_users(exclude=None) -> list[str]:
@@ -181,7 +204,8 @@ def get_state() -> dict:
 		"ends_on": ends_on,
 		"days_left": date_diff(ends_on, nowdate()) if ends_on else 0,
 		"grace_ends_on": add_days(sub.current_period_end, grace_days()) if sub.current_period_end else None,
-		"limits": {"rooms": cint(plan.get("max_rooms")), "users": cint(plan.get("max_users"))},
+		"limits": {key: cint(plan.get(limit)) for key, (limit, _label) in LIMITS.items()},
+		"features": {"whatsapp": bool(cint(plan.get("whatsapp")))},
 		"usage": get_usage(),
 		"currency": get_currency(),
 	}
@@ -214,6 +238,11 @@ def start_trial(force=False):
 
 
 def after_install():
+	from rent_management.rent_management_system.doctype.rent_property.rent_property import (
+		get_default_property,
+	)
+
+	get_default_property()
 	start_trial()
 
 
@@ -249,24 +278,52 @@ def check_writable(doc=None, method=None):
 	)
 
 
-def get_limit(key: str) -> int:
+def get_current_plan() -> dict:
 	sub = frappe.get_single(SUBSCRIPTION)
-	return cint((get_plans().get(sub.plan or trial_plan()) or {}).get(f"max_{key}"))
+	return get_plans().get(sub.plan or trial_plan()) or {}
 
 
-def check_room_limit(doc, method=None):
+def get_limit(key: str) -> int:
+	return cint(get_current_plan().get(LIMITS[key][0]))
+
+
+def has_feature(feature: str) -> bool:
+	"""Plan features such as WhatsApp messages. Always on where subscriptions aren't enforced."""
+	return not is_enforced() or bool(cint(get_current_plan().get(feature)))
+
+
+def limit_error(message, title):
+	frappe.throw(
+		_("{0} Upgrade from <a href='/rent/billing'>Subscription & Billing</a> to add more.").format(message),
+		PlanLimitError,
+		title=title,
+	)
+
+
+def check_bed_limit(doc, method=None):
+	"""Runs on Tenant Space validate: total beds across rooms must fit the plan."""
 	if skip_enforcement():
 		return
-	limit = get_limit("rooms")
-	if limit and frappe.db.count("Tenant Space") >= limit:
-		frappe.throw(
-			_(
-				"Your plan allows up to {0} rooms. Upgrade from "
-				"<a href='/rent/billing'>Subscription & Billing</a> to add more."
-			).format(limit),
-			PlanLimitError,
-			title=_("Room limit reached"),
-		)
+	limit = get_limit("beds")
+	if not limit:
+		return
+	before = doc.get_doc_before_save()
+	if before and cint(before.capacity) >= cint(doc.capacity):
+		return  # not adding beds
+	if get_total_beds(exclude_room=doc.name) + max(cint(doc.capacity), 1) > limit:
+		limit_error(_("Your plan allows up to {0} beds.").format(limit), _("Bed limit reached"))
+
+
+def check_property_limit(doc, method=None):
+	"""Runs on Rent Property validate: a new or re-activated building must fit the plan."""
+	if skip_enforcement() or not doc.is_active:
+		return
+	before = doc.get_doc_before_save()
+	if before and before.is_active:
+		return
+	limit = get_limit("properties")
+	if limit and frappe.db.count("Rent Property", {"is_active": 1, "name": ("!=", doc.name)}) >= limit:
+		limit_error(_("Your plan allows {0} building(s).").format(limit), _("Building limit reached"))
 
 
 def check_user_limit(doc, method=None):
@@ -296,13 +353,13 @@ def check_plan_fits(plan: str):
 	"""Refuse a downgrade to a plan that is smaller than what the customer already uses."""
 	limits = get_plan(plan)
 	usage = get_usage()
-	for key, label in (("rooms", _("rooms")), ("users", _("Rent Manager users"))):
-		limit = cint(limits.get(f"max_{key}"))
+	for key, (limit_key, label) in LIMITS.items():
+		limit = cint(limits.get(limit_key))
 		if limit and usage[key] > limit:
 			frappe.throw(
 				_(
 					"The {0} plan allows {1} {2}, but you have {3}. Remove some first or choose a bigger plan."
-				).format(limits.get("title", plan), limit, label, usage[key]),
+				).format(limits.get("title", plan), limit, _(label), usage[key]),
 				PlanLimitError,
 			)
 

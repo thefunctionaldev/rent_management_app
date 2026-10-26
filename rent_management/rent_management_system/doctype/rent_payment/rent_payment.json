@@ -13,6 +13,7 @@
   "tenant_name",
   "rent_invoice",
   "room",
+  "property",
   "column_break_payment",
   "payment_date",
   "mode_of_payment",
@@ -147,13 +148,22 @@
    "no_copy": 1,
    "options": "Security Deposit Settlement",
    "read_only": 1
+  },
+  {
+   "fetch_from": "rent_invoice.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 22:18:03.775185",
+ "modified": "2026-10-26 18:58:16.113271",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Payment",

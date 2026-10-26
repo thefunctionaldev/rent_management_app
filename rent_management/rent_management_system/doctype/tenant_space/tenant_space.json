@@ -1,21 +1,23 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:room_number",
  "creation": "2026-01-31 00:18:41.143131",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "room_number",
+  "property",
   "floor",
   "column_break_qjsp",
   "status",
   "room_type",
   "room_rent",
+  "capacity",
   "basic_information_section",
   "tenant",
   "tenant_name",
   "column_break_occupancy",
+  "occupied_beds",
   "checkin_date",
   "current_allotment"
  ],
@@ -24,8 +26,7 @@
    "fieldname": "room_number",
    "fieldtype": "Data",
    "label": "Room Number",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_qjsp",
@@ -33,22 +34,20 @@
   },
   {
    "fieldname": "floor",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Floor",
-   "options": "\nGround\nFirst\nSecond\nThird\nFourth",
-   "reqd": 1
+   "label": "Floor"
   },
   {
    "default": "Available",
-   "description": "Set to Occupied / Available automatically by Tenant Space Allotment",
+   "description": "Set automatically from allotments: Partly Occupied while a shared room still has free beds",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Available\nReserved\nOccupied\nUnder Renovation"
+   "options": "Available\nPartly Occupied\nReserved\nOccupied\nUnder Renovation"
   },
   {
    "fieldname": "room_type",
@@ -63,6 +62,7 @@
    "label": "Current Occupancy"
   },
   {
+   "description": "Filled when one tenant occupies the room",
    "fieldname": "tenant",
    "fieldtype": "Link",
    "label": "Tenant",
@@ -88,7 +88,7 @@
    "fieldname": "room_rent",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Monthly Rent"
+   "label": "Monthly Rent (per bed)"
   },
   {
    "fieldname": "column_break_occupancy",
@@ -99,6 +99,31 @@
    "fieldtype": "Link",
    "label": "Current Allotment",
    "options": "Tenant Space Allotment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Number of beds. Shared rooms (2 or 3 sharing) take one tenant per bed.",
+   "fieldname": "capacity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Beds",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "occupied_beds",
+   "fieldtype": "Int",
+   "label": "Occupied Beds",
    "read_only": 1
   }
  ],
@@ -116,11 +141,11 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-10-26 22:18:04.720530",
+ "modified": "2026-10-26 18:58:16.110377",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space",
- "naming_rule": "By fieldname",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {
@@ -150,7 +175,10 @@
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
+ "search_fields": "room_number,property",
+ "show_title_field_in_link": 0,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "room_number"
 }

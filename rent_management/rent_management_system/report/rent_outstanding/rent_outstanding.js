@@ -11,6 +11,12 @@ frappe.query_reports["Rent Outstanding"] = {
 			reqd: 1,
 		},
 		{
+			fieldname: "property",
+			label: __("Building"),
+			fieldtype: "Link",
+			options: "Rent Property",
+		},
+		{
 			fieldname: "tenant",
 			label: __("Tenant"),
 			fieldtype: "Link",

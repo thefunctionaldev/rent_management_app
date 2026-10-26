@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:property_name",
+ "creation": "2026-10-26 18:58:16.109433",
+ "description": "A building (PG, hostel, apartment block) with rooms.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "property_name",
+  "abbr",
+  "is_active",
+  "column_break_address",
+  "address",
+  "city",
+  "state",
+  "pincode"
+ ],
+ "fields": [
+  {
+   "fieldname": "property_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Building Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Added to room names when two buildings have the same room number, e.g. 101-B2.",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Short Code",
+   "length": 10,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "fieldname": "column_break_address",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "City"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Pincode"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [
+  {
+   "group": "Rooms",
+   "link_doctype": "Tenant Space",
+   "link_fieldname": "property"
+  }
+ ],
+ "modified": "2026-10-26 18:58:16.109433",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Property",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "city",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "property_name"
+}

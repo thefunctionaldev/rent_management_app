@@ -163,6 +163,7 @@ _subscription_check = {
 doc_events = {
 	doctype: dict(_subscription_check)
 	for doctype in (
+		"Rent Property",
 		"Tenant",
 		"Tenant Space Type",
 		"Tenant Space",
@@ -173,7 +174,14 @@ doc_events = {
 		"Rent Management Settings",
 	)
 }
-doc_events["Tenant Space"]["before_insert"] = "rent_management.subscription.check_room_limit"
+doc_events["Tenant Space"]["validate"] = [
+	"rent_management.subscription.check_writable",
+	"rent_management.subscription.check_bed_limit",
+]
+doc_events["Rent Property"]["validate"] = [
+	"rent_management.subscription.check_writable",
+	"rent_management.subscription.check_property_limit",
+]
 doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
 
 # Scheduled Tasks

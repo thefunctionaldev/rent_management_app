@@ -51,7 +51,7 @@
 				<StatCard
 					label="Occupancy"
 					:value="`${d.rooms.occupancy}%`"
-					:hint="`${d.rooms.by_status.Occupied || 0} of ${d.rooms.total} rooms occupied`"
+					:hint="`${d.rooms.occupied_beds} of ${d.rooms.beds} beds taken`"
 					:icon="DoorOpen"
 				>
 					<div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
@@ -112,7 +112,7 @@
 			<div class="card p-5">
 				<h2 class="font-semibold text-slate-900">Rooms</h2>
 				<p class="min-h-5 text-sm text-slate-500">
-					{{ d ? `${d.rooms.total} rooms, ${d.tenants} active tenants` : "" }}
+					{{ d ? `${d.rooms.total} rooms, ${d.tenants} tenants staying` : "" }}
 				</p>
 				<template v-if="d">
 					<div class="mt-5 flex h-3 overflow-hidden rounded-full bg-slate-100">
@@ -252,11 +252,11 @@ import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
-import { boot } from "@/store";
+import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, daysBetween, money, shortDate } from "@/utils";
 
-const { data } = useResource(() => get("get_dashboard"));
+const { data } = useResource(() => get("get_dashboard", scope()));
 const d = data;
 
 const firstName = computed(() => (boot.full_name || "").split(" ")[0]);
@@ -281,6 +281,7 @@ const collectionRate = computed(() => {
 
 const statusBars = {
 	Occupied: "bg-brand-500",
+	"Partly Occupied": "bg-sky-400",
 	Available: "bg-emerald-400",
 	Reserved: "bg-amber-400",
 	"Under Renovation": "bg-slate-300",

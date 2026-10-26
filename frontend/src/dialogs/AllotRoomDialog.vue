@@ -1,16 +1,21 @@
 <template>
 	<Modal open title="Allot room" :subtitle="subtitle" width="lg" @close="$emit('close')">
 		<form id="allot-form" class="space-y-5" @submit.prevent="save">
-			<Field v-if="!room" label="Room" required>
-				<select v-model="form.room" class="input" required>
-					<option value="" disabled>Select an available room</option>
-					<option v-for="r in availableRooms" :key="r.name" :value="r.name">
-						{{ r.name }} · {{ r.floor }} floor{{
-							r.room_type ? ` · ${r.room_type}` : ""
-						}}
-					</option>
-				</select>
-			</Field>
+			<div class="grid gap-4" :class="bedChoices.length > 1 && 'sm:grid-cols-[1fr_9rem]'">
+				<Field v-if="!room" label="Room" required>
+					<select v-model="form.room" class="input" required>
+						<option value="" disabled>Select a room with a free bed</option>
+						<option v-for="r in availableRooms" :key="r.name" :value="r.name">
+							{{ roomLabel(r) }}
+						</option>
+					</select>
+				</Field>
+				<Field v-if="bedChoices.length > 1" label="Bed">
+					<select v-model.number="form.bed_no" class="input">
+						<option v-for="b in bedChoices" :key="b" :value="b">Bed {{ b }}</option>
+					</select>
+				</Field>
+			</div>
 
 			<div>
 				<div class="mb-1.5 flex items-center justify-between">
@@ -140,9 +145,9 @@ import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
 import SearchInput from "@/components/SearchInput.vue";
-import { boot, toast } from "@/store";
+import { boot, scope, toast } from "@/store";
 import { useAction, useResource } from "@/useResource";
-import { money } from "@/utils";
+import { floorLabel, money } from "@/utils";
 
 const props = defineProps({
 	room: { type: Object, default: null },
@@ -157,26 +162,49 @@ const form = reactive({
 	rent_amount: props.room?.room_rent || "",
 	security_deposit: "",
 	deposit_collected: false,
+	bed_no: null,
 });
 const tenant = reactive({ first_name: "", last_name: "", mobile_no: "" });
 const newTenant = ref(false);
 const search = ref("");
 
-const rooms = useResource(() => get("get_rooms"), { initial: [] });
+const rooms = useResource(() => get("get_rooms", scope()), { initial: [] });
 const types = useResource(() => get("get_room_types"), { initial: [] });
 const tenants = useResource(() => get("get_tenants", { status: "Active" }), { initial: [] });
 
 const availableRooms = computed(() =>
-	rooms.data.value.filter((r) => ["Available", "Reserved"].includes(r.status))
+	rooms.data.value.filter((r) => r.free_beds > 0 && r.status !== "Under Renovation")
 );
 const selectedRoom = computed(
 	() => props.room || rooms.data.value.find((r) => r.name === form.room)
 );
-const subtitle = computed(() =>
-	selectedRoom.value
-		? `Room ${selectedRoom.value.name} · ${selectedRoom.value.floor} floor`
-		: "Move a tenant in"
+const multipleBuildings = computed(
+	() => new Set(rooms.data.value.map((r) => r.property)).size > 1
 );
+function roomLabel(r) {
+	const parts = [r.room_number];
+	if (multipleBuildings.value) parts.push(r.property);
+	if (r.floor) parts.push(floorLabel(r.floor));
+	if (r.capacity > 1) parts.push(`${r.free_beds} of ${r.capacity} beds free`);
+	else if (r.room_type) parts.push(r.room_type);
+	return parts.join(" · ");
+}
+const bedChoices = computed(() => {
+	const room = selectedRoom.value;
+	if (!room) return [];
+	const taken = new Set((room.occupants || []).map((o) => o.bed_no));
+	return Array.from({ length: room.capacity || 1 }, (_, i) => i + 1).filter(
+		(b) => !taken.has(b)
+	);
+});
+watch(bedChoices, (beds) => (form.bed_no = beds[0] || null), { immediate: true });
+const subtitle = computed(() => {
+	const room = selectedRoom.value;
+	if (!room) return "Move a tenant in";
+	return [`Room ${room.room_number}`, room.property, room.floor && floorLabel(room.floor)]
+		.filter(Boolean)
+		.join(" · ");
+});
 const filteredTenants = computed(() => {
 	const q = search.value.toLowerCase();
 	return tenants.data.value.filter(
@@ -208,7 +236,7 @@ const { loading, run } = useAction(
 			deposit_collected: form.deposit_collected ? 1 : 0,
 		});
 	},
-	{ success: () => `Room ${selectedRoom.value?.name} allotted` }
+	{ success: () => `Room ${selectedRoom.value?.room_number} allotted` }
 );
 
 async function save() {

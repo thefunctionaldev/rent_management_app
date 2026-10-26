@@ -25,6 +25,25 @@
 				</div>
 			</div>
 
+			<div v-if="buildings.length > 1" class="px-3 pt-1">
+				<label class="relative block">
+					<Building2
+						class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
+					/>
+					<select
+						:value="ui.property"
+						class="input pl-9 font-medium"
+						aria-label="Building"
+						@change="setProperty($event.target.value)"
+					>
+						<option value="">All buildings</option>
+						<option v-for="b in buildings" :key="b.name" :value="b.name">
+							{{ b.name }}
+						</option>
+					</select>
+				</label>
+			</div>
+
 			<nav class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
 				<div v-for="group in nav" :key="group.label">
 					<p
@@ -136,6 +155,7 @@
 import {
 	AlertTriangle,
 	BarChart3,
+	Building2,
 	CreditCard,
 	DoorOpen,
 	ExternalLink,
@@ -154,11 +174,12 @@ import { computed, defineAsyncComponent, ref } from "vue";
 import Avatar from "./components/Avatar.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";
-import { boot } from "./store";
+import { activeProperties, boot, setProperty, ui } from "./store";
 import { date } from "./utils";
 
 const logo = `${import.meta.env.BASE_URL}favicon.svg`;
 const menuOpen = ref(false);
+const buildings = computed(() => activeProperties());
 
 const nav = [
 	{
@@ -170,6 +191,7 @@ const nav = [
 		items: [
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
+			{ to: "/buildings", label: "Buildings", icon: Building2 },
 		],
 	},
 	{
@@ -240,6 +262,7 @@ const dialogs = {
 	recordPayment: lazy("RecordPaymentDialog"),
 	settleDeposit: lazy("SettleDepositDialog"),
 	collectDeposit: lazy("CollectDepositDialog"),
+	property: lazy("PropertyDialog"),
 };
 
 function logout() {

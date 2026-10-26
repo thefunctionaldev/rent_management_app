@@ -8,7 +8,16 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []
 IGNORE_TEST_RECORD_DEPENDENCIES = []
 
 
-def make_room(rent=3000, deposit=None):
+def make_property(name=None):
+	name = name or "Test Building " + frappe.generate_hash(length=6)
+	if not frappe.db.exists("Rent Property", name):
+		frappe.get_doc(
+			{"doctype": "Rent Property", "property_name": name, "abbr": frappe.generate_hash(length=4)}
+		).insert()
+	return name
+
+
+def make_room(rent=3000, deposit=None, capacity=1, property=None, room_number=None):
 	room_type = frappe.get_doc(
 		{
 			"doctype": "Tenant Space Type",
@@ -21,9 +30,11 @@ def make_room(rent=3000, deposit=None):
 	return frappe.get_doc(
 		{
 			"doctype": "Tenant Space",
-			"room_number": "T-" + frappe.generate_hash(length=6),
+			"room_number": room_number or "T-" + frappe.generate_hash(length=6),
 			"floor": "Ground",
 			"room_type": room_type.name,
+			"capacity": capacity,
+			"property": property,
 		}
 	).insert()
 
@@ -88,6 +99,101 @@ class IntegrationTestTenantSpaceAllotment(IntegrationTestCase):
 		room = frappe.get_doc("Tenant Space", allotment.room)
 		self.assertEqual(room.status, "Available")
 		self.assertFalse(room.tenant)
+
+
+class IntegrationTestBedsAndBuildings(IntegrationTestCase):
+	def test_shared_room(self):
+		room = make_room(capacity=3)
+		first = make_allotment(room=room)
+		self.assertEqual(first.bed_no, 1)
+		room.reload()
+		self.assertEqual((room.status, room.occupied_beds), ("Partly Occupied", 1))
+		self.assertEqual(room.current_allotment, first.name)
+
+		second = make_allotment(room=room, bed_no=3)
+		third = make_allotment(room=room)
+		self.assertEqual((second.bed_no, third.bed_no), (3, 2))
+		room.reload()
+		self.assertEqual((room.status, room.occupied_beds), ("Occupied", 3))
+		self.assertFalse(room.current_allotment)  # several tenants: no single "current" one
+
+		# full
+		self.assertRaises(frappe.ValidationError, make_allotment, room=room)
+
+		second.vacate("2026-02-01")
+		room.reload()
+		self.assertEqual((room.status, room.occupied_beds), ("Partly Occupied", 2))
+		# the freed bed is reused
+		self.assertEqual(make_allotment(room=room, allotment_date="2026-02-02").bed_no, 3)
+
+	def test_bed_checks(self):
+		room = make_room(capacity=2)
+		tenant = make_tenant()
+		make_allotment(room=room, tenant=tenant, bed_no=1)
+		self.assertRaises(frappe.ValidationError, make_allotment, room=room, bed_no=1)
+		self.assertRaises(frappe.ValidationError, make_allotment, room=room, bed_no=5)
+		# same tenant can't take a second bed in the same room
+		self.assertRaises(frappe.ValidationError, make_allotment, room=room, tenant=tenant)
+
+	def test_capacity_cannot_drop_below_tenants(self):
+		room = make_room(capacity=2)
+		make_allotment(room=room)
+		make_allotment(room=room)
+		room.reload()
+		room.capacity = 1
+		self.assertRaises(frappe.ValidationError, room.save)
+
+		room.reload()
+		room.capacity = 3
+		room.save()
+		self.assertEqual(room.status, "Partly Occupied")
+
+	def test_same_room_number_in_two_buildings(self):
+		number = "R-" + frappe.generate_hash(length=5)
+		first = make_room(property=make_property(), room_number=number)
+		other = make_property()
+		second = make_room(property=other, room_number=number)
+		self.assertEqual(first.name, number)
+		self.assertEqual(second.name, f"{number}-{frappe.db.get_value('Rent Property', other, 'abbr')}")
+		# but not twice in the same building
+		self.assertRaises(frappe.ValidationError, make_room, property=other, room_number=number)
+
+	def test_building_flows_to_invoices_and_payments(self):
+		building = make_property()
+		allotment = make_allotment(room=make_room(property=building))
+		self.assertEqual(allotment.property, building)
+		invoice = frappe.get_doc(
+			{
+				"doctype": "Tenant Rent Invoice",
+				"tenant_space_allotment": allotment.name,
+				"billing_month": "January",
+				"billing_year": 2026,
+				"posting_date": "2026-01-01",
+			}
+		).insert()
+		self.assertEqual(invoice.property, building)
+
+	def test_migration_patch(self):
+		from rent_management.patches.v1_2 import add_buildings_and_beds
+
+		allotment = make_allotment()
+		frappe.db.set_value(
+			"Tenant Space", allotment.room, {"property": None, "capacity": 0, "occupied_beds": 0}
+		)
+		frappe.db.set_value("Tenant Space Allotment", allotment.name, {"property": None, "bed_no": 0})
+		add_buildings_and_beds.execute()
+
+		room = frappe.get_doc("Tenant Space", allotment.room)
+		self.assertTrue(room.property)
+		self.assertEqual((room.capacity, room.occupied_beds, room.status), (1, 1, "Occupied"))
+		self.assertEqual(
+			frappe.db.get_value("Tenant Space Allotment", allotment.name, ["property", "bed_no"]),
+			(room.property, 1),
+		)
+
+	def test_room_defaults_to_a_building(self):
+		room = make_room()
+		self.assertTrue(room.property)
 
 
 class IntegrationTestRentManagerRole(IntegrationTestCase):

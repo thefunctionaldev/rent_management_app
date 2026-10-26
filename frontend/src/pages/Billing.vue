@@ -24,12 +24,18 @@
 						The app is read-only. Choose a plan below to continue.
 					</p>
 				</div>
-				<div class="grid gap-5 sm:grid-cols-2 lg:col-span-2">
+				<div class="grid gap-4 sm:grid-cols-3 lg:col-span-2">
 					<UsageMeter
-						label="Rooms"
-						:used="sub.usage.rooms"
-						:limit="sub.limits.rooms"
-						:icon="DoorOpen"
+						label="Beds"
+						:used="sub.usage.beds"
+						:limit="sub.limits.beds"
+						:icon="BedDouble"
+					/>
+					<UsageMeter
+						label="Buildings"
+						:used="sub.usage.properties"
+						:limit="sub.limits.properties"
+						:icon="Building2"
 					/>
 					<UsageMeter
 						label="Manager logins"
@@ -170,7 +176,7 @@
 </template>
 
 <script setup>
-import { Check, DoorOpen, Receipt, Users } from "lucide-vue-next";
+import { BedDouble, Building2, Check, Receipt, Users } from "lucide-vue-next";
 import { computed, ref } from "vue";
 
 import { get, post } from "@/api";
@@ -193,8 +199,7 @@ const price = (plan) => (cycle.value === "Monthly" ? plan.monthly : plan.yearly)
 // billing_cycle is only set once a plan has been paid for
 const isCurrent = (plan) => plan.key === sub.value.plan && cycle.value === sub.value.billing_cycle;
 const fits = (plan) =>
-	(!plan.max_rooms || sub.value.usage.rooms <= plan.max_rooms) &&
-	(!plan.max_users || sub.value.usage.users <= plan.max_users);
+	Object.entries(plan.limits).every(([key, limit]) => !limit || sub.value.usage[key] <= limit);
 const running = computed(() => sub.value.status === "Active");
 
 function buttonLabel(plan) {

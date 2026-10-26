@@ -1,12 +1,19 @@
 <template>
 	<Modal
 		open
-		title="Add room"
-		subtitle="Add a room or unit to the property"
+		:title="room ? `Edit room ${room.room_number}` : 'Add room'"
+		:subtitle="room ? room.property : 'Add a room or unit to a building'"
 		@close="$emit('close')"
 	>
 		<form id="room-form" class="space-y-4" @submit.prevent="save">
-			<div class="grid gap-4 sm:grid-cols-2">
+			<Field v-if="!room && buildings.length > 1" label="Building" required>
+				<select v-model="form.property" class="input" required>
+					<option v-for="b in buildings" :key="b.name" :value="b.name">
+						{{ b.name }}
+					</option>
+				</select>
+			</Field>
+			<div class="grid gap-4 sm:grid-cols-3">
 				<Field label="Room number" required>
 					<input
 						v-model="form.room_number"
@@ -14,14 +21,38 @@
 						required
 						autofocus
 						placeholder="101"
+						:disabled="!!room"
 					/>
 				</Field>
-				<Field label="Floor" required>
-					<select v-model="form.floor" class="input" required>
-						<option v-for="f in floors" :key="f">{{ f }}</option>
-					</select>
+				<Field label="Floor">
+					<input
+						v-model="form.floor"
+						class="input"
+						list="floor-options"
+						placeholder="Ground"
+					/>
+					<datalist id="floor-options">
+						<option v-for="f in floorOptions" :key="f" :value="f" />
+					</datalist>
+				</Field>
+				<Field label="Beds" required hint="2 or more for shared rooms">
+					<input
+						v-model.number="form.capacity"
+						class="input tabular"
+						type="number"
+						min="1"
+						max="50"
+						required
+					/>
 				</Field>
 			</div>
+			<Field v-if="room && !room.occupants.length" label="Status">
+				<select v-model="form.status" class="input">
+					<option>Available</option>
+					<option>Reserved</option>
+					<option>Under Renovation</option>
+				</select>
+			</Field>
 
 			<div v-if="!newType">
 				<div class="mb-1.5 flex items-center justify-between">
@@ -102,7 +133,10 @@
 				</div>
 			</div>
 
-			<Field label="Monthly rent" hint="Leave blank to use the room type's standard rent">
+			<Field
+				:label="form.capacity > 1 ? 'Monthly rent per bed' : 'Monthly rent'"
+				hint="Leave blank to use the room type's standard rent"
+			>
 				<input
 					v-model="form.room_rent"
 					class="input tabular"
@@ -114,9 +148,9 @@
 		</form>
 		<template #footer>
 			<Button @click="$emit('close')">Cancel</Button>
-			<Button variant="primary" type="submit" form="room-form" :loading="loading"
-				>Add room</Button
-			>
+			<Button variant="primary" type="submit" form="room-form" :loading="loading">{{
+				room ? "Save" : "Add room"
+			}}</Button>
 		</template>
 	</Modal>
 </template>
@@ -128,13 +162,24 @@ import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
+import { activeProperties, reloadProperties, ui } from "@/store";
 import { useAction, useResource } from "@/useResource";
 import { money } from "@/utils";
 
+const props = defineProps({ room: { type: Object, default: null } });
 const emit = defineEmits(["close"]);
-const floors = ["Ground", "First", "Second", "Third", "Fourth"];
+const floorOptions = ["Ground", "First", "Second", "Third", "Fourth", "Fifth", "Terrace"];
+const buildings = computed(() => activeProperties());
 
-const form = reactive({ room_number: "", floor: "Ground", room_type: "", room_rent: "" });
+const form = reactive({
+	room_number: props.room?.room_number || "",
+	property: props.room?.property || ui.property || buildings.value[0]?.name || "",
+	floor: props.room ? props.room.floor || "" : "Ground",
+	capacity: props.room?.capacity || 1,
+	status: props.room?.status || "Available",
+	room_type: props.room?.room_type || "",
+	room_rent: props.room?.room_rent || "",
+});
 const type = reactive({
 	type: "",
 	standard_rent: "",
@@ -164,20 +209,23 @@ const { loading, run } = useAction(
 				},
 			});
 		}
-		return post("create_room", {
+		return post("save_room", {
 			data: {
 				...form,
+				name: props.room?.name,
 				room_type: roomType || null,
 				room_rent: form.room_rent || null,
-				status: "Available",
+				property: form.property || null,
+				status: props.room ? form.status : "Available",
 			},
 		});
 	},
-	{ success: (name) => `Room ${name} added` }
+	{ success: (name) => (props.room ? `Room ${name} saved` : `Room ${name} added`) }
 );
 
 async function save() {
 	await run();
+	reloadProperties();
 	emit("close");
 }
 </script>

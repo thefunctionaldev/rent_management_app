@@ -12,6 +12,7 @@
   "tenant",
   "tenant_name",
   "room",
+  "property",
   "column_break_vcam",
   "posting_date",
   "due_date",
@@ -273,6 +274,15 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fetch_from": "room.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -285,7 +295,7 @@
    "link_fieldname": "rent_invoice"
   }
  ],
- "modified": "2026-10-26 22:18:04.219960",
+ "modified": "2026-10-26 18:58:16.112450",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Rent Invoice",

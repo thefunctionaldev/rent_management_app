@@ -83,9 +83,18 @@
 									><DoorOpen class="size-5"
 								/></span>
 								<div>
-									<p class="font-semibold">Room {{ current.room }}</p>
+									<p class="font-semibold">
+										Room {{ current.room
+										}}<span
+											v-if="current.bed_no"
+											class="font-normal text-slate-500"
+										>
+											· Bed {{ current.bed_no }}</span
+										>
+									</p>
 									<p class="text-sm text-slate-500">
-										{{ current.room_type || "Room" }} · since
+										{{ current.property ? `${current.property} · ` : ""
+										}}{{ current.room_type || "Room" }} · since
 										{{ date(current.allotment_date) }}
 									</p>
 								</div>

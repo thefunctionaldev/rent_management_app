@@ -35,7 +35,8 @@ TENANT_FIELDS = (
 	"workspace",
 	"salary",
 )
-ROOM_FIELDS = ("room_number", "floor", "status", "room_type", "room_rent")
+ROOM_FIELDS = ("room_number", "property", "floor", "status", "room_type", "room_rent", "capacity")
+PROPERTY_FIELDS = ("property_name", "abbr", "address", "city", "state", "pincode", "is_active")
 ROOM_TYPE_FIELDS = (
 	"type",
 	"description",
@@ -50,6 +51,7 @@ INVOICE_LIST_FIELDS = [
 	"tenant",
 	"tenant_name",
 	"room",
+	"property",
 	"tenant_space_allotment",
 	"billing_month",
 	"billing_year",
@@ -67,6 +69,7 @@ PAYMENT_LIST_FIELDS = [
 	"tenant_name",
 	"rent_invoice",
 	"room",
+	"property",
 	"payment_date",
 	"mode_of_payment",
 	"amount",
@@ -89,6 +92,13 @@ def pick(data, fields):
 	return {key: data[key] for key in fields if key in data}
 
 
+def by_property(filters: dict, property=None) -> dict:
+	"""Most lists can be narrowed to one building (the switcher in the sidebar)."""
+	if property:
+		filters["property"] = property
+	return filters
+
+
 # ---------------------------------------------------------------- session
 
 
@@ -107,6 +117,7 @@ def get_boot():
 		"site_name": frappe.local.site,
 		"months": MONTHS,
 		"today": nowdate(),
+		"properties": get_properties(),
 		"subscription": subscription.get_state(),
 	}
 
@@ -115,18 +126,22 @@ def get_boot():
 
 
 @frappe.whitelist()
-def get_dashboard():
+def get_dashboard(property=None):
 	check_access()
 	today = getdate(nowdate())
 
-	rooms = frappe.get_all("Tenant Space", fields=["status"])
+	rooms = frappe.get_all(
+		"Tenant Space", filters=by_property({}, property), fields=["status", "capacity", "occupied_beds"]
+	)
 	room_status = defaultdict(int)
 	for room in rooms:
 		room_status[room.status or "Available"] += 1
+	beds = sum(max(cint(r.capacity), 1) for r in rooms)
+	occupied_beds = sum(cint(r.occupied_beds) for r in rooms)
 
 	open_invoices = frappe.get_all(
 		"Tenant Rent Invoice",
-		filters={"docstatus": 1, "outstanding_amount": (">", 0)},
+		filters=by_property({"docstatus": 1, "outstanding_amount": (">", 0)}, property),
 		fields=INVOICE_LIST_FIELDS,
 		order_by="due_date asc",
 	)
@@ -136,44 +151,51 @@ def get_dashboard():
 		"rooms": {
 			"total": len(rooms),
 			"by_status": dict(room_status),
-			"occupancy": round(room_status["Occupied"] / len(rooms) * 100) if rooms else 0,
+			"beds": beds,
+			"occupied_beds": occupied_beds,
+			"occupancy": round(occupied_beds / beds * 100) if beds else 0,
 		},
-		"tenants": frappe.db.count("Tenant", {"status": "Active"}),
-		"this_month": get_month_totals(today),
+		"tenants": frappe.db.count(
+			"Tenant Space Allotment", by_property({"docstatus": 1, "status": "Active"}, property)
+		),
+		"this_month": get_month_totals(today, property),
 		"outstanding": {
 			"amount": sum(flt(inv.outstanding_amount) for inv in open_invoices),
 			"count": len(open_invoices),
 			"overdue_amount": sum(flt(inv.outstanding_amount) for inv in overdue),
 			"overdue_count": len(overdue),
 		},
-		"trend": [get_month_totals(add_months(today, -offset)) for offset in range(5, -1, -1)],
+		"trend": [get_month_totals(add_months(today, -offset), property) for offset in range(5, -1, -1)],
 		"overdue_invoices": overdue[:6],
 		"recent_payments": frappe.get_all(
 			"Rent Payment",
-			filters={"docstatus": 1},
+			filters=by_property({"docstatus": 1}, property),
 			fields=PAYMENT_LIST_FIELDS,
 			order_by="payment_date desc, creation desc",
 			limit=6,
 		),
-		"draft_invoices": frappe.db.count("Tenant Rent Invoice", {"docstatus": 0}),
-		"pending_deposits": len(get_pending_settlements()),
+		"draft_invoices": frappe.db.count("Tenant Rent Invoice", by_property({"docstatus": 0}, property)),
+		"pending_deposits": len(get_pending_settlements(property)),
 	}
 
 
-def get_month_totals(date):
+def get_month_totals(date, property=None):
 	start, end = get_first_day(date), get_last_day(date)
 	invoiced = frappe.get_all(
 		"Tenant Rent Invoice",
-		filters={
-			"docstatus": 1,
-			"billing_month": MONTHS[start.month - 1],
-			"billing_year": start.year,
-		},
+		filters=by_property(
+			{
+				"docstatus": 1,
+				"billing_month": MONTHS[start.month - 1],
+				"billing_year": start.year,
+			},
+			property,
+		),
 		pluck="final_amount",
 	)
 	collected = frappe.get_all(
 		"Rent Payment",
-		filters={"docstatus": 1, "payment_date": ("between", (start, end))},
+		filters=by_property({"docstatus": 1, "payment_date": ("between", (start, end))}, property),
 		pluck="amount",
 	)
 	return {
@@ -189,31 +211,48 @@ def get_month_totals(date):
 
 
 @frappe.whitelist()
-def get_rooms():
+def get_rooms(property=None):
 	check_access()
 	rooms = frappe.get_all(
 		"Tenant Space",
+		filters=by_property({}, property),
 		fields=[
 			"name",
 			"room_number",
+			"property",
 			"floor",
 			"status",
 			"room_type",
 			"room_rent",
+			"capacity",
+			"occupied_beds",
 			"tenant",
 			"tenant_name",
 			"checkin_date",
 			"current_allotment",
 		],
-		order_by="room_number asc",
+		order_by="property asc, room_number asc",
 	)
 	room_types = {rt.name: rt for rt in get_room_types()}
 	outstanding = get_outstanding_by("tenant_space_allotment")
+	occupants = defaultdict(list)
+	for allotment in frappe.get_all(
+		"Tenant Space Allotment",
+		filters=by_property({"docstatus": 1, "status": "Active"}, property),
+		fields=["name", "room", "tenant", "tenant_name", "bed_no", "allotment_date"],
+		order_by="bed_no asc",
+	):
+		allotment.outstanding = outstanding.get(allotment.name, 0)
+		occupants[allotment.room].append(allotment)
+
 	for room in rooms:
 		room_type = room_types.get(room.room_type) or {}
+		room.capacity = max(cint(room.capacity), 1)
 		room.is_furnished = room_type.get("is_furnished")
 		room.has_attached_bathroom = room_type.get("has_attached_bathroom")
-		room.outstanding = outstanding.get(room.current_allotment, 0)
+		room.occupants = occupants.get(room.name, [])
+		room.free_beds = room.capacity - len(room.occupants)
+		room.outstanding = sum(o.outstanding for o in room.occupants)
 	return rooms
 
 
@@ -227,8 +266,54 @@ def get_room_types():
 
 @frappe.whitelist(methods=["POST"])
 def create_room(data):
+	return save_room(data)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_room(data):
 	check_access()
-	doc = frappe.get_doc({"doctype": "Tenant Space", **pick(data, ROOM_FIELDS)}).insert()
+	data = frappe.parse_json(data)
+	if data.get("name"):
+		doc = frappe.get_doc("Tenant Space", data["name"])
+		doc.update(pick(data, [f for f in ROOM_FIELDS if f not in ("room_number", "status")]))
+		if data.get("status") in ("Reserved", "Under Renovation", "Available") and not doc.occupied_beds:
+			doc.status = data["status"]
+		doc.save()
+	else:
+		doc = frappe.get_doc({"doctype": "Tenant Space", **pick(data, ROOM_FIELDS)}).insert()
+	return doc.name
+
+
+# ---------------------------------------------------------------- buildings
+
+
+@frappe.whitelist()
+def get_properties():
+	check_access()
+	rooms = defaultdict(lambda: {"rooms": 0, "beds": 0, "occupied_beds": 0})
+	for room in frappe.get_all("Tenant Space", fields=["property", "capacity", "occupied_beds"]):
+		row = rooms[room.property]
+		row["rooms"] += 1
+		row["beds"] += max(cint(room.capacity), 1)
+		row["occupied_beds"] += cint(room.occupied_beds)
+	properties = frappe.get_all(
+		"Rent Property", fields=["name", *PROPERTY_FIELDS], order_by="is_active desc, creation asc"
+	)
+	for prop in properties:
+		prop.update(rooms[prop.name])
+	return properties
+
+
+@frappe.whitelist(methods=["POST"])
+def save_property(data):
+	check_access()
+	data = frappe.parse_json(data)
+	if data.get("name"):
+		doc = frappe.get_doc("Rent Property", data["name"])
+		doc.update(pick(data, [f for f in PROPERTY_FIELDS if f != "property_name"]))
+		doc.save()
+	else:
+		doc = frappe.get_doc({"doctype": "Rent Property", **pick(data, PROPERTY_FIELDS)}).insert()
 	return doc.name
 
 
@@ -243,7 +328,7 @@ def create_room_type(data):
 
 
 @frappe.whitelist()
-def get_tenants(search=None, status=None):
+def get_tenants(search=None, status=None, property=None):
 	check_access()
 	filters = {"status": status} if status else {}
 	or_filters = None
@@ -269,18 +354,24 @@ def get_tenants(search=None, status=None):
 		],
 		order_by="full_name asc",
 	)
-	rooms = {
-		str(a.tenant): a.room
+	stays = {
+		str(a.tenant): a
 		for a in frappe.get_all(
 			"Tenant Space Allotment",
 			filters={"docstatus": 1, "status": "Active"},
-			fields=["tenant", "room"],
+			fields=["tenant", "room", "bed_no", "property"],
 		)
 	}
 	outstanding = get_outstanding_by("tenant")
 	for tenant in tenants:
-		tenant.room = rooms.get(str(tenant.name))
+		stay = stays.get(str(tenant.name)) or {}
+		tenant.room = stay.get("room")
+		tenant.bed_no = stay.get("bed_no")
+		tenant.property = stay.get("property")
 		tenant.outstanding = outstanding.get(str(tenant.name), 0)
+	if property:
+		# tenants staying in another building are hidden; those without a room are always shown
+		tenants = [t for t in tenants if not t.property or t.property == property]
 	return tenants
 
 
@@ -295,6 +386,8 @@ def get_tenant(name):
 		fields=[
 			"name",
 			"room",
+			"bed_no",
+			"property",
 			"room_type",
 			"allotment_date",
 			"vacate_date",
@@ -359,6 +452,7 @@ def allot_room(
 	security_deposit=None,
 	deposit_collected=0,
 	notes=None,
+	bed_no=None,
 ):
 	check_access()
 	doc = frappe.get_doc(
@@ -366,6 +460,7 @@ def allot_room(
 			"doctype": "Tenant Space Allotment",
 			"tenant": tenant,
 			"room": room,
+			"bed_no": cint(bed_no) or None,
 			"allotment_date": allotment_date or nowdate(),
 			"rent_amount": flt(rent_amount) or None,
 			"security_deposit": flt(security_deposit) or None,
@@ -399,17 +494,18 @@ def mark_deposit_collected(allotment, collected_on=None):
 
 
 @frappe.whitelist()
-def get_billable_allotments():
+def get_billable_allotments(property=None):
 	"""Allotments an invoice can be raised against: current tenants and those who moved out."""
 	check_access()
 	return frappe.get_all(
 		"Tenant Space Allotment",
-		filters={"docstatus": 1, "status": ("in", ("Active", "Vacated"))},
+		filters=by_property({"docstatus": 1, "status": ("in", ("Active", "Vacated"))}, property),
 		fields=[
 			"name",
 			"tenant",
 			"tenant_name",
 			"room",
+			"bed_no",
 			"status",
 			"rent_amount",
 			"allotment_date",
@@ -423,9 +519,11 @@ def get_billable_allotments():
 
 
 @frappe.whitelist()
-def get_invoices(status=None, billing_month=None, billing_year=None, search=None, start=0, page_length=100):
+def get_invoices(
+	status=None, billing_month=None, billing_year=None, search=None, start=0, page_length=100, property=None
+):
 	check_access()
-	filters = {"docstatus": ("<", 2)}
+	filters = by_property({"docstatus": ("<", 2)}, property)
 	if billing_month:
 		filters["billing_month"] = billing_month
 	if billing_year:
@@ -538,9 +636,9 @@ def generate_invoices(billing_month, billing_year, submit=0):
 
 
 @frappe.whitelist()
-def get_payments(search=None, mode_of_payment=None, start=0, page_length=100):
+def get_payments(search=None, mode_of_payment=None, start=0, page_length=100, property=None):
 	check_access()
-	filters = {"docstatus": 1}
+	filters = by_property({"docstatus": 1}, property)
 	if mode_of_payment:
 		filters["mode_of_payment"] = mode_of_payment
 	or_filters = None
@@ -588,11 +686,11 @@ def record_payment(
 
 
 @frappe.whitelist()
-def get_deposits():
+def get_deposits(property=None):
 	check_access()
 	held = frappe.get_all(
 		"Tenant Space Allotment",
-		filters={"docstatus": 1, "status": "Active", "security_deposit": (">", 0)},
+		filters=by_property({"docstatus": 1, "status": "Active", "security_deposit": (">", 0)}, property),
 		fields=[
 			"name",
 			"tenant",
@@ -607,7 +705,7 @@ def get_deposits():
 	)
 	settlements = frappe.get_all(
 		"Security Deposit Settlement",
-		filters={"docstatus": 1},
+		filters=by_property({"docstatus": 1}, property),
 		fields=[
 			"name",
 			"tenant",
@@ -624,18 +722,21 @@ def get_deposits():
 		],
 		order_by="settlement_date desc",
 	)
-	return {"pending": get_pending_settlements(), "held": held, "settlements": settlements}
+	return {"pending": get_pending_settlements(property), "held": held, "settlements": settlements}
 
 
-def get_pending_settlements():
+def get_pending_settlements(property=None):
 	return frappe.get_all(
 		"Tenant Space Allotment",
-		filters={
-			"docstatus": 1,
-			"status": "Vacated",
-			"security_deposit": (">", 0),
-			"deposit_settlement": ("is", "not set"),
-		},
+		filters=by_property(
+			{
+				"docstatus": 1,
+				"status": "Vacated",
+				"security_deposit": (">", 0),
+				"deposit_settlement": ("is", "not set"),
+			},
+			property,
+		),
 		fields=[
 			"name",
 			"tenant",
@@ -712,13 +813,14 @@ def settle_deposit(
 
 
 @frappe.whitelist()
-def get_outstanding(as_on_date=None, tenant=None, room=None, overdue_only=0):
+def get_outstanding(as_on_date=None, tenant=None, room=None, overdue_only=0, property=None):
 	check_access()
 	_columns, data, _message, _chart, summary = rent_outstanding.execute(
 		{
 			"as_on_date": as_on_date or nowdate(),
 			"tenant": tenant,
 			"room": room,
+			"property": property,
 			"overdue_only": cint(overdue_only),
 		}
 	)
@@ -756,8 +858,7 @@ def get_billing():
 			"description": plan.get("description"),
 			"monthly": flt(plan.get("monthly")),
 			"yearly": flt(plan.get("yearly")),
-			"max_rooms": cint(plan.get("max_rooms")),
-			"max_users": cint(plan.get("max_users")),
+			"limits": {key: cint(plan.get(limit)) for key, (limit, _label) in subscription.LIMITS.items()},
 			"features": plan.get("features") or [],
 		}
 		for key, plan in subscription.get_plans().items()

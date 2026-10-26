@@ -18,6 +18,7 @@ const routes = [
 		name: "outstanding",
 		component: () => import("./pages/Outstanding.vue"),
 	},
+	{ path: "/buildings", name: "buildings", component: () => import("./pages/Buildings.vue") },
 	{ path: "/billing", name: "billing", component: () => import("./pages/Billing.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];

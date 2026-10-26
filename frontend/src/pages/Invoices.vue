@@ -119,7 +119,7 @@ import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import Tabs from "@/components/Tabs.vue";
 import { openDialog } from "@/dialogs";
-import { boot } from "@/store";
+import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, debounce, money } from "@/utils";
 
@@ -137,6 +137,7 @@ const { data, loading, reload } = useResource(
 			search: search.value,
 			billing_month: month.value,
 			billing_year: year.value,
+			...scope(),
 		}),
 	{ initial: { invoices: [], counts: {} } }
 );

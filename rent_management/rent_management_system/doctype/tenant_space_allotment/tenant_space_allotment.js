@@ -3,7 +3,9 @@
 
 frappe.ui.form.on("Tenant Space Allotment", {
 	setup(frm) {
-		frm.set_query("room", () => ({ filters: { status: ["in", ["Available", "Reserved"]] } }));
+		frm.set_query("room", () => ({
+			filters: { status: ["in", ["Available", "Partly Occupied", "Reserved"]] },
+		}));
 	},
 
 	refresh(frm) {

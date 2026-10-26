@@ -1,6 +1,6 @@
 import { ref, watch } from "vue";
 
-import { bumpData, dataVersion, toast } from "./store";
+import { bumpData, dataVersion, toast, ui } from "./store";
 
 // Loads data from an async function and reloads whenever dialogs change data.
 export function useResource(fetcher, { immediate = true, initial = null } = {}) {
@@ -21,7 +21,8 @@ export function useResource(fetcher, { immediate = true, initial = null } = {}) 
 		}
 	}
 
-	watch(() => dataVersion.value, reload);
+	// reload after dialogs change data, and when the building switcher changes
+	watch([() => dataVersion.value, () => ui.property], reload);
 	if (immediate) reload();
 	return { data, loading, error, reload };
 }

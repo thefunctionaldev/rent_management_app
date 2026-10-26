@@ -125,6 +125,7 @@ import SearchInput from "@/components/SearchInput.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
+import { scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, debounce, money } from "@/utils";
 
@@ -140,7 +141,7 @@ const colors = {
 const search = ref("");
 const mode = ref("");
 const { data, loading, reload } = useResource(
-	() => get("get_payments", { search: search.value, mode_of_payment: mode.value }),
+	() => get("get_payments", { search: search.value, mode_of_payment: mode.value, ...scope() }),
 	{ initial: [] }
 );
 const payments = computed(() => data.value || []);
