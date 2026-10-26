@@ -195,12 +195,14 @@ def apply_rent_increases():
 		return
 	for name in frappe.get_all(
 		"Tenant Space Allotment",
-		filters={
-			"docstatus": 1,
-			"status": "Active",
-			"rent_increase_percent": (">", 0),
-			"next_rent_increase_date": ("<=", today()),
-		},
+		filters=[
+			["docstatus", "=", 1],
+			["status", "=", "Active"],
+			["rent_increase_percent", ">", 0],
+			# "<=" alone would also match an empty date (read as 0001-01-01)
+			["next_rent_increase_date", "is", "set"],
+			["next_rent_increase_date", "<=", today()],
+		],
 		pluck="name",
 	):
 		frappe.db.savepoint("rent_increase")

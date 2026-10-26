@@ -51,9 +51,12 @@ class TestAgreements(IntegrationTestCase):
 
 	def test_notice(self):
 		allotment = make_allotment(room=make_room(), allotment_date="2026-01-01")
+		staying = make_allotment(room=make_room(), allotment_date="2026-01-01")
 		result = api.give_notice(allotment.name, "2026-02-01")
 		self.assertEqual(str(result["expected_vacate_date"]), "2026-03-03")
-		self.assertIn(allotment.name, [a.name for a in api.get_dashboard()["moving_out"]] or [allotment.name])
+		moving_out = [a.name for a in api.get_dashboard()["moving_out"]]
+		self.assertIn(allotment.name, moving_out)
+		self.assertNotIn(staying.name, moving_out)  # no notice, not moving out
 		api.withdraw_notice(allotment.name)
 		self.assertIsNone(
 			frappe.db.get_value("Tenant Space Allotment", allotment.name, "expected_vacate_date")
@@ -85,6 +88,13 @@ class TestAgreements(IntegrationTestCase):
 		self.assertEqual(str(allotment.next_rent_increase_date), "2027-01-15")
 		self.assertIn("5%", allotment.rent_revisions[0].reason)
 		self.assertEqual(getdate(allotment.rent_revisions[0].effective_from), getdate("2026-01-15"))
+
+	def test_no_increase_without_a_date(self):
+		allotment = make_allotment(room=make_room(rent=4000), allotment_date="2025-01-15")
+		allotment.db_set("next_rent_increase_date", None)
+		with patch.object(tenant_space_allotment, "today", return_value="2026-01-15"):
+			tenant_space_allotment.apply_rent_increases()
+		self.assertEqual(frappe.db.get_value("Tenant Space Allotment", allotment.name, "rent_amount"), 4000)
 
 	def test_agreement_document(self):
 		from frappe.www.printview import get_rendered_template

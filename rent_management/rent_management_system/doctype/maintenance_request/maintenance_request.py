@@ -16,6 +16,8 @@ class MaintenanceRequest(Document):
 			self.room = frappe.db.get_value(
 				"Tenant Space Allotment", {"tenant": self.tenant, "docstatus": 1, "status": "Active"}, "room"
 			)
+		# the room is often only known here, after fetch_from has already run
+		self.property = frappe.db.get_value("Tenant Space", self.room, "property") if self.room else None
 
 	def on_update(self):
 		before = self.get_doc_before_save()

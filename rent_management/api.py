@@ -206,15 +206,19 @@ def get_dashboard(property=None):
 			order_by="payment_date desc, creation desc",
 			limit=6,
 		),
-		"moving_out": frappe.get_all(
-			"Tenant Space Allotment",
-			filters=by_property(
-				{"docstatus": 1, "status": "Active", "expected_vacate_date": ("<=", add_days(today, 30))},
-				property,
-			),
-			fields=["name", "tenant", "tenant_name", "room", "bed_no", "expected_vacate_date"],
-			order_by="expected_vacate_date asc",
-		),
+		"moving_out": [
+			# a "<=" filter counts an empty date as 0001-01-01, so stays without notice are dropped here
+			a
+			for a in frappe.get_all(
+				"Tenant Space Allotment",
+				filters=by_property(
+					{"docstatus": 1, "status": "Active", "expected_vacate_date": ("is", "set")}, property
+				),
+				fields=["name", "tenant", "tenant_name", "room", "bed_no", "expected_vacate_date"],
+				order_by="expected_vacate_date asc",
+			)
+			if getdate(a.expected_vacate_date) <= getdate(add_days(today, 30))
+		],
 		"agreements_ending": frappe.get_all(
 			"Tenant Space Allotment",
 			filters=by_property(

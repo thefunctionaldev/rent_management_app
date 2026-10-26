@@ -107,6 +107,9 @@ class TestPortal(IntegrationTestCase):
 			(str(request.tenant), request.room, request.raised_via),
 			(str(self.tenant.name), self.allotment.room, "Tenant App"),
 		)
+		self.assertEqual(
+			request.property, frappe.db.get_value("Tenant Space", self.allotment.room, "property")
+		)
 		self.assertEqual([r.name for r in portal.get_requests()], [name])
 		self.assertRaises(frappe.ValidationError, portal.create_request, "x", "Not a category")
 
