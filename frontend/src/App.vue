@@ -165,9 +165,11 @@ import {
 	Lock,
 	LogOut,
 	Menu,
+	Receipt,
 	Settings,
 	ShieldCheck,
 	Sparkles,
+	TrendingUp,
 	Users,
 	Wallet,
 	Zap,
@@ -206,6 +208,8 @@ const nav = [
 			{ to: "/deposits", label: "Deposits", icon: ShieldCheck },
 			{ to: "/electricity", label: "Electricity", icon: Zap },
 			{ to: "/outstanding", label: "Outstanding", icon: BarChart3 },
+			{ to: "/expenses", label: "Expenses", icon: Receipt },
+			{ to: "/profit", label: "Profit & loss", icon: TrendingUp },
 		],
 	},
 	{
@@ -273,6 +277,7 @@ const dialogs = {
 	property: lazy("PropertyDialog"),
 	notice: lazy("NoticeDialog"),
 	changeRent: lazy("ChangeRentDialog"),
+	expense: lazy("ExpenseDialog"),
 };
 
 function logout() {

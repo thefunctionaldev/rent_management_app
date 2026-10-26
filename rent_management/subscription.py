@@ -37,6 +37,7 @@ DEFAULT_PLANS = {
 		"max_properties": 1,
 		"max_users": 2,
 		"whatsapp": 0,
+		"profit_report": 0,
 		"features": [
 			"Up to 30 beds in 1 building",
 			"2 manager logins",
@@ -53,6 +54,7 @@ DEFAULT_PLANS = {
 		"max_properties": 3,
 		"max_users": 5,
 		"whatsapp": 1,
+		"profit_report": 1,
 		"features": [
 			"Up to 120 beds in 3 buildings",
 			"5 manager logins",
@@ -69,6 +71,7 @@ DEFAULT_PLANS = {
 		"max_properties": 0,
 		"max_users": 0,
 		"whatsapp": 1,
+		"profit_report": 1,
 		"features": [
 			"Unlimited beds and buildings",
 			"Unlimited manager logins",
@@ -208,7 +211,10 @@ def get_state() -> dict:
 		"days_left": date_diff(ends_on, nowdate()) if ends_on else 0,
 		"grace_ends_on": add_days(sub.current_period_end, grace_days()) if sub.current_period_end else None,
 		"limits": {key: cint(plan.get(limit)) for key, (limit, _label) in LIMITS.items()},
-		"features": {"whatsapp": bool(cint(plan.get("whatsapp")))},
+		"features": {
+			"whatsapp": bool(cint(plan.get("whatsapp"))),
+			"profit_report": bool(cint(plan.get("profit_report"))),
+		},
 		"usage": get_usage(),
 		"currency": get_currency(),
 	}

@@ -180,6 +180,7 @@ doc_events = {
 		"Security Deposit Settlement",
 		"Rent Management Settings",
 		"Meter Reading",
+		"Property Expense",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [

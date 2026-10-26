@@ -14,8 +14,9 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
-from rent_management import data_import, gst, notifications, razorpay, rent_collection, subscription
+from rent_management import data_import, gst, notifications, profit, razorpay, rent_collection, subscription
 from rent_management.rent_management_system import billing
+from rent_management.rent_management_system.doctype.rent_property.rent_property import get_default_property
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
 
@@ -1090,6 +1091,73 @@ def get_meter_readings(property=None, room=None, limit=100):
 def delete_meter_reading(name):
 	check_access()
 	frappe.delete_doc("Meter Reading", name)
+
+
+# ---------------------------------------------------------------- expenses
+
+EXPENSE_FIELDS = (
+	"property",
+	"expense_date",
+	"category",
+	"amount",
+	"paid_to",
+	"mode_of_payment",
+	"reference_no",
+	"description",
+	"receipt",
+)
+
+
+@frappe.whitelist()
+def get_expenses(property=None, from_date=None, to_date=None, category=None):
+	check_access()
+	filters = by_property({}, property)
+	if from_date and to_date:
+		filters["expense_date"] = ("between", (from_date, to_date))
+	if category:
+		filters["category"] = category
+	return {
+		"expenses": frappe.get_all(
+			"Property Expense",
+			filters=filters,
+			fields=["name", *EXPENSE_FIELDS],
+			order_by="expense_date desc, creation desc",
+			limit=500,
+		),
+		"categories": frappe.get_meta("Property Expense").get_field("category").options.split("\n"),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_expense(data):
+	check_access()
+	data = frappe.parse_json(data)
+	values = pick(data, EXPENSE_FIELDS)
+	if not values.get("property"):
+		values["property"] = get_default_property()
+	if data.get("name"):
+		doc = frappe.get_doc("Property Expense", data["name"])
+		doc.update(values)
+		doc.save()
+	else:
+		doc = frappe.get_doc({"doctype": "Property Expense", **values}).insert()
+	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_expense(name):
+	check_access()
+	frappe.delete_doc("Property Expense", name)
+
+
+@frappe.whitelist()
+def get_profit_and_loss(months=12, property=None):
+	check_access()
+	if not subscription.has_feature("profit_report"):
+		frappe.throw(
+			_("The profit and loss report is part of the Growth and Pro plans."), subscription.PlanLimitError
+		)
+	return profit.get_profit_and_loss(min(max(cint(months), 1), 36), property)
 
 
 # ---------------------------------------------------------------- settings
