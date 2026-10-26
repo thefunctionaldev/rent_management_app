@@ -27,6 +27,20 @@
   "deposit_settlement",
   "notes_section",
   "notes",
+  "agreement_section",
+  "agreement_months",
+  "agreement_end_date",
+  "lock_in_months",
+  "notice_period_days",
+  "column_break_agreement",
+  "rent_increase_percent",
+  "rent_increase_every_months",
+  "next_rent_increase_date",
+  "notice_section",
+  "notice_given_on",
+  "expected_vacate_date",
+  "column_break_notice",
+  "rent_revisions",
   "amended_from"
  ],
  "fields": [
@@ -126,6 +140,8 @@
    "label": "Rent & Deposit"
   },
   {
+   "allow_on_submit": 1,
+   "description": "Current rent. Change it with Change Rent so the history is kept.",
    "fetch_from": "room.room_rent",
    "fetch_if_empty": 1,
    "fieldname": "rent_amount",
@@ -194,6 +210,98 @@
    "fieldtype": "Int",
    "label": "Bed No",
    "non_negative": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "agreement_section",
+   "fieldtype": "Section Break",
+   "label": "Agreement"
+  },
+  {
+   "description": "Blank: the default from Rent Management Settings.",
+   "fieldname": "agreement_months",
+   "fieldtype": "Int",
+   "label": "Agreement Period (Months)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "agreement_end_date",
+   "fieldtype": "Date",
+   "label": "Agreement Ends On",
+   "read_only": 1
+  },
+  {
+   "description": "The tenant can't move out (or forfeits the deposit) before this.",
+   "fieldname": "lock_in_months",
+   "fieldtype": "Int",
+   "label": "Lock-in (Months)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "notice_period_days",
+   "fieldtype": "Int",
+   "label": "Notice Period (Days)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_agreement",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Applied automatically every period below. 0 for none.",
+   "fieldname": "rent_increase_percent",
+   "fieldtype": "Percent",
+   "label": "Rent Increase"
+  },
+  {
+   "default": "12",
+   "depends_on": "rent_increase_percent",
+   "fieldname": "rent_increase_every_months",
+   "fieldtype": "Int",
+   "label": "Increase Every (Months)",
+   "non_negative": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "rent_increase_percent",
+   "fieldname": "next_rent_increase_date",
+   "fieldtype": "Date",
+   "label": "Next Rent Increase",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notice_section",
+   "fieldtype": "Section Break",
+   "label": "Notice"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "notice_given_on",
+   "fieldtype": "Date",
+   "label": "Notice Given On",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "expected_vacate_date",
+   "fieldtype": "Date",
+   "label": "Expected Move-out",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_notice",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rent_revisions",
+   "fieldtype": "Table",
+   "label": "Rent Changes",
+   "no_copy": 1,
+   "options": "Rent Revision",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -211,7 +319,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-26 18:58:16.111510",
+ "modified": "2026-10-26 19:44:01.334695",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

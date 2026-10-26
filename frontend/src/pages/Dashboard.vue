@@ -224,6 +224,60 @@
 				/>
 			</div>
 		</div>
+
+		<!-- coming up -->
+		<div v-if="d && (d.moving_out.length || d.agreements_ending.length)" class="card mt-6">
+			<div class="px-5 pt-5">
+				<h2 class="font-semibold text-slate-900">Coming up</h2>
+				<p class="text-sm text-slate-500">
+					Move-outs and agreements ending in the next 30 days
+				</p>
+			</div>
+			<ul class="mt-3 divide-y divide-slate-100">
+				<li
+					v-for="m in d.moving_out"
+					:key="m.name"
+					class="flex items-center gap-3 px-5 py-3"
+				>
+					<span
+						class="grid size-7 place-items-center rounded-full bg-amber-50 text-amber-600"
+						><LogOut class="size-4"
+					/></span>
+					<RouterLink
+						:to="`/tenants/${m.tenant}`"
+						class="min-w-0 flex-1 hover:underline"
+					>
+						<p class="truncate text-sm font-medium">{{ m.tenant_name }}</p>
+						<p class="text-xs text-slate-500">
+							Moving out of room {{ m.room }} · bed {{ m.bed_no }}
+						</p>
+					</RouterLink>
+					<p class="text-sm font-medium text-amber-700">
+						{{ shortDate(m.expected_vacate_date) }}
+					</p>
+				</li>
+				<li
+					v-for="a in d.agreements_ending"
+					:key="a.name"
+					class="flex items-center gap-3 px-5 py-3"
+				>
+					<span
+						class="grid size-7 place-items-center rounded-full bg-sky-50 text-sky-600"
+						><FileText class="size-4"
+					/></span>
+					<RouterLink
+						:to="`/tenants/${a.tenant}`"
+						class="min-w-0 flex-1 hover:underline"
+					>
+						<p class="truncate text-sm font-medium">{{ a.tenant_name }}</p>
+						<p class="text-xs text-slate-500">Agreement ends · room {{ a.room }}</p>
+					</RouterLink>
+					<p class="text-sm font-medium text-sky-700">
+						{{ shortDate(a.agreement_end_date) }}
+					</p>
+				</li>
+			</ul>
+		</div>
 	</div>
 </template>
 
@@ -233,8 +287,10 @@ import {
 	ArrowDownLeft,
 	DoorOpen,
 	FilePen,
+	FileText,
 	Hourglass,
 	KeyRound,
+	LogOut,
 	PartyPopper,
 	Plus,
 	ShieldCheck,

@@ -271,6 +271,8 @@ const dialogs = {
 	settleDeposit: lazy("SettleDepositDialog"),
 	collectDeposit: lazy("CollectDepositDialog"),
 	property: lazy("PropertyDialog"),
+	notice: lazy("NoticeDialog"),
+	changeRent: lazy("ChangeRentDialog"),
 };
 
 function logout() {

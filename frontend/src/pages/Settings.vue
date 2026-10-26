@@ -120,6 +120,73 @@
 					</div>
 				</section>
 
+				<!-- agreements -->
+				<section class="card p-6">
+					<h2 class="font-semibold">Rental agreements</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						Printed for every tenant from their profile. Check it suits your state's
+						rules.
+					</p>
+					<div class="mt-4 grid gap-4 sm:grid-cols-2">
+						<Field label="Landlord / owner name">
+							<input v-model="form.landlord_name" class="input" />
+						</Field>
+						<Field label="Landlord phone">
+							<input v-model="form.landlord_phone" class="input" />
+						</Field>
+						<Field
+							label="Landlord address"
+							hint="Blank: the building's address"
+							class="sm:col-span-2"
+						>
+							<textarea v-model="form.landlord_address" class="input" rows="2" />
+						</Field>
+					</div>
+					<div class="mt-4 grid gap-4 sm:grid-cols-4">
+						<Field label="Period (months)">
+							<input
+								v-model.number="form.default_agreement_months"
+								type="number"
+								min="0"
+								class="input tabular"
+							/>
+						</Field>
+						<Field label="Lock-in (months)">
+							<input
+								v-model.number="form.default_lock_in_months"
+								type="number"
+								min="0"
+								class="input tabular"
+							/>
+						</Field>
+						<Field label="Notice (days)">
+							<input
+								v-model.number="form.default_notice_days"
+								type="number"
+								min="0"
+								class="input tabular"
+							/>
+						</Field>
+						<Field label="Yearly increase %">
+							<input
+								v-model.number="form.default_rent_increase_percent"
+								type="number"
+								min="0"
+								step="0.5"
+								class="input tabular"
+							/>
+						</Field>
+					</div>
+					<Field label="House rules" hint="One rule per line" class="mt-4">
+						<textarea
+							v-model="houseRules"
+							class="input"
+							rows="5"
+							placeholder="Gate closes at 11 pm&#10;No smoking inside rooms"
+						/>
+					</Field>
+				</section>
+
 				<!-- reminders -->
 				<section class="card p-6">
 					<h2 class="font-semibold">Reminders and receipts</h2>
@@ -256,6 +323,20 @@ const secrets = reactive({
 	whatsapp_token: "",
 });
 watch(data, (value) => value && (form.value = { ...value.settings }), { immediate: true });
+
+// stored as HTML paragraphs, edited as lines
+const houseRules = computed({
+	get: () =>
+		(form.value?.agreement_terms || "")
+			.replace(/<\/p>\s*<p>/g, "\n")
+			.replace(/<br\s*\/?>/g, "\n")
+			.replace(/<[^>]+>/g, "")
+			.replace(/&amp;/g, "&")
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.trim(),
+	set: (value) => (form.value.agreement_terms = value),
+});
 
 const whatsappHint = computed(() => {
 	const w = data.value?.whatsapp || {};

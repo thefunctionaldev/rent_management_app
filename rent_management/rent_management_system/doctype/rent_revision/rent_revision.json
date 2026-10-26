@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "creation": "2026-10-26 19:43:15.717130",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "effective_from",
+  "old_rent",
+  "new_rent",
+  "reason"
+ ],
+ "fields": [
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Effective From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "old_rent",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Old Rent"
+  },
+  {
+   "fieldname": "new_rent",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "New Rent",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reason"
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-26 19:43:15.717130",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Revision",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -61,7 +61,10 @@ class TenantRentInvoice(Document):
 		self.tenant = allotment.tenant
 		self.room = allotment.room
 		if not self.monthly_rent:
-			self.monthly_rent = allotment.rent_amount
+			# the rent that applied at the start of the billing month (rent changes keep a history)
+			month_start = date(int(self.billing_year), MONTHS.index(self.billing_month) + 1, 1)
+			doc = frappe.get_doc("Tenant Space Allotment", self.tenant_space_allotment)
+			self.monthly_rent = doc.get_rent_on(max(month_start, getdate(doc.allotment_date)))
 
 	def validate_duplicate(self):
 		existing = frappe.db.get_value(

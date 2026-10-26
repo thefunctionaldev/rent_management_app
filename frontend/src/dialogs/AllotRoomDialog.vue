@@ -108,6 +108,47 @@
 					/>
 				</Field>
 			</div>
+			<details class="rounded-xl border border-slate-200 px-4 py-3">
+				<summary class="cursor-pointer text-sm font-medium text-slate-700">
+					Agreement terms
+					<span class="font-normal text-slate-500">· {{ termsSummary }}</span>
+				</summary>
+				<div class="mt-3 grid gap-4 sm:grid-cols-4">
+					<Field label="Period (months)">
+						<input
+							v-model="terms.agreement_months"
+							type="number"
+							min="0"
+							class="input tabular"
+						/>
+					</Field>
+					<Field label="Lock-in (months)">
+						<input
+							v-model="terms.lock_in_months"
+							type="number"
+							min="0"
+							class="input tabular"
+						/>
+					</Field>
+					<Field label="Notice (days)">
+						<input
+							v-model="terms.notice_period_days"
+							type="number"
+							min="0"
+							class="input tabular"
+						/>
+					</Field>
+					<Field label="Yearly increase %">
+						<input
+							v-model="terms.rent_increase_percent"
+							type="number"
+							min="0"
+							step="0.5"
+							class="input tabular"
+						/>
+					</Field>
+				</div>
+			</details>
 			<label
 				v-if="form.security_deposit > 0"
 				class="flex items-center gap-2 text-sm text-slate-700"
@@ -165,6 +206,25 @@ const form = reactive({
 	bed_no: null,
 });
 const tenant = reactive({ first_name: "", last_name: "", mobile_no: "" });
+const defaults = boot.agreement_defaults || {};
+const terms = reactive({
+	agreement_months: defaults.agreement_months ?? 11,
+	lock_in_months: defaults.lock_in_months ?? 0,
+	notice_period_days: defaults.notice_period_days ?? 30,
+	rent_increase_percent: defaults.rent_increase_percent ?? 0,
+});
+const termsSummary = computed(() =>
+	[
+		terms.agreement_months ? `${terms.agreement_months} months` : "no fixed period",
+		`${terms.notice_period_days || 0} days notice`,
+		terms.lock_in_months ? `${terms.lock_in_months} months lock-in` : "",
+		Number(terms.rent_increase_percent)
+			? `${terms.rent_increase_percent}% yearly increase`
+			: "",
+	]
+		.filter(Boolean)
+		.join(" · ")
+);
 const newTenant = ref(false);
 const search = ref("");
 
@@ -232,6 +292,7 @@ const { loading, run } = useAction(
 		}
 		return post("allot_room", {
 			...form,
+			...terms,
 			tenant: tenantName,
 			deposit_collected: form.deposit_collected ? 1 : 0,
 		});

@@ -8,6 +8,22 @@ frappe.ui.form.on("Tenant Space Allotment", {
 		}));
 	},
 
+	onload(frm) {
+		if (!frm.is_new()) return;
+		// agreement terms default to the ones in Rent Management Settings
+		frappe.db.get_doc("Rent Management Settings").then((settings) => {
+			const defaults = {
+				agreement_months: settings.default_agreement_months,
+				lock_in_months: settings.default_lock_in_months,
+				notice_period_days: settings.default_notice_days,
+				rent_increase_percent: settings.default_rent_increase_percent,
+			};
+			for (const [field, value] of Object.entries(defaults)) {
+				if (!frm.doc[field] && value) frm.set_value(field, value);
+			}
+		});
+	},
+
 	refresh(frm) {
 		if (
 			frm.doc.status === "Vacated" &&

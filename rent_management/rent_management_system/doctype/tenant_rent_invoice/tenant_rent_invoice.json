@@ -98,12 +98,10 @@
    "reqd": 1
   },
   {
-   "fetch_from": "tenant_space_allotment.rent_amount",
-   "fetch_if_empty": 1,
+   "description": "Leave blank for the stay's rent for this month.",
    "fieldname": "monthly_rent",
    "fieldtype": "Currency",
-   "label": "Monthly Rent",
-   "reqd": 1
+   "label": "Monthly Rent"
   },
   {
    "fieldname": "total_days",
@@ -326,7 +324,7 @@
    "link_fieldname": "rent_invoice"
   }
  ],
- "modified": "2026-10-26 19:22:06.338052",
+ "modified": "2026-10-26 19:44:01.333597",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Rent Invoice",

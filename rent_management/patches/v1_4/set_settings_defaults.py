@@ -10,6 +10,10 @@ DEFAULTS = {
 	"send_receipts": 1,
 	"notify_by_whatsapp": 1,
 	"notify_by_email": 1,
+	"default_agreement_months": 11,
+	"default_lock_in_months": 0,
+	"default_notice_days": 30,
+	"default_rent_increase_percent": 0,
 }
 
 

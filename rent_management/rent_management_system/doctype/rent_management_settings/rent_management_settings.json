@@ -33,7 +33,18 @@
   "whatsapp_section",
   "whatsapp_phone_number_id",
   "column_break_whatsapp",
-  "whatsapp_token"
+  "whatsapp_token",
+  "agreement_section",
+  "landlord_name",
+  "landlord_phone",
+  "landlord_address",
+  "column_break_agreement",
+  "default_agreement_months",
+  "default_lock_in_months",
+  "default_notice_days",
+  "default_rent_increase_percent",
+  "agreement_terms_section",
+  "agreement_terms"
  ],
  "fields": [
   {
@@ -213,13 +224,75 @@
    "fieldname": "electricity_rate",
    "fieldtype": "Currency",
    "label": "Electricity Rate per Unit"
+  },
+  {
+   "fieldname": "agreement_section",
+   "fieldtype": "Section Break",
+   "label": "Rental Agreements"
+  },
+  {
+   "fieldname": "landlord_name",
+   "fieldtype": "Data",
+   "label": "Landlord / Owner Name"
+  },
+  {
+   "fieldname": "landlord_phone",
+   "fieldtype": "Data",
+   "label": "Landlord Phone"
+  },
+  {
+   "description": "Leave blank to use the building's address.",
+   "fieldname": "landlord_address",
+   "fieldtype": "Small Text",
+   "label": "Landlord Address"
+  },
+  {
+   "fieldname": "column_break_agreement",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "11",
+   "fieldname": "default_agreement_months",
+   "fieldtype": "Int",
+   "label": "Default Agreement Period (Months)",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "default_lock_in_months",
+   "fieldtype": "Int",
+   "label": "Default Lock-in (Months)",
+   "non_negative": 1
+  },
+  {
+   "default": "30",
+   "fieldname": "default_notice_days",
+   "fieldtype": "Int",
+   "label": "Default Notice Period (Days)",
+   "non_negative": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "default_rent_increase_percent",
+   "fieldtype": "Percent",
+   "label": "Default Yearly Rent Increase"
+  },
+  {
+   "fieldname": "agreement_terms_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Printed on every rental agreement.",
+   "fieldname": "agreement_terms",
+   "fieldtype": "Text Editor",
+   "label": "House Rules and Terms"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 19:31:50.857479",
+ "modified": "2026-10-26 19:43:15.718938",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

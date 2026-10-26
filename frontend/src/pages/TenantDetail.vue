@@ -125,7 +125,47 @@
 										</span>
 									</dd>
 								</div>
+								<div
+									v-if="current.agreement_end_date"
+									class="flex justify-between"
+								>
+									<dt class="text-slate-500">Agreement until</dt>
+									<dd>{{ date(current.agreement_end_date) }}</dd>
+								</div>
+								<div v-if="current.lock_in_months" class="flex justify-between">
+									<dt class="text-slate-500">Lock-in</dt>
+									<dd>{{ current.lock_in_months }} months</dd>
+								</div>
+								<div class="flex justify-between">
+									<dt class="text-slate-500">Notice period</dt>
+									<dd>{{ current.notice_period_days || 0 }} days</dd>
+								</div>
+								<div
+									v-if="current.next_rent_increase_date"
+									class="flex justify-between"
+								>
+									<dt class="text-slate-500">Next increase</dt>
+									<dd>
+										{{ current.rent_increase_percent }}% on
+										{{ date(current.next_rent_increase_date) }}
+									</dd>
+								</div>
 							</dl>
+							<div
+								v-if="current.expected_vacate_date"
+								class="mt-4 flex items-start justify-between gap-3 rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-800"
+							>
+								<p>
+									Gave notice on {{ date(current.notice_given_on) }}; moving out
+									<b>{{ date(current.expected_vacate_date) }}</b>
+								</p>
+								<button
+									class="shrink-0 text-xs font-medium underline"
+									@click="withdrawNotice"
+								>
+									Withdraw
+								</button>
+							</div>
 							<div class="mt-5 grid grid-cols-2 gap-2">
 								<Button
 									size="sm"
@@ -144,6 +184,37 @@
 										})
 									"
 									>Vacate</Button
+								>
+								<Button
+									size="sm"
+									:icon="BellRing"
+									:disabled="!!current.expected_vacate_date"
+									@click="
+										openDialog('notice', {
+											allotment: current,
+											tenantName: tenant.full_name,
+										})
+									"
+									>Give notice</Button
+								>
+								<Button
+									size="sm"
+									:icon="IndianRupee"
+									@click="
+										openDialog('changeRent', {
+											allotment: current,
+											tenantName: tenant.full_name,
+										})
+									"
+									>Change rent</Button
+								>
+								<Button
+									size="sm"
+									class="col-span-2"
+									:icon="FileText"
+									:href="agreementUrl(current)"
+									target="_blank"
+									>Rental agreement (PDF)</Button
 								>
 								<Button
 									v-if="current.security_deposit && !current.deposit_collected"
@@ -312,6 +383,15 @@
 									{{ money(a.rent_amount) }}/mo
 								</p>
 								<p
+									v-for="r in a.rent_revisions"
+									:key="r.effective_from"
+									class="mt-1 text-xs text-slate-500"
+								>
+									Rent {{ money(r.old_rent) }} → {{ money(r.new_rent) }} from
+									{{ date(r.effective_from)
+									}}<template v-if="r.reason"> · {{ r.reason }}</template>
+								</p>
+								<p
 									v-if="a.deposit_settlement"
 									class="mt-1 text-xs text-emerald-600"
 								>
@@ -329,6 +409,8 @@
 <script setup>
 import {
 	ArrowDownLeft,
+	BellRing,
+	IndianRupee,
 	Briefcase,
 	ChevronLeft,
 	DoorOpen,
@@ -352,7 +434,7 @@ import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import Tabs from "@/components/Tabs.vue";
 import { openDialog } from "@/dialogs";
-import { toast } from "@/store";
+import { bumpData, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money } from "@/utils";
 
@@ -360,6 +442,18 @@ const props = defineProps({ name: { type: String, required: true } });
 const { data } = useResource(() => get("get_tenant", { name: props.name }));
 
 const tenant = computed(() => data.value.tenant);
+
+const agreementUrl = (a) =>
+	`/api/method/rent_management.api.download_agreement?allotment=${encodeURIComponent(a.name)}`;
+async function withdrawNotice() {
+	try {
+		await post("withdraw_notice", { allotment: current.value.name });
+		toast("Notice withdrawn");
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 
 // the full number is fetched on demand (the view is logged) and hidden again after a minute
 const aadhaar = ref("");

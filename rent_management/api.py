@@ -12,7 +12,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
+from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
 from rent_management import data_import, gst, notifications, razorpay, rent_collection, subscription
 from rent_management.rent_management_system import billing
@@ -20,6 +20,7 @@ from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_r
 from rent_management.rent_management_system.report.rent_outstanding import rent_outstanding
 
 ALLOWED_ROLES = ("System Manager", "Rent Manager")
+AGREEMENT_FORMAT = "Rent Agreement"
 
 TENANT_FIELDS = (
 	"first_name",
@@ -128,6 +129,15 @@ def get_boot():
 		"months": MONTHS,
 		"today": nowdate(),
 		"properties": get_properties(),
+		"agreement_defaults": {
+			field: frappe.db.get_single_value("Rent Management Settings", f"default_{key}")
+			for field, key in (
+				("agreement_months", "agreement_months"),
+				("lock_in_months", "lock_in_months"),
+				("notice_period_days", "notice_days"),
+				("rent_increase_percent", "rent_increase_percent"),
+			)
+		},
 		"subscription": subscription.get_state(),
 	}
 
@@ -183,6 +193,29 @@ def get_dashboard(property=None):
 			fields=PAYMENT_LIST_FIELDS,
 			order_by="payment_date desc, creation desc",
 			limit=6,
+		),
+		"moving_out": frappe.get_all(
+			"Tenant Space Allotment",
+			filters=by_property(
+				{"docstatus": 1, "status": "Active", "expected_vacate_date": ("<=", add_days(today, 30))},
+				property,
+			),
+			fields=["name", "tenant", "tenant_name", "room", "bed_no", "expected_vacate_date"],
+			order_by="expected_vacate_date asc",
+		),
+		"agreements_ending": frappe.get_all(
+			"Tenant Space Allotment",
+			filters=by_property(
+				{
+					"docstatus": 1,
+					"status": "Active",
+					"expected_vacate_date": ("is", "not set"),
+					"agreement_end_date": ("between", (add_days(today, -30), add_days(today, 30))),
+				},
+				property,
+			),
+			fields=["name", "tenant", "tenant_name", "room", "agreement_end_date"],
+			order_by="agreement_end_date asc",
 		),
 		"draft_invoices": frappe.db.count("Tenant Rent Invoice", by_property({"docstatus": 0}, property)),
 		"pending_deposits": len(get_pending_settlements(property)),
@@ -410,9 +443,30 @@ def get_tenant(name):
 			"deposit_collected_on",
 			"deposit_settlement",
 			"docstatus",
+			"agreement_months",
+			"agreement_end_date",
+			"lock_in_months",
+			"notice_period_days",
+			"rent_increase_percent",
+			"next_rent_increase_date",
+			"notice_given_on",
+			"expected_vacate_date",
 		],
 		order_by="allotment_date desc",
 	)
+	revisions = defaultdict(list)
+	for row in frappe.get_all(
+		"Rent Revision",
+		filters={
+			"parenttype": "Tenant Space Allotment",
+			"parent": ("in", [a.name for a in allotments] or [""]),
+		},
+		fields=["parent", "effective_from", "old_rent", "new_rent", "reason"],
+		order_by="effective_from desc",
+	):
+		revisions[row.parent].append(row)
+	for allotment in allotments:
+		allotment.rent_revisions = revisions.get(allotment.name, [])
 	invoices = frappe.get_all(
 		"Tenant Rent Invoice",
 		filters={"tenant": name, "docstatus": ("<", 2)},
@@ -476,14 +530,23 @@ def allot_room(
 	deposit_collected=0,
 	notes=None,
 	bed_no=None,
+	agreement_months=None,
+	lock_in_months=None,
+	notice_period_days=None,
+	rent_increase_percent=None,
 ):
 	check_access()
+	optional = lambda value: None if value in (None, "") else value  # noqa: E731
 	doc = frappe.get_doc(
 		{
 			"doctype": "Tenant Space Allotment",
 			"tenant": tenant,
 			"room": room,
 			"bed_no": cint(bed_no) or None,
+			"agreement_months": optional(agreement_months),
+			"lock_in_months": optional(lock_in_months),
+			"notice_period_days": optional(notice_period_days),
+			"rent_increase_percent": optional(rent_increase_percent),
 			"allotment_date": allotment_date or nowdate(),
 			"rent_amount": flt(rent_amount) or None,
 			"security_deposit": flt(security_deposit) or None,
@@ -504,6 +567,41 @@ def vacate_room(allotment, vacate_date=None):
 	doc.check_permission("write")
 	doc.vacate(vacate_date)
 	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def give_notice(allotment, notice_date=None, vacate_date=None):
+	check_access()
+	return frappe.get_doc("Tenant Space Allotment", allotment).give_notice(notice_date, vacate_date)
+
+
+@frappe.whitelist(methods=["POST"])
+def withdraw_notice(allotment):
+	check_access()
+	frappe.get_doc("Tenant Space Allotment", allotment).withdraw_notice()
+
+
+@frappe.whitelist(methods=["POST"])
+def revise_rent(allotment, new_rent, effective_from=None, reason=None):
+	check_access()
+	frappe.get_doc("Tenant Space Allotment", allotment).revise_rent(new_rent, effective_from, reason)
+
+
+@frappe.whitelist()
+def download_agreement(allotment):
+	check_access()
+	doc = frappe.get_doc("Tenant Space Allotment", allotment)
+	doc.check_permission("print")
+	send_pdf(
+		f"Agreement-{doc.name}",
+		frappe.get_print(doc.doctype, doc.name, print_format=AGREEMENT_FORMAT, as_pdf=True),
+	)
+
+
+def send_pdf(filename, content):
+	frappe.local.response.filename = f"{filename}.pdf"
+	frappe.local.response.filecontent = content
+	frappe.local.response.type = "pdf"
 
 
 @frappe.whitelist(methods=["POST"])
@@ -1014,6 +1112,14 @@ SETTINGS_FIELDS = (
 	"notify_by_whatsapp",
 	"notify_by_email",
 	"whatsapp_phone_number_id",
+	"landlord_name",
+	"landlord_phone",
+	"landlord_address",
+	"default_agreement_months",
+	"default_lock_in_months",
+	"default_notice_days",
+	"default_rent_increase_percent",
+	"agreement_terms",
 )
 # write-only: the browser only learns whether they are set
 SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
@@ -1044,6 +1150,12 @@ def save_settings(data):
 	check_access()
 	data = frappe.parse_json(data)
 	settings = frappe.get_single("Rent Management Settings")
+	terms = data.get("agreement_terms")
+	if terms and "<" not in terms:
+		# typed in a plain textarea: keep the lines when printed
+		data["agreement_terms"] = "".join(
+			f"<p>{frappe.utils.escape_html(line)}</p>" for line in terms.splitlines() if line.strip()
+		)
 	settings.update(pick(data, SETTINGS_FIELDS))
 	for field in SECRET_FIELDS:
 		if data.get(field):
