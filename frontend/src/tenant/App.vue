@@ -1,10 +1,29 @@
 <template>
 	<div v-if="me.loaded" class="min-h-screen bg-slate-50 pb-24">
-		<header class="bg-gradient-to-br from-brand-600 to-violet-600 px-5 pt-6 pb-16 text-white">
-			<div class="mx-auto flex max-w-lg items-center justify-between">
-				<div>
-					<p class="text-sm text-white/70">{{ greeting }},</p>
-					<p class="text-xl font-semibold">{{ me.first_name }}</p>
+		<header
+			class="relative overflow-hidden bg-gradient-to-br from-brand-600 to-violet-600 px-5 pt-6 pb-16 text-white"
+		>
+			<template v-if="me.building?.image">
+				<img
+					:src="me.building.image"
+					alt=""
+					class="absolute inset-0 size-full object-cover"
+				/>
+				<div
+					class="absolute inset-0 bg-gradient-to-br from-brand-700/90 to-violet-700/75"
+				/>
+			</template>
+			<div class="relative mx-auto flex max-w-lg items-center justify-between">
+				<div class="flex items-center gap-3">
+					<Avatar
+						:name="me.full_name"
+						:image="me.picture"
+						class="ring-2 ring-white/40"
+					/>
+					<div>
+						<p class="text-sm text-white/70">{{ greeting }},</p>
+						<p class="text-xl font-semibold">{{ me.first_name }}</p>
+					</div>
 				</div>
 				<div class="text-right text-sm text-white/80">
 					<p class="font-medium text-white">{{ me.building?.property_name }}</p>
@@ -50,6 +69,7 @@
 import { Home, MessageSquareWarning, ReceiptText, UserRound } from "lucide-vue-next";
 import { useRoute } from "vue-router";
 
+import Avatar from "@/components/Avatar.vue";
 import Toasts from "@/components/Toasts.vue";
 
 import { me } from "./store";

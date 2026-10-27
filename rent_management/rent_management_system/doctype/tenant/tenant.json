@@ -66,6 +66,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Kept as a private file.",
    "fieldname": "display_picture",
    "fieldtype": "Attach Image",
    "label": "Display Picture"
@@ -195,7 +196,7 @@
    "link_fieldname": "tenant"
   }
  ],
- "modified": "2026-10-26 19:52:37.683187",
+ "modified": "2026-10-27 16:58:30.847544",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant",

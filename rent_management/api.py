@@ -18,6 +18,7 @@ from rent_management import (
 	data_import,
 	gst,
 	notifications,
+	pictures,
 	portal,
 	profit,
 	razorpay,
@@ -198,7 +199,7 @@ def get_dashboard(property=None):
 			"overdue_count": len(overdue),
 		},
 		"trend": [get_month_totals(add_months(today, -offset), property) for offset in range(5, -1, -1)],
-		"overdue_invoices": overdue[:6],
+		"overdue_invoices": pictures.add_tenant_pictures(overdue[:6]),
 		"recent_payments": frappe.get_all(
 			"Rent Payment",
 			filters=by_property({"docstatus": 1}, property),
@@ -305,6 +306,7 @@ def get_rooms(property=None):
 	):
 		allotment.outstanding = outstanding.get(allotment.name, 0)
 		occupants[allotment.room].append(allotment)
+	pictures.add_tenant_pictures([o for room in occupants.values() for o in room])
 
 	for room in rooms:
 		room_type = room_types.get(room.room_type) or {}
@@ -358,7 +360,7 @@ def get_properties():
 		row["beds"] += max(cint(room.capacity), 1)
 		row["occupied_beds"] += cint(room.occupied_beds)
 	properties = frappe.get_all(
-		"Rent Property", fields=["name", *PROPERTY_FIELDS], order_by="is_active desc, creation asc"
+		"Rent Property", fields=["name", "image", *PROPERTY_FIELDS], order_by="is_active desc, creation asc"
 	)
 	for prop in properties:
 		prop.update(rooms[prop.name])
@@ -375,6 +377,7 @@ def save_property(data):
 		doc.save()
 	else:
 		doc = frappe.get_doc({"doctype": "Rent Property", **pick(data, PROPERTY_FIELDS)}).insert()
+	pictures.set_picture(doc, data.get("picture"))  # a data URL, "" to remove, or left out
 	return doc.name
 
 
@@ -524,6 +527,7 @@ def save_tenant(data):
 		doc.save()
 	else:
 		doc = frappe.get_doc({"doctype": "Tenant", **pick(data, TENANT_FIELDS)}).insert()
+	pictures.set_picture(doc, data.get("picture"))  # a data URL, "" to remove, or left out
 	return doc.name
 
 
@@ -721,6 +725,7 @@ def get_invoice(name):
 			order_by="payment_date asc",
 		),
 		"mobile_no": frappe.db.get_value("Tenant", doc.tenant, "mobile_no"),
+		"tenant_picture": pictures.tenant_pictures([doc.tenant]).get(str(doc.tenant)),
 		"print_url": f"/printview?doctype=Tenant%20Rent%20Invoice&name={name}"
 		"&format=Tenant%20Rent%20Invoice%20Print%20Format&no_letterhead=1",
 	}
@@ -891,28 +896,30 @@ def get_deposits(property=None):
 
 
 def get_pending_settlements(property=None):
-	return frappe.get_all(
-		"Tenant Space Allotment",
-		filters=by_property(
-			{
-				"docstatus": 1,
-				"status": "Vacated",
-				"security_deposit": (">", 0),
-				"deposit_settlement": ("is", "not set"),
-			},
-			property,
-		),
-		fields=[
-			"name",
-			"tenant",
-			"tenant_name",
-			"room",
-			"allotment_date",
-			"vacate_date",
-			"security_deposit",
-			"deposit_collected",
-		],
-		order_by="vacate_date desc",
+	return pictures.add_tenant_pictures(
+		frappe.get_all(
+			"Tenant Space Allotment",
+			filters=by_property(
+				{
+					"docstatus": 1,
+					"status": "Vacated",
+					"security_deposit": (">", 0),
+					"deposit_settlement": ("is", "not set"),
+				},
+				property,
+			),
+			fields=[
+				"name",
+				"tenant",
+				"tenant_name",
+				"room",
+				"allotment_date",
+				"vacate_date",
+				"security_deposit",
+				"deposit_collected",
+			],
+			order_by="vacate_date desc",
+		)
 	)
 
 

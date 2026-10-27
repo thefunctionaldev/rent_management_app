@@ -8,6 +8,8 @@ from the logged-in user and only ever reads or changes that tenant's own records
 the browser sends can reach another tenant's data.
 """
 
+import hashlib
+
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, nowdate, random_string
@@ -143,7 +145,7 @@ def get_boot():
 	settings = frappe.get_single("Rent Management Settings")
 	building = (
 		frappe.db.get_value(
-			"Rent Property", stay.property, ["property_name", "address", "city"], as_dict=True
+			"Rent Property", stay.property, ["property_name", "address", "city", "image"], as_dict=True
 		)
 		if stay
 		else None
@@ -155,6 +157,7 @@ def get_boot():
 		"first_name": tenant.first_name,
 		"email": tenant.email_id,
 		"mobile_no": tenant.mobile_no,
+		"picture": picture_url(tenant),
 		"building": building,
 		"landlord": {
 			"name": settings.landlord_name or (building or {}).get("property_name"),
@@ -354,6 +357,38 @@ def report_payment(name, amount, reference_no=None, payment_date=None, mode_of_p
 		),
 	)
 	return payment.name
+
+
+def picture_url(tenant) -> str | None:
+	# the photo is a private file the tenant can't open directly; the version busts the cache
+	if not tenant.display_picture:
+		return None
+	version = hashlib.sha1(tenant.display_picture.encode()).hexdigest()[:8]
+	return f"/api/method/rent_management.portal.my_picture?v={version}"
+
+
+@frappe.whitelist()
+def my_picture():
+	tenant = current_tenant()
+	if not tenant.display_picture:
+		raise frappe.DoesNotExistError
+	file = frappe.get_doc("File", {"file_url": tenant.display_picture})
+	frappe.local.response.filename = file.file_name
+	frappe.local.response.filecontent = file.get_content(encodings=[])  # bytes, not decoded text
+	frappe.local.response.type = "download"
+	frappe.local.response.display_content_as = "inline"
+
+
+@frappe.whitelist(methods=["POST"])
+def update_picture(picture=None):
+	"""The tenant sets or removes their own photo (a data URL, or "" to remove)."""
+	from rent_management.pictures import set_picture
+
+	tenant = current_tenant()
+	subscription.check_writable()
+	set_picture(tenant, picture or "")
+	tenant.reload()
+	return picture_url(tenant)
 
 
 @frappe.whitelist()

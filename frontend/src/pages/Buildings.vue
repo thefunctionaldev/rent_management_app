@@ -16,12 +16,19 @@
 			<div
 				v-for="p in properties"
 				:key="p.name"
-				class="card flex flex-col p-5"
+				class="card flex flex-col overflow-hidden p-5"
 				:class="!p.is_active && 'opacity-60'"
 			>
+				<img
+					v-if="p.image"
+					:src="p.image"
+					:alt="p.name"
+					class="-mx-5 -mt-5 mb-4 h-40 w-[calc(100%+2.5rem)] max-w-none object-cover"
+				/>
 				<div class="flex items-start justify-between gap-3">
 					<div class="flex min-w-0 items-center gap-3">
 						<span
+							v-if="!p.image"
 							class="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600"
 						>
 							<Building2 class="size-5" />

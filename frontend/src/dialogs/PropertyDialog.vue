@@ -6,6 +6,7 @@
 		@close="$emit('close')"
 	>
 		<form id="property-form" class="space-y-4" @submit.prevent="save">
+			<PictureInput v-model="picture" :name="form.property_name" />
 			<div class="grid gap-4 sm:grid-cols-[1fr_8rem]">
 				<Field label="Building name" required>
 					<input
@@ -44,12 +45,13 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 
 import { post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
+import PictureInput from "@/components/PictureInput.vue";
 import { reloadProperties } from "@/store";
 import { useAction } from "@/useResource";
 
@@ -66,11 +68,17 @@ const form = reactive({
 	pincode: p.pincode || "",
 	is_active: p.is_active ?? 1,
 });
+const picture = ref(p.image || "");
 
 const { loading, run } = useAction(
 	() =>
 		post("save_property", {
-			data: { ...form, name: props.property?.name, is_active: form.is_active ? 1 : 0 },
+			data: {
+				...form,
+				name: props.property?.name,
+				is_active: form.is_active ? 1 : 0,
+				...(picture.value !== (p.image || "") && { picture: picture.value }),
+			},
 		}),
 	{ success: (name) => `${name} saved` }
 );

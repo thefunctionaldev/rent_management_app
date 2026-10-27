@@ -20,7 +20,7 @@
 		<div v-else class="flex-1 overflow-y-auto px-6 py-5">
 			<div class="flex items-start justify-between">
 				<div class="flex items-center gap-3">
-					<Avatar :name="inv.tenant_name" />
+					<Avatar :name="inv.tenant_name" :image="data.tenant_picture" />
 					<div>
 						<RouterLink
 							:to="`/tenants/${inv.tenant}`"

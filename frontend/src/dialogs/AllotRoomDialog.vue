@@ -59,7 +59,7 @@
 							:class="String(form.tenant) === String(t.name) && 'bg-brand-50/70'"
 							@click="form.tenant = t.name"
 						>
-							<Avatar :name="t.full_name" size="sm" />
+							<Avatar :name="t.full_name" :image="t.display_picture" size="sm" />
 							<div class="min-w-0 flex-1">
 								<p class="truncate text-sm font-medium text-slate-900">
 									{{ t.full_name }}

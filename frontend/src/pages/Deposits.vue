@@ -33,7 +33,7 @@
 			<div v-if="pending.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 				<div v-for="a in pending" :key="a.name" class="card p-5">
 					<div class="flex items-center gap-3">
-						<Avatar :name="a.tenant_name" />
+						<Avatar :name="a.tenant_name" :image="a.tenant_picture" />
 						<div class="min-w-0 flex-1">
 							<p class="truncate font-medium">{{ a.tenant_name }}</p>
 							<p class="text-xs text-slate-500">

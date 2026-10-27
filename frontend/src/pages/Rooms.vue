@@ -55,7 +55,13 @@
 				v-if="groups.length > 1"
 				class="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700"
 			>
-				<Building2 class="size-4 text-slate-400" />{{ group.property }}
+				<img
+					v-if="buildingImage(group.property)"
+					:src="buildingImage(group.property)"
+					alt=""
+					class="size-7 rounded-md object-cover"
+				/>
+				<Building2 v-else class="size-4 text-slate-400" />{{ group.property }}
 				<span class="font-normal text-slate-400">· {{ group.rooms.length }} rooms</span>
 			</h2>
 			<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -132,7 +138,11 @@
 								:to="`/tenants/${o.tenant}`"
 								class="-m-1.5 flex min-w-0 flex-1 items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-slate-50"
 							>
-								<Avatar :name="o.tenant_name" size="sm" />
+								<Avatar
+									:name="o.tenant_name"
+									:image="o.tenant_picture"
+									size="sm"
+								/>
 								<div class="min-w-0">
 									<p class="truncate text-sm font-medium">{{ o.tenant_name }}</p>
 									<p class="truncate text-xs whitespace-nowrap text-slate-500">
@@ -215,7 +225,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import { openDialog } from "@/dialogs";
-import { scope } from "@/store";
+import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { floorLabel, money, shortDate, sortFloors } from "@/utils";
 
@@ -251,6 +261,7 @@ const filtered = computed(() =>
 			(!floor.value || r.floor === floor.value)
 	)
 );
+const buildingImage = (name) => boot.properties?.find((p) => p.name === name)?.image;
 const groups = computed(() => {
 	const byProperty = new Map();
 	for (const room of filtered.value) {

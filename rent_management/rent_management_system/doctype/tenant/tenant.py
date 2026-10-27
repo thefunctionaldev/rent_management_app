@@ -34,7 +34,8 @@ class Tenant(Document):
 	def validate(self):
 		self.set_full_name()
 		self.check_aadhar()
-		self.make_aadhar_card_private()
+		self.make_private("aadhar_card")
+		self.make_private("display_picture")
 
 	def set_full_name(self):
 		parts = [self.first_name, self.middle_name, self.last_name]
@@ -68,18 +69,19 @@ class Tenant(Document):
 			indicator="green",
 		)
 
-	def make_aadhar_card_private(self):
-		"""The scan of the Aadhaar card must never be reachable at a public /files/ URL."""
-		if not self.aadhar_card or not self.aadhar_card.startswith("/files/"):
+	def make_private(self, field):
+		"""The Aadhaar scan and the tenant's photo must never be reachable at a public /files/ URL."""
+		url = self.get(field)
+		if not url or not url.startswith("/files/"):
 			return
-		file = frappe.db.get_value("File", {"file_url": self.aadhar_card, "is_private": 0})
+		file = frappe.db.get_value("File", {"file_url": url, "is_private": 0})
 		if not file:
 			return
 		file = frappe.get_doc("File", file)
 		file.is_private = 1
 		file.flags.ignore_permissions = True
 		file.save()
-		self.aadhar_card = file.file_url
+		self.set(field, file.file_url)
 
 	def reveal_aadhar(self) -> str:
 		"""The full Aadhaar number, for police verification forms. Every view is logged."""

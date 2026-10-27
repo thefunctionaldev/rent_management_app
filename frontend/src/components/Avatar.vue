@@ -25,7 +25,12 @@ const props = defineProps({
 	size: { type: String, default: "md" },
 });
 
-const sizes = { sm: "size-7 text-[11px]", md: "size-9 text-xs", lg: "size-14 text-lg" };
+const sizes = {
+	sm: "size-7 text-[11px]",
+	md: "size-9 text-xs",
+	lg: "size-14 text-lg",
+	xl: "size-16 text-xl",
+};
 const tones = [
 	"bg-brand-100 text-brand-700",
 	"bg-emerald-100 text-emerald-700",

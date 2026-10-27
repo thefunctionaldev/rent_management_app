@@ -10,6 +10,7 @@
   "property_name",
   "abbr",
   "is_active",
+  "image",
   "column_break_address",
   "address",
   "city",
@@ -65,9 +66,16 @@
    "fieldname": "pincode",
    "fieldtype": "Data",
    "label": "Pincode"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Photo"
   }
  ],
  "grid_page_length": 50,
+ "image_field": "image",
  "links": [
   {
    "group": "Rooms",
@@ -75,7 +83,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-26 18:58:16.109433",
+ "modified": "2026-10-27 16:58:30.844404",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",

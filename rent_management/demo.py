@@ -29,6 +29,8 @@ from frappe.utils import (
 )
 from frappe.utils.password import update_password
 
+from rent_management import demo_pictures
+from rent_management.pictures import set_picture
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 
 SETTINGS = "Rent Management Settings"
@@ -176,6 +178,7 @@ class Demo:
 		self.window_start = add_months(self.current_month, -(MONTHS_OF_HISTORY - 1))
 		self.events, self.seq = [], 0
 		self.people = self.make_people()
+		self.art = random.Random(7)  # pictures have their own sequence, so the data stays the same
 
 	def run(self) -> dict:
 		settings = frappe.get_single(SETTINGS)
@@ -242,7 +245,7 @@ class Demo:
 			frappe.delete_doc("Rent Property", "Main Building")  # the empty one made on install
 		self.opened = {}
 		for name, abbr, address, pincode, _for, opened in BUILDINGS:
-			frappe.get_doc(
+			building = frappe.get_doc(
 				{
 					"doctype": "Rent Property",
 					"property_name": name,
@@ -253,6 +256,7 @@ class Demo:
 					"pincode": pincode,
 				}
 			).insert()
+			set_picture(building, demo_pictures.building(self.art, floors=self.art.randint(3, 5)))
 			self.opened[name] = self.days_ago(opened)
 		for room_type in ROOM_TYPES:
 			if not frappe.db.exists("Tenant Space Type", room_type["type"]):
@@ -435,6 +439,8 @@ class Demo:
 				"aadhar_card_number": self.aadhaar() if self.rng.random() < 0.75 else None,
 			}
 		).insert()
+		if stay is self.app_tenant_stay or self.art.random() < 0.6:  # the rest show their initials
+			set_picture(tenant, demo_pictures.avatar(self.art, gender))
 		self.backdate("Tenant", tenant.name, date)
 		stay.tenant = tenant.name
 

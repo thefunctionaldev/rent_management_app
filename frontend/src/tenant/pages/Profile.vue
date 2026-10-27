@@ -2,12 +2,21 @@
 	<div class="space-y-4">
 		<div class="card p-5">
 			<div class="flex items-center gap-3">
-				<Avatar :name="me.full_name" size="lg" />
+				<Avatar :name="me.full_name" :image="me.picture" size="lg" />
 				<div>
 					<p class="text-lg font-semibold">{{ me.full_name }}</p>
 					<p class="text-sm text-slate-500">{{ me.email }}</p>
 					<p v-if="me.mobile_no" class="text-sm text-slate-500">{{ me.mobile_no }}</p>
 				</div>
+			</div>
+			<div class="mt-4">
+				<PictureInput
+					:model-value="me.picture || ''"
+					round
+					buttons-only
+					:name="me.full_name"
+					@update:model-value="savePicture"
+				/>
 			</div>
 			<p class="mt-3 text-xs text-slate-400">To change your details, ask your landlord.</p>
 		</div>
@@ -68,6 +77,7 @@ import { computed, ref, watch } from "vue";
 import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
+import PictureInput from "@/components/PictureInput.vue";
 import { toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date } from "@/utils";
@@ -78,6 +88,15 @@ const { data, reload } = useResource(() => get(call("get_home")));
 const stay = computed(() => data.value?.stay);
 
 const vacateDate = ref("");
+
+async function savePicture(picture) {
+	try {
+		me.picture = await post(call("update_picture"), { picture });
+		toast(picture ? "Photo saved" : "Photo removed");
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 watch(
 	stay,
 	(s) => {

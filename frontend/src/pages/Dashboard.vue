@@ -160,7 +160,7 @@
 						:key="inv.name"
 						class="flex items-center gap-3 px-5 py-3"
 					>
-						<Avatar :name="inv.tenant_name" size="sm" />
+						<Avatar :name="inv.tenant_name" :image="inv.tenant_picture" size="sm" />
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium">{{ inv.tenant_name }}</p>
 							<p class="text-xs text-slate-500">

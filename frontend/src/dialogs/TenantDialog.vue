@@ -7,6 +7,11 @@
 		@close="$emit('close')"
 	>
 		<form id="tenant-form" class="space-y-5" @submit.prevent="save">
+			<PictureInput
+				v-model="picture"
+				round
+				:name="[form.first_name, form.last_name].filter(Boolean).join(' ')"
+			/>
 			<div class="grid gap-4 sm:grid-cols-3">
 				<Field label="First name" required>
 					<input v-model="form.first_name" class="input" required autofocus />
@@ -80,13 +85,14 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
 import { post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
+import PictureInput from "@/components/PictureInput.vue";
 import { useAction } from "@/useResource";
 
 const props = defineProps({ tenant: { type: Object, default: null } });
@@ -109,13 +115,21 @@ const fields = [
 ];
 const form = reactive(Object.fromEntries(fields.map((f) => [f, props.tenant?.[f] ?? ""])));
 form.aadhar_card_number = ""; // never prefilled: the saved number stays on the server
+const savedPicture = props.tenant?.display_picture || "";
+const picture = ref(savedPicture);
 
 const { loading, run } = useAction((data) => post("save_tenant", { data }), {
 	success: props.tenant ? "Tenant updated" : "Tenant added",
 });
 
 async function save() {
-	const name = await run({ ...form, name: props.tenant?.name, salary: form.salary || 0 });
+	const name = await run({
+		...form,
+		name: props.tenant?.name,
+		salary: form.salary || 0,
+		// only sent when changed: a new photo (data URL) or "" to remove it
+		...(picture.value !== savedPicture && { picture: picture.value }),
+	});
 	emit("close");
 	if (!props.tenant) router.push(`/tenants/${name}`);
 }
