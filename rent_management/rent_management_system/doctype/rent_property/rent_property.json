@@ -33,7 +33,11 @@
   "serves_dinner",
   "dinner_time",
   "column_break_food",
-  "meal_skip_cutoff_hours"
+  "meal_skip_cutoff_hours",
+  "register_section",
+  "curfew_time",
+  "column_break_register",
+  "visitors_until"
  ],
  "fields": [
   {
@@ -199,6 +203,29 @@
    "fieldname": "meal_skip_cutoff_hours",
    "fieldtype": "Int",
    "label": "Skip a Meal Up To (Hours Before)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "register_section",
+   "fieldtype": "Section Break",
+   "label": "Register"
+  },
+  {
+   "default": "22:30:00",
+   "description": "Tenants back after this are marked late.",
+   "fieldname": "curfew_time",
+   "fieldtype": "Time",
+   "label": "Night Curfew"
+  },
+  {
+   "fieldname": "column_break_register",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "21:00:00",
+   "fieldname": "visitors_until",
+   "fieldtype": "Time",
+   "label": "Visitors Until"
   }
  ],
  "grid_page_length": 50,
@@ -210,7 +237,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-27 18:22:37.774937",
+ "modified": "2026-10-27 18:32:04.480746",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",

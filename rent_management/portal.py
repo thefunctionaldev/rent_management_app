@@ -12,9 +12,9 @@ import hashlib
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, nowdate, random_string
+from frappe.utils import add_days, cint, flt, nowdate, random_string
 
-from rent_management import mess, rent_collection, subscription
+from rent_management import mess, register, rent_collection, subscription
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -528,3 +528,91 @@ def skip_meal(date, meal, skip=1):
 	subscription.check_writable()
 	mess.set_skip(stay.name, date, meal, cint(skip))
 	return mess.tenant_week(stay)
+
+
+# ---------------------------------------------------------------- leave and visitors
+
+
+def my_stay():
+	tenant = current_tenant()
+	stay = current_stay(tenant.name)
+	if not stay:
+		frappe.throw(_("You have no current stay."))
+	return tenant, stay
+
+
+@frappe.whitelist()
+def get_register():
+	tenant, stay = my_stay()
+	building = frappe.db.get_value(
+		"Rent Property", stay.property, ["curfew_time", "visitors_until"], as_dict=True
+	)
+	return {
+		"curfew": str(building.curfew_time)[:5] if building.curfew_time else None,
+		"visitors_until": str(building.visitors_until)[:5] if building.visitors_until else None,
+		"leaves": frappe.get_all(
+			register.LEAVE,
+			filters={"allotment": stay.name, "to_date": (">=", add_days(nowdate(), -60))},
+			fields=["name", "from_date", "to_date", "status", "destination", "reason", "decision_note"],
+			order_by="from_date desc",
+		),
+		"visitors": frappe.get_all(
+			register.VISITOR,
+			filters={
+				"tenant": tenant.name,
+				"property": stay.property,
+				"creation": (">=", add_days(nowdate(), -30)),
+			},
+			fields=[
+				"name",
+				"visitor_name",
+				"visitor_phone",
+				"purpose",
+				"status",
+				"expected_on",
+				"check_in",
+				"check_out",
+				"overnight",
+			],
+			order_by="creation desc",
+			limit=20,
+		),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def request_leave(from_date, to_date, destination=None, reason=None):
+	_tenant, stay = my_stay()
+	subscription.check_writable()
+	register.request_leave(stay.name, from_date, to_date, destination, reason)
+	return get_register()
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_leave(name):
+	_tenant, stay = my_stay()
+	leave = frappe.db.get_value(register.LEAVE, name, ["allotment", "status", "from_date"], as_dict=True)
+	if not leave or leave.allotment != stay.name:
+		frappe.throw(_("Leave not found."), frappe.PermissionError)
+	if leave.status not in ("Requested", "Approved"):
+		frappe.throw(_("This leave can't be cancelled."))
+	register.cancel_leave(name)
+	return get_register()
+
+
+@frappe.whitelist(methods=["POST"])
+def expect_visitor(visitor_name, expected_on, visitor_phone=None, purpose=None, overnight=0):
+	tenant, stay = my_stay()
+	subscription.check_writable()
+	register.expect_visitor(tenant.name, stay, visitor_name, expected_on, visitor_phone, purpose, overnight)
+	return get_register()
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_visitor(name):
+	tenant, _stay = my_stay()
+	visitor = frappe.db.get_value(register.VISITOR, name, ["tenant", "status"], as_dict=True)
+	if not visitor or str(visitor.tenant) != str(tenant.name) or visitor.status != "Expected":
+		frappe.throw(_("Visitor not found."), frappe.PermissionError)
+	frappe.db.set_value(register.VISITOR, name, "status", "Cancelled")
+	return get_register()

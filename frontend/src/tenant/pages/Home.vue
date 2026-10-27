@@ -122,6 +122,20 @@
 			<ChevronRight class="size-5 text-slate-400" />
 		</RouterLink>
 
+		<RouterLink
+			to="/away"
+			class="card flex items-center gap-3 p-4 transition hover:bg-slate-50"
+		>
+			<span class="grid size-10 place-items-center rounded-xl bg-sky-50 text-sky-600"
+				><Luggage class="size-5"
+			/></span>
+			<div class="flex-1">
+				<p class="font-medium">Going away or having a visitor?</p>
+				<p class="text-sm text-slate-500">Tell the warden</p>
+			</div>
+			<ChevronRight class="size-5 text-slate-400" />
+		</RouterLink>
+
 		<div v-if="data.payments.length" class="card">
 			<h2 class="px-5 pt-4 font-semibold">Recent payments</h2>
 			<ul class="mt-2 divide-y divide-slate-100">
@@ -143,7 +157,7 @@
 </template>
 
 <script setup>
-import { ChevronRight, CircleCheck, PenLine, Wrench } from "lucide-vue-next";
+import { ChevronRight, CircleCheck, Luggage, PenLine, Wrench } from "lucide-vue-next";
 import { computed } from "vue";
 
 import { get } from "@/api";

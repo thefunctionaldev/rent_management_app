@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "autoname": "VIS-.YYYY.-.#####",
+ "creation": "2026-10-27 18:32:04.481899",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "property",
+  "visitor_name",
+  "visitor_phone",
+  "purpose",
+  "tenant",
+  "tenant_name",
+  "column_break_visit",
+  "status",
+  "expected_on",
+  "check_in",
+  "check_out",
+  "overnight",
+  "source"
+ ],
+ "fields": [
+  {
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "reqd": 1
+  },
+  {
+   "fieldname": "visitor_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Visitor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "visitor_phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Purpose / Relation"
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "label": "Visiting",
+   "options": "Tenant"
+  },
+  {
+   "fetch_from": "tenant.full_name",
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "label": "Visiting (Name)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_visit",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Inside",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Expected\nInside\nLeft\nCancelled"
+  },
+  {
+   "fieldname": "expected_on",
+   "fieldtype": "Date",
+   "label": "Expected On"
+  },
+  {
+   "fieldname": "check_in",
+   "fieldtype": "Datetime",
+   "label": "In"
+  },
+  {
+   "fieldname": "check_out",
+   "fieldtype": "Datetime",
+   "label": "Out"
+  },
+  {
+   "fieldname": "overnight",
+   "fieldtype": "Check",
+   "label": "Staying Overnight"
+  },
+  {
+   "default": "Manager",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Registered From",
+   "options": "Manager\nTenant App"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-27 18:32:04.481899",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Visitor Log",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "visitor_name"
+}

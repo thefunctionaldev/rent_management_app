@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "autoname": "NA-.YYYY.-.#####",
+ "creation": "2026-10-27 18:32:04.482196",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "property",
+  "date",
+  "taken_by",
+  "column_break_counts",
+  "present",
+  "late",
+  "absent",
+  "on_leave",
+  "entries_section",
+  "entries"
+ ],
+ "fields": [
+  {
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Night Of",
+   "reqd": 1
+  },
+  {
+   "fieldname": "taken_by",
+   "fieldtype": "Link",
+   "label": "Taken By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_counts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "present",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Present",
+   "read_only": 1
+  },
+  {
+   "fieldname": "late",
+   "fieldtype": "Int",
+   "label": "Late",
+   "read_only": 1
+  },
+  {
+   "fieldname": "absent",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Absent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "on_leave",
+   "fieldtype": "Int",
+   "label": "On Leave",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entries_section",
+   "fieldtype": "Section Break",
+   "label": "Tenants"
+  },
+  {
+   "fieldname": "entries",
+   "fieldtype": "Table",
+   "label": "Tenants",
+   "options": "Night Attendance Entry"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-27 18:32:04.482196",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Night Attendance",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -27,6 +27,7 @@ from frappe.utils import (
 	get_first_day,
 	get_last_day,
 	getdate,
+	now_datetime,
 	nowdate,
 )
 from frappe.utils.password import update_password
@@ -275,6 +276,7 @@ class Demo:
 		self.make_leads()
 		self.make_checkins()
 		self.make_food()
+		self.make_register()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -910,6 +912,111 @@ class Demo:
 						frappe.get_doc({"doctype": "Meal Opt-out", "allotment": stay.name, "date": day, "meal": meal,
 							"source": "Tenant App"}).insert()  # fmt: skip
 				day = add_days(day, 1)
+
+	def make_register(self):
+		"""Two weeks of night attendance at the hostels, leave and visitors."""
+		from rent_management import register
+
+		rng = random.Random(53)  # its own sequence, so the rest of the data stays the same
+		places = [
+			"Home, Mysuru",
+			"Home, Hubballi",
+			"Chennai, cousin's wedding",
+			"Home, Mangaluru",
+			"Goa, trip",
+		]
+		visitors = [("Ramesh Rao", "Father"), ("Sunita Iyer", "Mother"), ("Arjun K", "Friend"),
+			("Swiggy delivery", "Delivery"), ("Raju (plumber)", "Repair"), ("Priya S", "Sister")]  # fmt: skip
+		deepak = frappe.db.get_value("Tenant", {"email_id": "deepak.reddy@example.com"})
+		for building in (BUILDINGS[0][0], BUILDINGS[1][0]):
+			stays = frappe.get_all(
+				ALLOTMENT,
+				filters={"docstatus": 1, "status": "Active", "property": building},
+				fields=["name", "tenant", "tenant_name", "allotment_date"],
+				order_by="room asc",
+			)
+			others = [s for s in stays if str(s.tenant) != str(deepak)]
+			# away now, coming up, asking, and done
+			plan = [(others[0], -2, 3, None), (others[1], 4, 6, None), (others[2], 2, 4, "ask"),
+				(others[3], -12, -9, None), (others[4], -7, -6, None)]  # fmt: skip
+			if building == BUILDINGS[0][0] and deepak:
+				plan.append(
+					(
+						frappe._dict(name=next(s.name for s in stays if str(s.tenant) == str(deepak))),
+						-20,
+						-18,
+						None,
+					)
+				)
+			for stay, start, end, ask in plan:
+				name = register.request_leave(
+					stay.name,
+					add_days(self.today, start),
+					add_days(self.today, end),
+					destination=rng.choice(places),
+					reason=rng.choice(["Festival at home", "Family function", None, "Long weekend"]),
+					source="Tenant App" if ask else "Manager",
+				)
+				frappe.db.set_value(register.LEAVE, name, "source", "Tenant App")
+				self.backdate(register.LEAVE, name, add_days(self.today, min(start, 0) - 3))
+
+			# every night of the last two weeks, but not tonight: that's for the warden
+			for back in range(14, 0, -1):
+				night = add_days(self.today, -back)
+				away = register.leave_on(building, night)
+				entries = []
+				for stay in stays:
+					if getdate(stay.allotment_date) > getdate(night):
+						continue
+					roll = rng.random()
+					status = "On Leave" if stay.name in away else "Late" if roll < 0.06 else "Present"
+					note = f"Came in at 11:{rng.randint(5, 50):02d}" if status == "Late" else None
+					if back == 1 and stay.name == others[5].name:
+						status, note = "Absent", "Phone switched off"  # last night: one to follow up
+					entries.append({"allotment": stay.name, "status": status, "note": note})
+				register.save_attendance(building, night, entries)
+
+			# visitors: the last two weeks, two inside now, and one expected
+			for back in range(14, 0, -1):
+				for _i in range(rng.randint(0, 2)):
+					stay = rng.choice(stays)
+					who, purpose = rng.choice(visitors)
+					arrived = get_datetime(
+						f"{add_days(self.today, -back)} {rng.randint(10, 20):02d}:{rng.randint(0, 59):02d}:00"
+					)
+					left = add_to_date(arrived, minutes=rng.randint(20, 150))
+					self.add_visitor(building, stay.tenant, who, purpose, rng, arrived, left)
+			self.add_visitor(
+				building,
+				others[6].tenant,
+				*visitors[1],
+				rng,
+				add_to_date(now_datetime(), hours=-1),
+				overnight=1,
+			)
+			self.add_visitor(building, None, *visitors[4], rng, add_to_date(now_datetime(), minutes=-25))
+		if deepak:
+			stay = frappe.get_doc(ALLOTMENT, {"tenant": deepak, "docstatus": 1, "status": "Active"})
+			register.expect_visitor(
+				deepak, stay, "Ramesh Reddy", add_days(self.today, 1), "9845012345", "Father", 1
+			)
+
+	def add_visitor(self, building, tenant, who, purpose, rng, arrived, left=None, overnight=0):
+		frappe.get_doc(
+			{
+				"doctype": "Visitor Log",
+				"property": building,
+				"tenant": tenant,
+				"visitor_name": who,
+				"purpose": purpose,
+				"visitor_phone": f"98{rng.randint(10**7, 10**8 - 1)}" if purpose != "Delivery" else None,
+				"check_in": arrived,
+				"check_out": left,
+				"status": "Left" if left else "Inside",
+				"overnight": overnight,
+				"source": "Manager",
+			}
+		).insert()
 
 	# ------------------------------------------------------------ messages and logins
 

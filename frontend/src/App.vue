@@ -171,6 +171,7 @@ import {
 	Lock,
 	LogOut,
 	Menu,
+	NotebookPen,
 	Receipt,
 	Settings,
 	ShieldCheck,
@@ -215,6 +216,12 @@ const nav = computed(() => [
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
 			{ to: "/requests", label: "Requests", icon: Wrench },
+			{
+				to: "/register",
+				label: "Register",
+				icon: NotebookPen,
+				badge: boot.leave_requests,
+			},
 			...(boot.properties.some((p) => p.food_included && p.is_active)
 				? [{ to: "/food", label: "Food", icon: UtensilsCrossed }]
 				: []),

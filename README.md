@@ -160,6 +160,24 @@ Tick *Food included* on a building (*Buildings > Edit > Listing page*) and choos
 - **Food cost:** this month's *Food & Groceries* expenses divided by the meals actually served, per meal
   and per tenant per month.
 
+### Hostel register
+
+The **Register** page (under Property) keeps the warden's books. Set when the gate closes and until when
+visitors are allowed on each building (*Buildings > Edit > Listing page*).
+
+- **Night attendance:** every tenant staying that night, to mark *Present*, *Late* or *Absent* (with a
+  note), then *Save attendance*. Tenants on approved leave are already marked *On Leave*. Someone absent
+  without leave stands out, with buttons to call them and to WhatsApp their emergency contact. Earlier
+  nights are a tap away; attendance can't be taken for a night that hasn't come.
+- **Leave:** tenants ask from the tenant app (*Home > Going away or having a visitor?*) and managers are
+  notified; the request waits under *Asking for leave* to approve or reject. Leave a manager adds is
+  approved straight away. Approved leave skips the tenant's meals on those days (so the kitchen count
+  drops); rejecting or cancelling it brings them back.
+- **Visitors:** *Visitor at the gate* checks someone in (who they visit, why, staying overnight), *Left*
+  checks them out, and *Inside now* lists who is in the building. Tenants can tell the warden in advance
+  who is coming, which shows under *Expected* until the visitor arrives. Check-ins after visiting hours
+  (and not overnight) are flagged.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

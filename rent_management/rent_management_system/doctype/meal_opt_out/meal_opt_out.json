@@ -12,7 +12,8 @@
   "column_break_meal",
   "date",
   "meal",
-  "source"
+  "source",
+  "leave"
  ],
  "fields": [
   {
@@ -72,12 +73,19 @@
    "fieldname": "source",
    "fieldtype": "Select",
    "label": "Skipped From",
-   "options": "Tenant App\nManager"
+   "options": "Tenant App\nManager\nLeave"
+  },
+  {
+   "fieldname": "leave",
+   "fieldtype": "Link",
+   "label": "Because Of Leave",
+   "options": "Tenant Leave",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-27 18:22:37.777598",
+ "modified": "2026-10-27 18:32:04.482349",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Meal Opt-out",

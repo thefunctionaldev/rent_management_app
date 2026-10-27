@@ -26,6 +26,7 @@ from rent_management import (
 	portal,
 	profit,
 	razorpay,
+	register,
 	rent_collection,
 	saas,
 	subscription,
@@ -89,6 +90,8 @@ PROPERTY_FIELDS = (
 	"serves_dinner",
 	"dinner_time",
 	"meal_skip_cutoff_hours",
+	"curfew_time",
+	"visitors_until",
 )
 ROOM_TYPE_FIELDS = (
 	"type",
@@ -172,6 +175,7 @@ def get_boot():
 		"today": nowdate(),
 		"properties": get_properties(),
 		"new_leads": frappe.db.count(leads.LEAD, {"status": "New"}),
+		"leave_requests": frappe.db.count(register.LEAVE, {"status": "Requested"}),
 		"is_control_site": saas.is_control_site() and "System Manager" in frappe.get_roles(),
 		"agreement_defaults": {
 			field: frappe.db.get_single_value("Rent Management Settings", f"default_{key}")
@@ -1760,3 +1764,68 @@ def skip_meal_for(allotment, date, meal, skip=1):
 	"""A manager marks a meal skipped for a tenant (any time, e.g. they called)."""
 	check_access()
 	mess.set_skip(allotment, date, meal, cint(skip), source="Manager")
+
+
+# ---------------------------------------------------------------- register
+
+
+def register_buildings(property=None) -> list[str]:
+	filters = {"is_active": 1}
+	if property:
+		filters["name"] = property
+	return frappe.get_all("Rent Property", filters=filters, pluck="name", order_by="creation asc")
+
+
+@frappe.whitelist()
+def get_register(property=None, day=None):
+	"""The Register page: tonight's attendance per building, leave and visitors."""
+	check_access()
+	return {
+		"buildings": [
+			register.get_attendance(name, day) | {"name": name} for name in register_buildings(property)
+		],
+		"leaves": register.get_leaves(property),
+		"visitors": register.get_visitors(property),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_attendance(property, date, entries):
+	check_access()
+	return register.save_attendance(property, date, entries)
+
+
+@frappe.whitelist(methods=["POST"])
+def add_leave(allotment, from_date, to_date, destination=None, reason=None):
+	check_access()
+	return register.request_leave(allotment, from_date, to_date, destination, reason, source="Manager")
+
+
+@frappe.whitelist(methods=["POST"])
+def decide_leave(name, approve, note=None):
+	check_access()
+	register.decide_leave(name, approve, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_leave(name):
+	check_access()
+	register.cancel_leave(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def visitor_in(data):
+	check_access()
+	return register.check_in(data)
+
+
+@frappe.whitelist(methods=["POST"])
+def visitor_out(name):
+	check_access()
+	register.check_out(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_visitor(name):
+	check_access()
+	frappe.get_doc(register.VISITOR, name).db_set("status", "Cancelled")

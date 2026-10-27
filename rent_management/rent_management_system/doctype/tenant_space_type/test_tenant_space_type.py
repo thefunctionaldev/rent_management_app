@@ -11,7 +11,6 @@ EXTRA_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
-
 class IntegrationTestTenantSpaceType(IntegrationTestCase):
 	"""
 	Integration tests for TenantSpaceType.

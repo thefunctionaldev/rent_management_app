@@ -97,6 +97,14 @@
 							/>
 						</Field>
 					</div>
+					<div class="grid gap-3 sm:grid-cols-2">
+						<Field label="Gate closes at" hint="Curfew for night attendance">
+							<input v-model="form.curfew_time" type="time" class="input" />
+						</Field>
+						<Field label="Visitors allowed until">
+							<input v-model="form.visitors_until" type="time" class="input" />
+						</Field>
+					</div>
 					<Field label="Description">
 						<textarea
 							v-model="form.description"
@@ -165,6 +173,8 @@ const form = reactive({
 	serves_dinner: p.serves_dinner ?? 1,
 	dinner_time: (p.dinner_time || "20:30").slice(0, 5),
 	meal_skip_cutoff_hours: p.meal_skip_cutoff_hours ?? 4,
+	curfew_time: (p.curfew_time || "22:30").slice(0, 5),
+	visitors_until: (p.visitors_until || "21:00").slice(0, 5),
 });
 const picture = ref(p.image || "");
 

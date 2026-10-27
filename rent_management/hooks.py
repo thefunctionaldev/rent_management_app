@@ -193,6 +193,9 @@ doc_events = {
 		"Room Inspection",
 		"Meal Opt-out",
 		"Mess Menu",
+		"Tenant Leave",
+		"Visitor Log",
+		"Night Attendance",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
