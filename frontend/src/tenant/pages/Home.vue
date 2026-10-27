@@ -1,5 +1,21 @@
 <template>
 	<div v-if="data" class="space-y-4">
+		<a
+			v-if="data.checkin_url"
+			:href="data.checkin_url"
+			class="card flex items-center gap-3 border-brand-200 bg-brand-50/70 p-4"
+		>
+			<span class="grid size-10 place-items-center rounded-full bg-brand-600 text-white"
+				><PenLine class="size-5"
+			/></span>
+			<span class="flex-1">
+				<span class="block font-medium">Finish your check-in</span>
+				<span class="block text-sm text-slate-600"
+					>Add your details and ID, and sign your agreement</span
+				>
+			</span>
+			<ChevronRight class="size-5 text-slate-400" />
+		</a>
 		<div class="card p-5">
 			<template v-if="data.due > 0">
 				<p class="text-sm text-slate-500">Rent due</p>
@@ -127,7 +143,7 @@
 </template>
 
 <script setup>
-import { ChevronRight, CircleCheck, Wrench } from "lucide-vue-next";
+import { ChevronRight, CircleCheck, PenLine, Wrench } from "lucide-vue-next";
 import { computed } from "vue";
 
 import { get } from "@/api";

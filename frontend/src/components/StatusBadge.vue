@@ -61,6 +61,9 @@ const colors = {
 	"Token Paid": "green",
 	"Token Reported": "sky",
 	"Token Pending": "amber",
+	"Link sent": "amber",
+	"Details in": "sky",
+	Signed: "green",
 };
 
 const tone = computed(() => palette[colors[props.status] || "slate"]);

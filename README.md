@@ -107,6 +107,28 @@ description, amenities, who it's for, food, a map link, and each room type with 
 
 Building details for the page are under *Buildings > Edit > Listing page*.
 
+### Tenant self check-in (`/checkin`)
+
+On a tenant's profile, **Send check-in link** opens WhatsApp with a link for them (it is emailed too
+when email is set up). On their phone, without logging in, the tenant:
+
+1. fills in their details: date of birth, father's or guardian's name, address, work, and an emergency
+   contact;
+2. enters their Aadhaar number and uploads a photo of the card and a photo of themselves (private files);
+3. reads their rental agreement and signs it by typing their name, ticking that they agree and entering a
+   one-time code. The code goes by WhatsApp when the site sends WhatsApp (template `rent_signing_code`,
+   category *Authentication*, body "{{1}} is your code to sign your rental agreement."), else by email.
+   With neither, they sign with their typed name.
+
+The **Tenant Check-in** keeps the proof: the agreement exactly as signed, its SHA-256 fingerprint, the
+time, IP address and device, and where the code was sent. The agreement PDF then shows "Signed
+electronically" instead of a signature line. Links expire after 14 days. The tenant app shows "Finish
+your check-in" while one is open, and managers are notified when details come in and when it is signed.
+
+**Police verification form**, on the tenant's profile: a PDF with their photo, full Aadhaar number,
+addresses, work, emergency contact, the tenancy and the landlord's details, to submit at the police station
+or on the state police portal. Printing it is logged on the tenant, as it shows the full Aadhaar number.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

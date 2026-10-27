@@ -251,6 +251,36 @@
 						</div>
 					</div>
 
+					<div v-if="current" class="card p-5">
+						<div class="flex items-start justify-between gap-3">
+							<div>
+								<h2 class="font-semibold">Check-in</h2>
+								<p class="text-sm text-slate-500">{{ checkinText }}</p>
+							</div>
+							<StatusBadge v-if="checkin" :status="checkinStatus" />
+						</div>
+						<div class="mt-3 flex flex-wrap gap-2">
+							<Button
+								v-if="checkin?.status !== 'Signed'"
+								size="sm"
+								:icon="Send"
+								:loading="sendingCheckin"
+								@click="sendCheckin"
+								>{{
+									checkin?.url ? "Send link again" : "Send check-in link"
+								}}</Button
+							>
+							<Button
+								size="sm"
+								:icon="ShieldCheck"
+								:href="`/api/method/rent_management.api.download_verification_form?allotment=${encodeURIComponent(
+									current.name
+								)}`"
+								>Police verification form</Button
+							>
+						</div>
+					</div>
+
 					<div class="card p-5">
 						<div class="flex items-center justify-between gap-3">
 							<div>
@@ -293,7 +323,14 @@
 							>
 								<dt class="text-slate-500">{{ row.label }}</dt>
 								<dd class="text-right text-slate-900">
-									{{ row.value || "—" }}
+									<a
+										v-if="row.link"
+										:href="row.link"
+										target="_blank"
+										class="font-medium text-brand-600 hover:underline"
+										>{{ row.value }}</a
+									>
+									<template v-else>{{ row.value || "—" }}</template>
 									<button
 										v-if="row.reveal"
 										class="ml-1 text-xs font-medium text-brand-600 hover:underline"
@@ -454,6 +491,7 @@ import {
 	Mail,
 	Pencil,
 	Phone,
+	Send,
 	ShieldCheck,
 	Wallet,
 } from "lucide-vue-next";
@@ -542,8 +580,57 @@ const stats = computed(() => [
 		class: data.value.totals.outstanding ? "text-amber-700" : "",
 	},
 ]);
+const checkin = computed(() => data.value.checkin);
+const checkinStatus = computed(() =>
+	checkin.value?.expired
+		? "Expired"
+		: { Sent: "Link sent", "Details Submitted": "Details in" }[checkin.value?.status] ||
+		  checkin.value?.status
+);
+const checkinText = computed(() => {
+	const c = checkin.value;
+	if (!c)
+		return "Let them fill in their details, upload their ID and sign the agreement on their phone.";
+	if (c.status === "Signed")
+		return `Agreement signed by ${c.signed_name} on ${date(c.signed_on.slice(0, 10))}${
+			c.otp_channel && c.otp_channel !== "None"
+				? `, with a code sent by ${c.otp_channel}`
+				: ""
+		}.`;
+	if (c.expired) return "The link expired before they finished. Send a new one.";
+	if (c.status === "Details Submitted")
+		return "Their details and ID are in. Waiting for them to sign.";
+	return `Link sent on ${date(c.sent_on.slice(0, 10))}. Waiting for them.`;
+});
+
+const sendingCheckin = ref(false);
+async function sendCheckin() {
+	sendingCheckin.value = true;
+	try {
+		const result = await post("send_checkin", { allotment: current.value.name });
+		const digits = (result.mobile_no || "").replace(/[^\d]/g, "");
+		const text = `Hello ${tenant.value.first_name}, welcome! Please fill in your details, upload your ID and sign your rental agreement here: ${result.url}`;
+		window.open(
+			`https://wa.me/${
+				digits.length === 10 ? `91${digits}` : digits
+			}?text=${encodeURIComponent(text)}`,
+			"_blank"
+		);
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	} finally {
+		sendingCheckin.value = false;
+	}
+}
+
 const details = computed(() => [
 	{ label: "Gender", value: tenant.value.gender },
+	{
+		label: "Date of birth",
+		value: tenant.value.date_of_birth ? date(tenant.value.date_of_birth) : "",
+	},
+	{ label: "Father / guardian", value: tenant.value.guardian_name },
 	{
 		label: "Aadhaar",
 		value:
@@ -554,5 +641,21 @@ const details = computed(() => [
 	{ label: "Workplace", value: tenant.value.workspace },
 	{ label: "Monthly income", value: tenant.value.salary ? money(tenant.value.salary) : "" },
 	{ label: "Address", value: tenant.value.permanent_address },
+	{
+		label: "Emergency contact",
+		value: [
+			tenant.value.emergency_contact_name,
+			tenant.value.emergency_contact_relation &&
+				`(${tenant.value.emergency_contact_relation})`,
+			tenant.value.emergency_contact_phone,
+		]
+			.filter(Boolean)
+			.join(" "),
+	},
+	{
+		label: "Aadhaar card",
+		value: tenant.value.aadhar_card ? "Uploaded" : "",
+		link: tenant.value.aadhar_card,
+	},
 ]);
 </script>

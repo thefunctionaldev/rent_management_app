@@ -244,6 +244,14 @@ def get_agreement_context(doc) -> dict:
 		"lock_in_ends": add_months(getdate(doc.allotment_date), cint(doc.lock_in_months))
 		if cint(doc.lock_in_months)
 		else None,
+		"signature": frappe.db.get_value(
+			"Tenant Check-in",
+			{"allotment": doc.name, "status": "Signed"},
+			["name", "signed_on", "signed_name", "otp_channel", "otp_sent_to"],
+			as_dict=True,
+		)
+		if doc.name
+		else None,
 		"money": lambda amount: frappe.utils.fmt_money(
 			amount, currency=frappe.db.get_default("currency") or "INR"
 		),

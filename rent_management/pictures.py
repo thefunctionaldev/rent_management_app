@@ -29,9 +29,14 @@ DATA_URL = re.compile(r"^data:image/[a-z+]+;base64,(?P<data>.+)$", re.S)
 
 def set_picture(doc, picture: str | None):
 	"""Replace the photo of a Tenant or Rent Property with a data URL, or remove it ("")."""
+	field, private = FIELDS[doc.doctype]
+	set_image(doc, field, picture, private)
+
+
+def set_image(doc, field, picture: str | None, private=True):
+	"""Replace an image field (a data URL), or empty it (""). None leaves it as it is."""
 	if picture is None:
 		return  # not changed
-	field, private = FIELDS[doc.doctype]
 	old = doc.get(field)
 	url = save_file(doc, field, private, picture) if picture else None
 	doc.db_set(field, url)

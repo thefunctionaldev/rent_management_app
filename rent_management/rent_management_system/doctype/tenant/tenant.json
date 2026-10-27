@@ -20,6 +20,8 @@
   "permanent_address",
   "personal_details_section",
   "gender",
+  "date_of_birth",
+  "guardian_name",
   "aadhar_card_number",
   "aadhar_last4",
   "aadhar_card",
@@ -29,7 +31,12 @@
   "occupation",
   "workspace",
   "column_break_umyq",
-  "salary"
+  "salary",
+  "emergency_section",
+  "emergency_contact_name",
+  "emergency_contact_relation",
+  "column_break_emergency",
+  "emergency_contact_phone"
  ],
  "fields": [
   {
@@ -169,6 +176,41 @@
    "options": "User",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "guardian_name",
+   "fieldtype": "Data",
+   "label": "Father's / Guardian's Name"
+  },
+  {
+   "fieldname": "emergency_section",
+   "fieldtype": "Section Break",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "emergency_contact_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "emergency_contact_relation",
+   "fieldtype": "Data",
+   "label": "Relation"
+  },
+  {
+   "fieldname": "column_break_emergency",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "emergency_contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
   }
  ],
  "grid_page_length": 50,
@@ -196,7 +238,7 @@
    "link_fieldname": "tenant"
   }
  ],
- "modified": "2026-10-27 16:58:30.847544",
+ "modified": "2026-10-27 17:56:54.032786",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant",

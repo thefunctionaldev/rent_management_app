@@ -59,6 +59,12 @@
 						"
 					/>
 				</Field>
+				<Field label="Date of birth"
+					><input v-model="form.date_of_birth" class="input" type="date"
+				/></Field>
+				<Field label="Father's / guardian's name"
+					><input v-model="form.guardian_name" class="input"
+				/></Field>
 				<Field label="Occupation"><input v-model="form.occupation" class="input" /></Field>
 				<Field label="Workplace"><input v-model="form.workspace" class="input" /></Field>
 				<Field label="Monthly income">
@@ -74,6 +80,17 @@
 			<Field label="Permanent address">
 				<textarea v-model="form.permanent_address" rows="2" class="input" />
 			</Field>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<Field label="Emergency contact"
+					><input v-model="form.emergency_contact_name" class="input" placeholder="Name"
+				/></Field>
+				<Field label="Relation"
+					><input v-model="form.emergency_contact_relation" class="input"
+				/></Field>
+				<Field label="Their phone"
+					><input v-model="form.emergency_contact_phone" class="input" type="tel"
+				/></Field>
+			</div>
 		</form>
 		<template #footer>
 			<Button @click="$emit('close')">Cancel</Button>
@@ -112,6 +129,11 @@ const fields = [
 	"salary",
 	"status",
 	"permanent_address",
+	"date_of_birth",
+	"guardian_name",
+	"emergency_contact_name",
+	"emergency_contact_relation",
+	"emergency_contact_phone",
 ];
 const form = reactive(Object.fromEntries(fields.map((f) => [f, props.tenant?.[f] ?? ""])));
 form.aadhar_card_number = ""; // never prefilled: the saved number stays on the server

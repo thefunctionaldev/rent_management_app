@@ -15,6 +15,7 @@ from frappe import _
 from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
 from rent_management import (
+	checkin,
 	data_import,
 	gst,
 	leads,
@@ -48,6 +49,11 @@ TENANT_FIELDS = (
 	"occupation",
 	"workspace",
 	"salary",
+	"date_of_birth",
+	"guardian_name",
+	"emergency_contact_name",
+	"emergency_contact_relation",
+	"emergency_contact_phone",
 )
 ROOM_FIELDS = (
 	"room_number",
@@ -517,6 +523,7 @@ def get_tenant(name):
 		order_by="payment_date desc",
 	)
 	submitted = [inv for inv in invoices if inv.docstatus == 1]
+	current = next((a for a in allotments if a.docstatus == 1 and a.status == "Active"), None)
 	tenant_data = tenant.as_dict()
 	tenant_data.pop("aadhar_card_number", None)  # '*****'; see reveal_aadhaar
 	return {
@@ -524,6 +531,7 @@ def get_tenant(name):
 		"allotments": allotments,
 		"invoices": invoices,
 		"payments": payments,
+		"checkin": checkin.get_status(current.name) if current else None,
 		"totals": {
 			"invoiced": sum(flt(inv.final_amount) for inv in submitted),
 			"paid": sum(flt(p.amount) for p in payments),
@@ -1616,4 +1624,24 @@ def move_in_lead(
 	check_access()
 	return leads.move_in(
 		name, room, allotment_date, bed_no, rent_amount, security_deposit, cint(deposit_collected)
+	)
+
+
+# ---------------------------------------------------------------- check-in
+
+
+@frappe.whitelist(methods=["POST"])
+def send_checkin(allotment):
+	check_access()
+	return checkin.send_checkin(allotment)
+
+
+@frappe.whitelist()
+def download_verification_form(allotment):
+	check_access()
+	doc = frappe.get_doc("Tenant Space Allotment", allotment)
+	doc.check_permission("print")
+	send_pdf(
+		f"Police-Verification-{doc.tenant_name or doc.tenant}",
+		frappe.get_print(doc.doctype, doc.name, print_format=checkin.VERIFICATION_FORMAT, as_pdf=True),
 	)

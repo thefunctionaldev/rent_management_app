@@ -106,6 +106,7 @@ jinja = {
 		"rent_management.gst.get_rent_vendor",
 		"rent_management.rent_collection.get_rent_payment_options",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.get_agreement_context",
+		"rent_management.checkin.get_verification_context",
 	]
 }
 

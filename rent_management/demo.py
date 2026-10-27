@@ -11,6 +11,7 @@ Everything goes through the normal documents, in date order (move-ins, meter rea
 every page. The data is the same every time (fixed random seed) and dated relative to today.
 """
 
+import hashlib
 import heapq
 import random
 
@@ -19,6 +20,7 @@ from frappe import _
 from frappe.utils import (
 	add_days,
 	add_months,
+	add_to_date,
 	date_diff,
 	flt,
 	get_datetime,
@@ -245,6 +247,7 @@ class Demo:
 			getattr(self, action)(date, payload)
 		self.log_messages()
 		self.make_leads()
+		self.make_checkins()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -749,6 +752,81 @@ class Demo:
 				}
 			).insert()
 			self.backdate("Rent Lead", lead.name, add_days(allotment.allotment_date, -5))
+
+	# ------------------------------------------------------------ check-ins
+
+	def make_checkins(self):
+		"""Details for the police verification, and agreements signed in the check-in."""
+		from rent_management import checkin
+
+		rng = random.Random(23)  # its own sequence, so the rest of the data stays the same
+		relations = [("Father", "Male"), ("Mother", "Female"), ("Brother", "Male"), ("Sister", "Female")]
+		stays = frappe.get_all(
+			ALLOTMENT,
+			filters={"docstatus": 1, "status": "Active"},
+			fields=["name", "tenant", "allotment_date"],
+			order_by="allotment_date asc",
+		)
+		for tenant in frappe.get_all("Tenant", fields=["name", "last_name"]):
+			relation, gender = rng.choice(relations)
+			first = rng.choice(MEN if gender == "Male" else WOMEN)
+			frappe.db.set_value(
+				"Tenant",
+				tenant.name,
+				{
+					"date_of_birth": add_days(self.today, -rng.randint(20 * 365, 32 * 365)),
+					"guardian_name": f"{rng.choice(MEN)} {tenant.last_name}",
+					"emergency_contact_name": f"{first} {tenant.last_name}",
+					"emergency_contact_relation": relation,
+					"emergency_contact_phone": f"9{rng.randint(100000000, 999999999)}",
+				},
+				update_modified=False,
+			)
+
+		app_tenant = str(self.app_tenant_stay.tenant)
+		for i, stay in enumerate(stays):
+			if str(stay.tenant) == app_tenant:
+				status = "Sent"  # the tenant app shows "Finish your check-in"
+			elif i == len(stays) - 1:
+				status = "Details Submitted"
+			elif i >= len(stays) - 4 or rng.random() < 0.75:
+				status = "Signed"
+			else:
+				continue  # moved in before the app was used
+			sent = get_datetime(f"{stay.allotment_date} 10:00:00")
+			doc = frappe.get_doc(
+				{
+					"doctype": checkin.CHECKIN,
+					"tenant": stay.tenant,
+					"allotment": stay.name,
+					"sent_on": sent,
+					"expires_on": add_days(self.today, 10)
+					if status != "Signed"
+					else add_days(stay.allotment_date, 14),
+				}
+			)
+			doc.insert()
+			if status != "Sent":
+				doc.db_set(
+					{"status": "Details Submitted", "details_submitted_on": add_to_date(sent, hours=3)}
+				)
+			if status == "Signed":
+				tenant = frappe.get_doc("Tenant", stay.tenant)
+				agreement = checkin.render_agreement(frappe.get_doc(ALLOTMENT, stay.name))
+				doc.db_set(
+					{
+						"status": "Signed",
+						"signed_on": add_to_date(sent, hours=4),
+						"signed_name": tenant.full_name,
+						"signed_ip": f"49.207.{rng.randint(1, 254)}.{rng.randint(1, 254)}",
+						"user_agent": "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile Safari/537.36",
+						"otp_channel": "Email",
+						"otp_sent_to": checkin.mask_email(tenant.email_id),
+						"agreement_snapshot": agreement,
+						"agreement_hash": hashlib.sha256(agreement.encode()).hexdigest(),
+					}
+				)
+			self.backdate(checkin.CHECKIN, doc.name, stay.allotment_date)
 
 	# ------------------------------------------------------------ messages and logins
 

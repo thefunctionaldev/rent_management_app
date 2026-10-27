@@ -205,7 +205,16 @@ def get_home():
 		"open_requests": frappe.db.count(
 			"Maintenance Request", {"tenant": tenant.name, "status": ("in", ("Open", "In Progress"))}
 		),
+		"checkin_url": checkin_link(stay),
 	}
+
+
+def checkin_link(stay):
+	"""The check-in the landlord sent, while it isn't finished."""
+	from rent_management.checkin import checkin_url, open_checkin
+
+	doc = open_checkin(stay.name) if stay else None
+	return checkin_url(doc) if doc else None
 
 
 def stay_details(stay):
