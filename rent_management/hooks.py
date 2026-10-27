@@ -190,6 +190,7 @@ doc_events = {
 		"Meter Reading",
 		"Property Expense",
 		"Rent Lead",
+		"Room Inspection",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [

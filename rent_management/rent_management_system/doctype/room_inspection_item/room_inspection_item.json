@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "creation": "2026-10-27 18:11:15.836882",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "quantity",
+  "condition",
+  "move_in_condition",
+  "notes",
+  "photo",
+  "replacement_cost",
+  "charge"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity"
+  },
+  {
+   "default": "Good",
+   "fieldname": "condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Condition",
+   "options": "Good\nFair\nDamaged\nMissing"
+  },
+  {
+   "fieldname": "move_in_condition",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "At Move-in",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Notes"
+  },
+  {
+   "fieldname": "photo",
+   "fieldtype": "Attach Image",
+   "label": "Photo"
+  },
+  {
+   "fieldname": "replacement_cost",
+   "fieldtype": "Currency",
+   "label": "Replacement Cost"
+  },
+  {
+   "description": "Taken from the deposit at move-out.",
+   "fieldname": "charge",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Charge"
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-27 18:11:15.836882",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Room Inspection Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -220,6 +220,12 @@ def apply_rent_increases():
 			frappe.log_error(title=f"Rent increase for {name} failed")
 
 
+def move_in_items(allotment):
+	from rent_management.inspections import move_in_items
+
+	return move_in_items(allotment)
+
+
 def get_agreement_context(doc) -> dict:
 	"""Everything the Rent Agreement print format needs (registered as a Jinja method)."""
 	settings = frappe.get_cached_doc("Rent Management Settings")
@@ -252,6 +258,7 @@ def get_agreement_context(doc) -> dict:
 		)
 		if doc.name
 		else None,
+		"room_items": move_in_items(doc.name),
 		"money": lambda amount: frappe.utils.fmt_money(
 			amount, currency=frappe.db.get_default("currency") or "INR"
 		),

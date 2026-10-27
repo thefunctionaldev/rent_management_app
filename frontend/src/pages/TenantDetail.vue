@@ -281,6 +281,41 @@
 						</div>
 					</div>
 
+					<div v-if="checklistStay" class="card p-5">
+						<h2 class="font-semibold">Room checklists</h2>
+						<p class="text-sm text-slate-500">
+							What's in the room and its condition, at move-in and move-out
+						</p>
+						<ul class="mt-3 space-y-2">
+							<li
+								v-for="kind in ['Move-in', 'Move-out']"
+								:key="kind"
+								class="flex items-center justify-between gap-3 text-sm"
+							>
+								<span>
+									{{ kind }}
+									<span class="text-xs text-slate-500">{{
+										checklistText(kind)
+									}}</span>
+								</span>
+								<Button
+									size="sm"
+									:icon="ClipboardCheck"
+									@click="
+										openDialog('inspection', {
+											allotment: {
+												...checklistStay,
+												tenant_name: tenant.full_name,
+											},
+											type: kind,
+										})
+									"
+									>{{ checklists[kind] ? "Open" : "Start" }}</Button
+								>
+							</li>
+						</ul>
+					</div>
+
 					<div class="card p-5">
 						<div class="flex items-center justify-between gap-3">
 							<div>
@@ -480,6 +515,7 @@ import {
 	Smartphone,
 	ArrowDownLeft,
 	BellRing,
+	ClipboardCheck,
 	IndianRupee,
 	Briefcase,
 	ChevronLeft,
@@ -581,6 +617,23 @@ const stats = computed(() => [
 	},
 ]);
 const checkin = computed(() => data.value.checkin);
+// the current stay, or the last one while its deposit isn't settled
+const checklistStay = computed(
+	() =>
+		current.value ||
+		data.value.allotments.find(
+			(a) => a.docstatus === 1 && a.status === "Vacated" && !a.deposit_settlement
+		)
+);
+const checklists = computed(() => data.value.checklists?.[checklistStay.value?.name] || {});
+function checklistText(kind) {
+	const c = checklists.value[kind];
+	if (!c) return "· not done";
+	if (c.status !== "Completed") return "· draft";
+	return kind === "Move-out" && c.total_charges
+		? `· done, ${money(c.total_charges)} charges`
+		: "· done";
+}
 const checkinStatus = computed(() =>
 	checkin.value?.expired
 		? "Expired"

@@ -18,6 +18,7 @@ from rent_management import (
 	checkin,
 	data_import,
 	gst,
+	inspections,
 	leads,
 	notifications,
 	pictures,
@@ -341,6 +342,33 @@ def get_rooms(property=None):
 	return rooms
 
 
+def set_room_items(doc, data):
+	if "items" in data:
+		doc.set(
+			"items",
+			[
+				pick(row, ("item", "quantity", "replacement_cost", "notes"))
+				for row in data["items"] or []
+				if row.get("item")
+			],
+		)
+
+
+@frappe.whitelist()
+def get_room_items(room):
+	check_access()
+	items = frappe.get_all(
+		"Room Item",
+		filters={"parent": room, "parenttype": "Tenant Space"},
+		fields=["item", "quantity", "replacement_cost", "notes"],
+		order_by="idx asc",
+	)
+	return {
+		"items": items,
+		"suggestions": [{"item": i, "replacement_cost": c} for i, c in inspections.DEFAULT_ITEMS],
+	}
+
+
 @frappe.whitelist()
 def get_room_types():
 	check_access()
@@ -363,9 +391,12 @@ def save_room(data):
 		doc.update(pick(data, [f for f in ROOM_FIELDS if f not in ("room_number", "status")]))
 		if data.get("status") in ("Reserved", "Under Renovation", "Available") and not doc.occupied_beds:
 			doc.status = data["status"]
+		set_room_items(doc, data)
 		doc.save()
 	else:
-		doc = frappe.get_doc({"doctype": "Tenant Space", **pick(data, ROOM_FIELDS)}).insert()
+		doc = frappe.get_doc({"doctype": "Tenant Space", **pick(data, ROOM_FIELDS)})
+		set_room_items(doc, data)
+		doc.insert()
 	return doc.name
 
 
@@ -532,6 +563,7 @@ def get_tenant(name):
 		"invoices": invoices,
 		"payments": payments,
 		"checkin": checkin.get_status(current.name) if current else None,
+		"checklists": {a.name: inspections.checklist_status(a.name) for a in allotments if a.docstatus == 1},
 		"totals": {
 			"invoiced": sum(flt(inv.final_amount) for inv in submitted),
 			"paid": sum(flt(p.amount) for p in payments),
@@ -1645,3 +1677,27 @@ def download_verification_form(allotment):
 		f"Police-Verification-{doc.tenant_name or doc.tenant}",
 		frappe.get_print(doc.doctype, doc.name, print_format=checkin.VERIFICATION_FORMAT, as_pdf=True),
 	)
+
+
+# ---------------------------------------------------------------- room checklists
+
+
+@frappe.whitelist()
+def get_room_inspection(allotment, inspection_type):
+	check_access()
+	return inspections.get_inspection(allotment, inspection_type)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_room_inspection(data):
+	check_access()
+	return inspections.save_inspection(data)
+
+
+@frappe.whitelist()
+def get_checklist_deductions(allotment):
+	check_access()
+	return {
+		"deductions": inspections.settlement_deductions(allotment),
+		"move_out": inspections.checklist_status(allotment)["Move-out"],
+	}

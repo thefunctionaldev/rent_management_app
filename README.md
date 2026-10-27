@@ -129,6 +129,21 @@ your check-in" while one is open, and managers are notified when details come in
 addresses, work, emergency contact, the tenancy and the landlord's details, to submit at the police station
 or on the state police portal. Printing it is logged on the tenant, as it shows the full Aadhaar number.
 
+### Room checklists (move-in and move-out)
+
+Each room has a list of **items in the room** (*Rooms > Edit*): bed, mattress, cupboard, chair, fan,
+keys..., with quantities and a replacement cost. New rooms start with the usual furniture.
+
+- **Move-in checklist** (tenant's profile > Room checklists): the condition of every item (Good, Fair,
+  Damaged, Missing), notes and a photo per item. Once completed it is printed in the rental agreement
+  ("Room condition at move-in"), so the tenant agrees to it when they sign at check-in. After that it can't
+  be changed.
+- **Move-out checklist**: starts from the move-in condition of each item. Damaged items are charged what
+  the manager enters, missing ones their replacement cost. When the deposit is settled, these charges are
+  filled in as deductions (Damages, or Lost Keys for keys). Once settled, the checklist can't be changed.
+
+Every checklist is a **Room Inspection** with its items and photos (private files).
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

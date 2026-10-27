@@ -22,7 +22,9 @@
   "current_allotment",
   "electricity_section",
   "has_meter",
-  "electricity_rate"
+  "electricity_rate",
+  "items_section",
+  "items"
  ],
  "fields": [
   {
@@ -148,6 +150,19 @@
    "fieldname": "electricity_rate",
    "fieldtype": "Currency",
    "label": "Rate per Unit"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items in the Room"
+  },
+  {
+   "description": "Furniture, appliances and keys. The move-in and move-out checklists start from this list.",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Room Item"
   }
  ],
  "grid_page_length": 50,
@@ -164,7 +179,7 @@
    "link_fieldname": "room"
   }
  ],
- "modified": "2026-10-26 19:31:50.856409",
+ "modified": "2026-10-27 18:11:15.837811",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space",

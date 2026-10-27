@@ -299,6 +299,7 @@ const dialogs = {
 	request: lazy("RequestDialog"),
 	lead: lazy("LeadDialog"),
 	moveInLead: lazy("MoveInLeadDialog"),
+	inspection: lazy("InspectionDialog"),
 };
 
 function logout() {

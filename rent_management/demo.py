@@ -209,6 +209,25 @@ REQUESTS = [
 ]  # fmt: skip
 
 
+def room_items(room_type, beds, building) -> list[dict]:
+	"""The furniture of a demo room: per bed, plus what the room shares."""
+	per_bed = [("Bed", 4500), ("Mattress", 3000), ("Pillow", 350), ("Cupboard", 6500), ("Chair", 1200)]
+	shared = [
+		("Study table", 2500),
+		("Ceiling fan", 1800),
+		("Tube light", 400),
+		("Curtains", 900),
+		("Room key", 300),
+	]
+	if room_type == "Single Room":
+		shared.append(("Geyser", 7500))
+	if building == BUILDINGS[2][0]:
+		shared.append(("Air conditioner", 32000))
+	return [{"item": i, "quantity": beds, "replacement_cost": c} for i, c in per_bed] + [
+		{"item": i, "quantity": 1, "replacement_cost": c} for i, c in shared
+	]
+
+
 def make_demo_data(password: str = "demo@1234") -> dict:
 	"""Fill an empty site with demo data. Returns a summary with the demo logins."""
 	if frappe.db.count("Tenant") or frappe.db.count("Tenant Space"):
@@ -231,6 +250,7 @@ class Demo:
 		self.events, self.seq = [], 0
 		self.people = self.make_people()
 		self.art = random.Random(7)  # pictures have their own sequence, so the data stays the same
+		self.check = random.Random(31)  # and so do the room checklists
 
 	def run(self) -> dict:
 		settings = frappe.get_single(SETTINGS)
@@ -334,6 +354,7 @@ class Demo:
 					"room_rent": rent or standard[room_type],
 					"has_meter": meter,
 					"status": "Under Renovation" if (building, number) in RENOVATION else "Available",
+					"items": room_items(room_type, beds, building),
 				}
 			).insert()
 			self.rooms.append(frappe._dict(name=doc.name, building=building, beds=beds, meter=meter))
@@ -515,6 +536,7 @@ class Demo:
 		allotment.submit()
 		self.backdate(ALLOTMENT, allotment.name, date)
 		stay.allotment = allotment.name
+		self.check_room(stay, "Move-in", date)
 		if date >= self.window_start:
 			self.make_invoice(stay, get_first_day(date), date)
 
@@ -625,10 +647,13 @@ class Demo:
 
 	def settle_deposit(self, date, stay):
 		from rent_management.api import make_settlement
+		from rent_management.inspections import settlement_deductions
 
+		self.rng.random()  # (kept, so the data after it stays the same)
+		broken_chair = self.check.random() < 0.6
+		self.check_room(stay, "Move-out", stay.end, broken_chair)
 		deductions = [{"reason": "Cleaning", "description": "Deep cleaning after move-out", "amount": 500}]
-		if self.rng.random() < 0.4:
-			deductions.append({"reason": "Damages", "description": "Broken chair", "amount": 1200})
+		deductions += settlement_deductions(stay.allotment)
 		settlement = make_settlement(
 			stay.allotment,
 			deductions=deductions,
@@ -638,6 +663,26 @@ class Demo:
 		).insert()
 		settlement.submit()
 		self.backdate("Security Deposit Settlement", settlement.name, date)
+
+	def check_room(self, stay, inspection_type, date, broken_chair=False):
+		"""The move-in checklist (all fine, the odd scratch) or the move-out one."""
+		from rent_management.inspections import get_inspection, save_inspection
+
+		data = get_inspection(stay.allotment, inspection_type)
+		data["inspection_date"] = date
+		for row in data["items"]:
+			if inspection_type == "Move-in" and self.check.random() < 0.12:
+				row.update(
+					{
+						"condition": "Fair",
+						"notes": self.check.choice(["Small scratches", "Slightly worn", "Old but working"]),
+					}
+				)
+			if inspection_type == "Move-out" and broken_chair and row["item"] == "Chair":
+				row.update({"condition": "Damaged", "notes": "Broken leg", "charge": 1200})
+				broken_chair = False
+		name = save_inspection({**data, "complete": 1})
+		self.backdate("Room Inspection", name, date)
 
 	def give_notice(self, date, stay):
 		frappe.get_doc(ALLOTMENT, stay.allotment).give_notice(date)

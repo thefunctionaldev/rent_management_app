@@ -171,6 +171,17 @@
 					:placeholder="defaultRent"
 				/>
 			</Field>
+			<details class="rounded-xl border border-slate-200 px-4 py-3" :open="!room">
+				<summary class="cursor-pointer text-sm font-medium">
+					Items in the room
+					<span class="font-normal text-slate-500"
+						>· {{ items.length }} · for the move-in and move-out checklists</span
+					>
+				</summary>
+				<div class="mt-3">
+					<RoomItemsEditor :items="items" :suggestions="suggestions" />
+				</div>
+			</details>
 		</form>
 		<template #footer>
 			<Button @click="$emit('close')">Cancel</Button>
@@ -188,6 +199,7 @@ import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
+import RoomItemsEditor from "@/components/RoomItemsEditor.vue";
 import { activeProperties, reloadProperties, ui } from "@/store";
 import { useAction, useResource } from "@/useResource";
 import { money } from "@/utils";
@@ -216,6 +228,16 @@ const type = reactive({
 	has_attached_bathroom: false,
 });
 const newType = ref(false);
+const items = reactive([]);
+const suggestions = ref([]);
+const itemsLoaded = ref(false);
+get("get_room_items", { room: props.room?.name || "" }).then((data) => {
+	suggestions.value = data.suggestions;
+	items.push(...data.items);
+	// a new room starts with the usual furniture
+	if (!props.room) items.push(...data.suggestions.map((s) => ({ ...s, quantity: 1 })));
+	itemsLoaded.value = true;
+});
 const types = useResource(() => get("get_room_types"));
 
 const defaultRent = computed(() => {
@@ -247,6 +269,8 @@ const { loading, run } = useAction(
 				has_meter: form.has_meter ? 1 : 0,
 				electricity_rate: form.electricity_rate || null,
 				status: props.room ? form.status : "Available",
+				// left out until loaded, so a quick save never empties the list
+				...(itemsLoaded.value && { items: items.filter((r) => r.item) }),
 			},
 		});
 	},

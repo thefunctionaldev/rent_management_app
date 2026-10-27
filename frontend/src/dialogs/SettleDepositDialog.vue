@@ -51,6 +51,19 @@
 					>
 						No deductions — damages, cleaning, repairs…
 					</p>
+					<p
+						v-if="checklist?.status === 'Completed'"
+						class="mt-2 text-xs text-slate-500"
+					>
+						Damages from the move-out checklist are filled in.
+					</p>
+					<p v-else class="mt-2 text-xs text-amber-700">
+						{{
+							checklist
+								? "The move-out checklist isn't completed yet."
+								: "No move-out checklist yet. Do one from the tenant's profile to charge damages."
+						}}
+					</p>
 				</div>
 
 				<label class="flex items-start gap-2 text-sm text-slate-700">
@@ -140,7 +153,7 @@
 import { ShieldCheck, Trash2 } from "lucide-vue-next";
 import { reactive, ref, watch } from "vue";
 
-import { post } from "@/api";
+import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
@@ -158,6 +171,13 @@ const adjustRent = ref(true);
 const form = reactive({ mode_of_refund: "Bank Transfer", reference_no: "", remarks: "" });
 const preview = ref(null);
 const previewing = ref(false);
+
+// the move-out checklist's charges, ready to keep or change
+const checklist = ref(null);
+get("get_checklist_deductions", { allotment: props.allotment.name }).then((data) => {
+	checklist.value = data.move_out;
+	if (!deductions.length) deductions.push(...data.deductions);
+});
 
 function addDeduction() {
 	deductions.push({ reason: "Cleaning", description: "", amount: "" });
