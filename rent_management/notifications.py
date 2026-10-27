@@ -119,7 +119,7 @@ def invoice_context(invoice) -> frappe._dict:
 		period=f"{invoice.billing_month} {invoice.billing_year}",
 		place=frappe.db.get_value("Rent Property", invoice.property, "property_name")
 		or _("room {0}").format(invoice.room),
-		due=formatdate(invoice.due_date) if invoice.due_date else _("today"),
+		due=formatdate(due_on(invoice)) if due_on(invoice) else _("today"),
 		balance=money(invoice.outstanding_amount),
 	)
 
@@ -190,10 +190,15 @@ def send(message_type, tenant, text, params, invoice=None, payment=None, subject
 # ---------------------------------------------------------------- reminders
 
 
+def due_on(invoice):
+	"""When the invoice (or its next instalment) is due."""
+	return invoice.get("next_due_date") or invoice.due_date
+
+
 def get_reminder_type(invoice, settings, today) -> str | None:
-	if not invoice.due_date:
+	if not due_on(invoice):
 		return None
-	days_left = date_diff(invoice.due_date, today)
+	days_left = date_diff(due_on(invoice), today)
 	if days_left > 0:
 		return "Reminder" if days_left == cint(settings.remind_days_before) else None
 	if days_left == 0:
@@ -228,7 +233,7 @@ def send_reminder(invoice, message_type=None) -> list[str]:
 		frappe.throw(_("Invoice {0} has nothing left to pay.").format(invoice.name))
 	if not message_type:
 		message_type = (
-			"Overdue" if invoice.due_date and getdate(invoice.due_date) < getdate(nowdate()) else "Reminder"
+			"Overdue" if due_on(invoice) and getdate(due_on(invoice)) < getdate(nowdate()) else "Reminder"
 		)
 	ctx = invoice_context(invoice)
 	text, params = reminder_text(message_type, ctx, pay_hint(invoice))

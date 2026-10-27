@@ -55,7 +55,11 @@ class IntegrationTestRentManagementSettings(IntegrationTestCase):
 		name = frappe.get_value(
 			"Tenant Rent Invoice", {"name": ("in", created), "tenant_space_allotment": allotment.name}
 		)
-		frappe.db.set_value("Tenant Rent Invoice", name, {"status": "Unpaid", "due_date": "2026-01-05"})
+		frappe.db.set_value(
+			"Tenant Rent Invoice",
+			name,
+			{"status": "Unpaid", "due_date": "2026-01-05", "next_due_date": "2026-01-05"},
+		)
 		mark_overdue_invoices()
 		self.assertEqual(frappe.db.get_value("Tenant Rent Invoice", name, "status"), "Overdue")
 

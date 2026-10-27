@@ -206,6 +206,25 @@ Rent goes straight into the landlord's own account, set up in *Settings > Online
   account, event `payment_link.paid`:
   `https://<site>/api/method/rent_management.rent_collection.razorpay_webhook` with its secret in Settings.
 
+### Late fees, early payment discounts and instalments
+
+Set them up in **Settings > Late fees and discounts**.
+
+- **Late fee:** a fixed amount once, or an amount for every day late (with an optional maximum), added
+  to an unpaid invoice once the grace days after its due date are over. A daily job adds it and lets it
+  grow while the invoice is unpaid. *Waive* it on any invoice (and *charge it* again).
+- **Discount for paying early:** an amount or a percent of the rent, if the invoice is paid in full by
+  the due date (or some days before). Each invoice keeps the offer it was made with. While the offer
+  stands, the tenant app, UPI QR and payment link ask for the discounted amount, and recording that
+  amount settles the invoice. Paying late, or cancelling the payment, takes the discount back off.
+- **Instalments:** on an unpaid invoice, *Split into instalments* (2 to 4 parts, or your own dates and
+  amounts). Payments go to the parts in order. The next unpaid part decides when the invoice is overdue,
+  when reminders go out and when a late fee starts. Tenants see the schedule on their bill. Split
+  invoices get no early payment discount.
+
+Late fees and discounts show on the invoice, the printed invoice and the tenant's bill, and count as
+rent invoiced in profit and loss.
+
 ### Reminders and receipts (WhatsApp and email)
 
 A daily job sends rent reminders before the due date, on the due date and while overdue (interval and

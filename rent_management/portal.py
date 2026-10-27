@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate, random_string
 
-from rent_management import mess, register, rent_collection, subscription
+from rent_management import fees, mess, register, rent_collection, subscription
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -184,12 +184,19 @@ def get_home():
 			"billing_month",
 			"billing_year",
 			"due_date",
+			"next_due_date",
 			"final_amount",
+			"paid_amount",
 			"outstanding_amount",
+			"late_fee",
+			"early_discount_offer",
+			"early_discount_until",
 			"status",
 		],
-		order_by="due_date asc",
+		order_by="next_due_date asc",
 	)
+	for invoice in unpaid:
+		invoice.pay_now = fees.payable_now(invoice)
 	payments = frappe.get_all(
 		"Rent Payment",
 		filters={"tenant": tenant.name, "docstatus": 1},
@@ -278,9 +285,14 @@ def get_invoice(name):
 				"days_stayed",
 				"total_days",
 				"due_date",
+				"next_due_date",
 				"monthly_rent",
 				"pro_rated_rent",
 				"discount_amount",
+				"late_fee",
+				"early_discount",
+				"early_discount_offer",
+				"early_discount_until",
 				"final_amount",
 				"paid_amount",
 				"outstanding_amount",
@@ -303,6 +315,9 @@ def get_invoice(name):
 			filters={"rent_invoice": invoice.name, "docstatus": 0},
 			fields=["name", "payment_date", "amount", "mode_of_payment", "reference_no"],
 		),
+		"pay_now": fees.payable_now(invoice),
+		"discount_now": fees.discount_available(invoice),
+		"instalments": fees.schedule(invoice),
 		"upi_link": upi,
 		"upi_qr": rent_collection.qr_data_uri(upi) if upi else None,
 		"upi_id": frappe.db.get_single_value("Rent Management Settings", "upi_id"),

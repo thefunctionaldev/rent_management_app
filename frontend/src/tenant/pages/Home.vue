@@ -28,7 +28,14 @@
 					:class="overdue ? 'text-rose-600' : 'text-slate-500'"
 				>
 					{{ next.billing_month }} {{ next.billing_year }} ·
-					{{ overdue ? "was due" : "due" }} {{ date(next.due_date) }}
+					{{ overdue ? "was due" : "due" }} {{ date(nextDue) }}
+				</p>
+				<p
+					v-if="next && next.pay_now < next.outstanding_amount"
+					class="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+				>
+					Pay {{ money(next.pay_now) }} by {{ date(next.early_discount_until) }} and save
+					{{ money(next.outstanding_amount - next.pay_now) }}.
 				</p>
 				<Button
 					variant="primary"
@@ -170,5 +177,6 @@ import { call, me } from "../store";
 
 const { data } = useResource(() => get(call("get_home")));
 const next = computed(() => data.value?.unpaid[0]);
-const overdue = computed(() => next.value?.due_date && next.value.due_date < me.today);
+const nextDue = computed(() => next.value?.next_due_date || next.value?.due_date);
+const overdue = computed(() => nextDue.value && nextDue.value < me.today);
 </script>

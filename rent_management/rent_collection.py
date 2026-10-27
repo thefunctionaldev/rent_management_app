@@ -18,7 +18,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_url, nowdate
 
-from rent_management import razorpay
+from rent_management import fees, razorpay
 
 SETTINGS = "Rent Management Settings"
 INVOICE = "Tenant Rent Invoice"
@@ -54,7 +54,7 @@ def get_payment_options() -> dict:
 
 def get_upi_link(invoice) -> str | None:
 	settings = frappe.get_single(SETTINGS)
-	amount = flt(invoice.outstanding_amount)
+	amount = fees.payable_now(invoice)  # less the discount for paying early
 	if not settings.upi_id or amount <= 0 or invoice.docstatus != 1:
 		return None
 	params = {
@@ -105,7 +105,8 @@ def get_payment_link(invoice_name: str) -> str:
 		invoice.reload()
 	if flt(invoice.outstanding_amount) <= 0:
 		frappe.throw(_("Invoice {0} is already paid.").format(invoice.name))
-	if invoice.payment_link_id and flt(invoice.payment_link_amount) == flt(invoice.outstanding_amount):
+	amount = fees.payable_now(invoice)  # less the discount for paying early
+	if invoice.payment_link_id and flt(invoice.payment_link_amount) == amount:
 		return invoice.payment_link_url
 
 	if invoice.payment_link_id:
@@ -124,7 +125,7 @@ def get_payment_link(invoice_name: str) -> str:
 		customer["email"] = tenant.email_id
 	link = razorpay.create_payment_link(
 		{
-			"amount": razorpay.to_subunits(invoice.outstanding_amount),
+			"amount": razorpay.to_subunits(amount),
 			"currency": "INR",
 			"accept_partial": False,
 			"description": _("Rent {0} {1}, room {2}").format(
@@ -145,7 +146,7 @@ def get_payment_link(invoice_name: str) -> str:
 		{
 			"payment_link_id": link["id"],
 			"payment_link_url": link["short_url"],
-			"payment_link_amount": invoice.outstanding_amount,
+			"payment_link_amount": amount,
 		},
 		update_modified=False,
 	)

@@ -317,6 +317,7 @@ const dialogs = {
 	staff: lazy("StaffDialog"),
 	advance: lazy("AdvanceDialog"),
 	paySalary: lazy("PaySalaryDialog"),
+	splitInvoice: lazy("SplitInvoiceDialog"),
 };
 
 function logout() {

@@ -259,7 +259,9 @@ def give_advance(staff, amount, advance_date=None, recover_per_month=None, mode_
 
 def delete_advance(name):
 	"""Only an advance nothing was recovered from yet; draft slips are worked out again."""
-	slips = frappe.get_all("Salary Slip Advance", filters={"advance": name, "parenttype": SLIP}, pluck="parent")
+	slips = frappe.get_all(
+		"Salary Slip Advance", filters={"advance": name, "parenttype": SLIP}, pluck="parent"
+	)
 	if any(frappe.db.get_value(SLIP, slip, "status") == "Paid" for slip in slips):
 		frappe.throw(_("Part of this advance was recovered from a salary. Undo that salary payment first."))
 	frappe.db.delete("Salary Slip Advance", {"advance": name, "parenttype": SLIP})

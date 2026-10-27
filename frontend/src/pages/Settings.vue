@@ -69,6 +69,96 @@
 					</div>
 				</section>
 
+				<!-- late fees and discounts -->
+				<section class="card p-6">
+					<h2 class="font-semibold">Late fees and discounts</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						Nudge tenants to pay on time. You can waive a late fee on any invoice.
+					</p>
+					<div class="mt-2 divide-y divide-slate-100">
+						<Toggle
+							v-model="form.late_fee_enabled"
+							label="Charge a late fee"
+							hint="Added to unpaid invoices once the grace days after the due date are over"
+						/>
+						<div v-if="form.late_fee_enabled" class="grid gap-3 py-3 sm:grid-cols-2">
+							<Field label="Late fee">
+								<select v-model="form.late_fee_type" class="input">
+									<option value="Flat">A fixed amount, once</option>
+									<option value="Per Day">An amount for every day late</option>
+								</select>
+							</Field>
+							<Field
+								:label="form.late_fee_type === 'Per Day' ? 'Per day' : 'Amount'"
+							>
+								<input
+									v-model.number="form.late_fee_amount"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+							<Field label="Grace days" hint="after the due date">
+								<input
+									v-model.number="form.late_fee_grace_days"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+							<Field
+								v-if="form.late_fee_type === 'Per Day'"
+								label="At most"
+								hint="empty: no limit"
+							>
+								<input
+									v-model.number="form.late_fee_max"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+						</div>
+						<Toggle
+							v-model="form.early_discount_enabled"
+							label="Discount for paying early"
+							hint="Taken off when the invoice is paid in full by the date"
+						/>
+						<div
+							v-if="form.early_discount_enabled"
+							class="grid gap-3 py-3 sm:grid-cols-3"
+						>
+							<Field label="Discount">
+								<select v-model="form.early_discount_type" class="input">
+									<option value="Amount">An amount</option>
+									<option value="Percent of Rent">A percent of the rent</option>
+								</select>
+							</Field>
+							<Field
+								:label="
+									form.early_discount_type === 'Amount' ? 'Amount' : 'Percent'
+								"
+							>
+								<input
+									v-model.number="form.early_discount_value"
+									type="number"
+									min="0"
+									step="0.5"
+									class="input tabular"
+								/>
+							</Field>
+							<Field label="Days before due" hint="0: by the due date">
+								<input
+									v-model.number="form.early_discount_days"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+						</div>
+					</div>
+				</section>
+
 				<!-- online collection -->
 				<section class="card p-6">
 					<h2 class="font-semibold">Online rent collection</h2>

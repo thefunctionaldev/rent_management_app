@@ -54,6 +54,10 @@
 					<input v-model="form.payment_date" type="date" class="input" required />
 				</Field>
 			</div>
+			<p v-if="discount" class="-mt-2 text-sm text-emerald-700">
+				Paid by {{ date(selected.early_discount_until) }}: {{ money(discount) }} off for
+				paying early, so {{ money(selected.outstanding_amount - discount) }} settles it.
+			</p>
 
 			<div>
 				<span class="label">Mode of payment</span>
@@ -111,7 +115,7 @@ import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
 import { boot } from "@/store";
 import { useAction, useResource } from "@/useResource";
-import { money } from "@/utils";
+import { date, money } from "@/utils";
 
 const props = defineProps({ invoice: { type: Object, default: null } });
 const emit = defineEmits(["close"]);
@@ -119,7 +123,7 @@ const emit = defineEmits(["close"]);
 const modes = ["Cash", "UPI", "Bank Transfer", "Cheque", "Card", "Other"];
 const form = reactive({
 	rent_invoice: props.invoice?.name || "",
-	amount: props.invoice?.outstanding_amount || "",
+	amount: "",
 	payment_date: boot.today,
 	mode_of_payment: "UPI",
 	reference_no: "",
@@ -136,9 +140,23 @@ const selected = computed(
 	() => props.invoice || openInvoices.value.find((i) => i.name === form.rent_invoice)
 );
 
-watch(selected, (inv) => {
-	if (inv && !props.invoice) form.amount = inv.outstanding_amount;
+// the early payment discount, if paid in full by its date
+const discount = computed(() => {
+	const inv = selected.value;
+	if (!inv?.early_discount_offer || inv.late_fee || !inv.early_discount_until) return 0;
+	if (form.payment_date > inv.early_discount_until) return 0;
+	return Math.min(inv.early_discount_offer, inv.outstanding_amount);
 });
+const fullAmount = computed(() =>
+	selected.value ? selected.value.outstanding_amount - discount.value : ""
+);
+watch(
+	fullAmount,
+	(amount, before) => {
+		if (form.amount === "" || form.amount === before) form.amount = amount;
+	},
+	{ immediate: true }
+);
 
 const { loading, run } = useAction(() => post("record_payment", form), {
 	success: () => `Payment of ${money(form.amount)} recorded`,

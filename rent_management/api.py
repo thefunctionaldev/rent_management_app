@@ -17,6 +17,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 from rent_management import (
 	checkin,
 	data_import,
+	fees,
 	gst,
 	inspections,
 	leads,
@@ -114,7 +115,12 @@ INVOICE_LIST_FIELDS = [
 	"billing_year",
 	"posting_date",
 	"due_date",
+	"next_due_date",
 	"final_amount",
+	"late_fee",
+	"early_discount",
+	"early_discount_offer",
+	"early_discount_until",
 	"paid_amount",
 	"outstanding_amount",
 	"status",
@@ -214,7 +220,11 @@ def get_dashboard(property=None):
 		fields=INVOICE_LIST_FIELDS,
 		order_by="due_date asc",
 	)
-	overdue = [inv for inv in open_invoices if inv.due_date and getdate(inv.due_date) < today]
+	overdue = [
+		inv
+		for inv in open_invoices
+		if (inv.next_due_date or inv.due_date) and getdate(inv.next_due_date or inv.due_date) < today
+	]
 
 	return {
 		"rooms": {
@@ -788,6 +798,9 @@ def get_invoice(name):
 	upi_link = rent_collection.get_upi_link(doc)
 	return {
 		"invoice": doc.as_dict(),
+		"pay_now": fees.payable_now(doc),
+		"discount_now": fees.discount_available(doc),
+		"instalments": fees.schedule(doc),
 		"online": rent_collection.get_payment_options(),
 		"upi_link": upi_link,
 		"upi_qr": rent_collection.qr_data_uri(upi_link) if upi_link else None,
@@ -1392,6 +1405,15 @@ SETTINGS_FIELDS = (
 	"agreement_terms",
 	"listing_enabled",
 	"booking_token_amount",
+	"late_fee_enabled",
+	"late_fee_type",
+	"late_fee_amount",
+	"late_fee_max",
+	"late_fee_grace_days",
+	"early_discount_enabled",
+	"early_discount_type",
+	"early_discount_value",
+	"early_discount_days",
 )
 # write-only: the browser only learns whether they are set
 SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
@@ -1900,3 +1922,19 @@ def give_advance(staff, amount, advance_date=None, recover_per_month=None, mode_
 def delete_advance(name):
 	check_access()
 	salaries.delete_advance(name)
+
+
+# ---------------------------------------------------------------- late fees and instalments
+
+
+@frappe.whitelist(methods=["POST"])
+def waive_late_fee(name, waive=1):
+	check_access()
+	fees.waive_late_fee(name, waive)
+
+
+@frappe.whitelist(methods=["POST"])
+def split_invoice(name, instalments):
+	"""Split an invoice into instalments; an empty list removes them."""
+	check_access()
+	fees.split(name, instalments)

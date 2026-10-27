@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, date_diff, flt, get_last_day, getdate, nowdate
 
+from rent_management import fees
 from rent_management.rent_management_system.doctype.meter_reading.meter_reading import (
 	add_meter_charges,
 	link_meter_charges,
@@ -28,6 +29,9 @@ class TenantRentInvoice(Document):
 		self.set_billing_period()
 		self.calculate_totals()
 		self.set_due_date()
+		if self.docstatus == 0:
+			fees.set_offer(self)
+		fees.recalculate(self)  # late fee, early discount, instalments, outstanding
 		self.set_status()
 
 	def before_insert(self):
@@ -125,17 +129,8 @@ class TenantRentInvoice(Document):
 		self.total_charges = sum(flt(row.amount) for row in self.charges)
 		self.round_floats_in(self, ["total_charges", "discount_amount"])
 
-		self.final_amount = flt(
-			self.pro_rated_rent + self.total_charges - flt(self.discount_amount),
-			self.precision("final_amount"),
-		)
-		if self.final_amount < 0:
+		if fees.base_amount(self) < 0:
 			frappe.throw(_("Discount cannot be more than the invoice total."))
-
-		self.paid_amount = flt(self.paid_amount) if self.docstatus else 0
-		self.outstanding_amount = flt(
-			self.final_amount - self.paid_amount, self.precision("outstanding_amount")
-		)
 
 	def set_due_date(self):
 		if self.due_date:
@@ -154,20 +149,8 @@ class TenantRentInvoice(Document):
 		self.due_date = max(getdate(due_date), getdate(self.posting_date))
 
 	def update_paid_amount(self):
-		"""Recalculate paid / outstanding amounts from submitted Rent Payments."""
-		paid = frappe.get_all(
-			"Rent Payment",
-			filters={"rent_invoice": self.name, "docstatus": 1},
-			fields=[{"SUM": "amount", "as": "total"}],
-		)[0].total
-		self.db_set(
-			{
-				"paid_amount": flt(paid),
-				"outstanding_amount": flt(
-					flt(self.final_amount) - flt(paid), self.precision("outstanding_amount")
-				),
-			}
-		)
+		"""Recalculate paid / outstanding amounts (and the early discount) from Rent Payments."""
+		fees.recalculate(self, update=True)
 		self.set_status(update=True)
 
 	def set_status(self, update=False):
@@ -185,7 +168,8 @@ def get_status(doc) -> str:
 		return "Cancelled"
 	if flt(doc.outstanding_amount) <= 0:
 		return "Paid"
-	if doc.due_date and getdate(doc.due_date) < getdate(nowdate()):
+	due = doc.get("next_due_date") or doc.due_date  # the next instalment, if split
+	if due and getdate(due) < getdate(nowdate()):
 		return "Overdue"
 	if flt(doc.paid_amount) > 0:
 		return "Partly Paid"

@@ -8,7 +8,8 @@
 						{{ inv.billing_month }} {{ inv.billing_year }}
 					</h1>
 					<p class="text-sm text-slate-500">
-						{{ inv.name }} · due {{ date(inv.due_date) }}
+						{{ inv.name }} · {{ data.instalments.length ? "next due" : "due" }}
+						{{ date(inv.next_due_date || inv.due_date) }}
 					</p>
 				</div>
 				<StatusBadge :status="inv.status" />
@@ -39,6 +40,14 @@
 					<dt class="text-slate-600">Discount</dt>
 					<dd class="text-emerald-600">− {{ money(inv.discount_amount) }}</dd>
 				</div>
+				<div v-if="inv.late_fee" class="flex justify-between py-2.5">
+					<dt class="text-slate-600">Late fee</dt>
+					<dd>{{ money(inv.late_fee) }}</dd>
+				</div>
+				<div v-if="inv.early_discount" class="flex justify-between py-2.5">
+					<dt class="text-slate-600">Paid early</dt>
+					<dd class="text-emerald-600">− {{ money(inv.early_discount) }}</dd>
+				</div>
 				<div v-if="inv.paid_amount" class="flex justify-between py-2.5">
 					<dt class="text-slate-600">Paid</dt>
 					<dd class="text-emerald-600">− {{ money(inv.paid_amount) }}</dd>
@@ -65,8 +74,38 @@
 			>
 		</div>
 
+		<div v-if="data.instalments.length" class="card p-5">
+			<h2 class="font-semibold">Instalments</h2>
+			<p class="text-sm text-slate-500">Your landlord agreed you can pay this in parts.</p>
+			<ul class="mt-3 divide-y divide-slate-100">
+				<li
+					v-for="(r, i) in data.instalments"
+					:key="i"
+					class="flex items-center gap-3 py-2.5 text-sm"
+				>
+					<span class="flex-1">{{ date(r.due_date) }}</span>
+					<span class="tabular font-medium">{{ money(r.amount) }}</span>
+					<StatusBadge :status="r.status" />
+				</li>
+			</ul>
+		</div>
+
 		<div v-if="inv.outstanding_amount > 0" class="card p-5">
-			<h2 class="font-semibold">Pay {{ money(inv.outstanding_amount) }}</h2>
+			<h2 class="font-semibold">
+				Pay {{ money(data.pay_now) }}
+				<span
+					v-if="data.instalments.length && data.pay_now < inv.outstanding_amount"
+					class="text-sm font-normal text-slate-500"
+					>· this instalment</span
+				>
+			</h2>
+			<p
+				v-if="data.discount_now"
+				class="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+			>
+				You save {{ money(data.discount_now) }} for paying by
+				{{ date(inv.early_discount_until) }}.
+			</p>
 			<p v-if="me.read_only" class="mt-2 text-sm text-amber-700">
 				Online payment is paused. Please pay your landlord directly.
 			</p>
@@ -186,7 +225,7 @@ const { data, reload } = useResource(() => get(call("get_invoice"), { name: prop
 const inv = computed(() => data.value?.invoice);
 
 const claim = reactive({ amount: 0, mode_of_payment: "UPI", reference_no: "" });
-watch(inv, (value) => value && (claim.amount = value.outstanding_amount), { immediate: true });
+watch(data, (value) => value && (claim.amount = value.pay_now), { immediate: true });
 
 const paying = ref(false);
 async function payOnline() {

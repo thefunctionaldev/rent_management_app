@@ -63,7 +63,7 @@ def get_data(filters, as_on_date) -> list[dict]:
 		if filters.get(field):
 			invoice_filters[field] = filters.get(field)
 	if filters.overdue_only:
-		invoice_filters["due_date"] = ("<", as_on_date)
+		invoice_filters["next_due_date"] = ("<", as_on_date)  # the next instalment, if split
 
 	invoices = frappe.get_all(
 		"Tenant Rent Invoice",
@@ -76,6 +76,7 @@ def get_data(filters, as_on_date) -> list[dict]:
 			"billing_month",
 			"billing_year",
 			"due_date",
+			"next_due_date",
 			"final_amount",
 			"paid_amount",
 			"outstanding_amount",
@@ -95,6 +96,7 @@ def get_data(filters, as_on_date) -> list[dict]:
 
 	for row in invoices:
 		row.billing_period = f"{row.billing_month} {row.billing_year}"
+		row.due_date = row.next_due_date or row.due_date
 		row.mobile_no = mobile_nos.get(str(row.tenant))
 		row.days_overdue = max(date_diff(as_on_date, row.due_date), 0) if row.due_date else 0
 		for fieldname, _label, _limit in AGING_BUCKETS:

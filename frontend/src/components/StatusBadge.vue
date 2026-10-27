@@ -42,6 +42,7 @@ const colors = {
 	Unknown: "slate",
 	Open: "amber",
 	Recovered: "green",
+	Due: "slate",
 	"In Progress": "sky",
 	Resolved: "green",
 	Closed: "slate",

@@ -95,7 +95,7 @@ def mark_overdue_invoices():
 			"docstatus": 1,
 			"status": ("in", ("Unpaid", "Partly Paid")),
 			"outstanding_amount": (">", 0),
-			"due_date": ("<", nowdate()),
+			"next_due_date": ("<", nowdate()),  # the next instalment, if split
 		},
 		pluck="name",
 	)

@@ -48,7 +48,18 @@
   "listing_settings_section",
   "listing_enabled",
   "column_break_listing_settings",
-  "booking_token_amount"
+  "booking_token_amount",
+  "late_fee_section",
+  "late_fee_enabled",
+  "late_fee_type",
+  "late_fee_amount",
+  "late_fee_max",
+  "late_fee_grace_days",
+  "column_break_late_fee",
+  "early_discount_enabled",
+  "early_discount_type",
+  "early_discount_value",
+  "early_discount_days"
  ],
  "fields": [
   {
@@ -314,13 +325,84 @@
    "fieldname": "booking_token_amount",
    "fieldtype": "Currency",
    "label": "Token to Hold a Bed"
+  },
+  {
+   "fieldname": "late_fee_section",
+   "fieldtype": "Section Break",
+   "label": "Late Fees and Discounts"
+  },
+  {
+   "fieldname": "late_fee_enabled",
+   "fieldtype": "Check",
+   "label": "Charge a Late Fee"
+  },
+  {
+   "default": "Flat",
+   "depends_on": "late_fee_enabled",
+   "fieldname": "late_fee_type",
+   "fieldtype": "Select",
+   "label": "Late Fee",
+   "options": "Flat\nPer Day"
+  },
+  {
+   "depends_on": "late_fee_enabled",
+   "description": "Once, or for every day late",
+   "fieldname": "late_fee_amount",
+   "fieldtype": "Currency",
+   "label": "Late Fee Amount"
+  },
+  {
+   "depends_on": "eval:doc.late_fee_enabled && doc.late_fee_type=='Per Day'",
+   "description": "Leave empty for no limit",
+   "fieldname": "late_fee_max",
+   "fieldtype": "Currency",
+   "label": "Maximum Late Fee"
+  },
+  {
+   "default": "3",
+   "depends_on": "late_fee_enabled",
+   "description": "Days after the due date before the fee starts",
+   "fieldname": "late_fee_grace_days",
+   "fieldtype": "Int",
+   "label": "Grace Days"
+  },
+  {
+   "fieldname": "column_break_late_fee",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "early_discount_enabled",
+   "fieldtype": "Check",
+   "label": "Discount for Paying Early"
+  },
+  {
+   "default": "Amount",
+   "depends_on": "early_discount_enabled",
+   "fieldname": "early_discount_type",
+   "fieldtype": "Select",
+   "label": "Discount",
+   "options": "Amount\nPercent of Rent"
+  },
+  {
+   "depends_on": "early_discount_enabled",
+   "fieldname": "early_discount_value",
+   "fieldtype": "Float",
+   "label": "Discount Amount or Percent"
+  },
+  {
+   "default": "0",
+   "depends_on": "early_discount_enabled",
+   "description": "Pay in full this many days before the due date to get it (0: by the due date)",
+   "fieldname": "early_discount_days",
+   "fieldtype": "Int",
+   "label": "Days Before the Due Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-27 17:23:58.551490",
+ "modified": "2026-10-27 18:59:50.874577",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

@@ -50,12 +50,14 @@
 					</p>
 				</div>
 				<div class="rounded-xl bg-slate-50 p-3">
-					<p class="text-[11px] text-slate-500 uppercase">Due</p>
+					<p class="text-[11px] text-slate-500 uppercase">
+						{{ data.instalments.length ? "Next due" : "Due" }}
+					</p>
 					<p
 						class="mt-1 text-sm font-medium"
 						:class="inv.status === 'Overdue' && 'text-rose-600'"
 					>
-						{{ date(inv.due_date) }}
+						{{ date(inv.next_due_date || inv.due_date) }}
 					</p>
 				</div>
 			</div>
@@ -86,6 +88,28 @@
 						<dt class="text-slate-600">Discount</dt>
 						<dd class="text-emerald-600">− {{ money(inv.discount_amount) }}</dd>
 					</div>
+					<div
+						v-if="inv.late_fee || inv.late_fee_waived"
+						class="flex items-center justify-between gap-3 px-4 py-3"
+					>
+						<dt class="text-slate-600">
+							Late fee
+							<button
+								v-if="inv.docstatus === 1 && inv.outstanding_amount > 0"
+								class="ml-1 text-xs font-medium text-brand-600 hover:underline"
+								@click="waive(!inv.late_fee_waived)"
+							>
+								{{ inv.late_fee_waived ? "charge it" : "waive" }}
+							</button>
+						</dt>
+						<dd :class="inv.late_fee_waived && 'text-slate-400'">
+							{{ inv.late_fee_waived ? "Waived" : money(inv.late_fee) }}
+						</dd>
+					</div>
+					<div v-if="inv.early_discount" class="flex justify-between px-4 py-3">
+						<dt class="text-slate-600">Paid early</dt>
+						<dd class="text-emerald-600">− {{ money(inv.early_discount) }}</dd>
+					</div>
 					<div class="flex justify-between bg-slate-50/70 px-4 py-3 font-semibold">
 						<dt>Total</dt>
 						<dd>{{ money(inv.final_amount) }}</dd>
@@ -108,6 +132,51 @@
 						</dd>
 					</div>
 				</dl>
+			</div>
+
+			<p
+				v-if="data.discount_now"
+				class="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+			>
+				{{ money(data.discount_now) }} off if the rest is paid by
+				{{ date(inv.early_discount_until) }}: {{ money(data.pay_now) }} to pay now.
+			</p>
+
+			<div
+				v-if="
+					inv.docstatus === 1 && (data.instalments.length || inv.outstanding_amount > 0)
+				"
+				class="mt-6"
+			>
+				<div class="flex items-center justify-between">
+					<h3 class="text-sm font-semibold">
+						{{ data.instalments.length ? "Instalments" : "Pay in parts?" }}
+					</h3>
+					<button
+						v-if="inv.outstanding_amount > 0"
+						class="text-xs font-medium text-brand-600 hover:underline"
+						@click="
+							openDialog('splitInvoice', {
+								invoice: inv,
+								instalments: data.instalments,
+							})
+						"
+					>
+						{{ data.instalments.length ? "Change" : "Split into instalments" }}
+					</button>
+				</div>
+				<ul v-if="data.instalments.length" class="mt-2 space-y-2">
+					<li
+						v-for="(r, i) in data.instalments"
+						:key="i"
+						class="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm"
+					>
+						<span class="tabular w-5 text-slate-400">{{ i + 1 }}</span>
+						<span class="flex-1">{{ date(r.due_date) }}</span>
+						<span class="tabular font-medium">{{ money(r.amount) }}</span>
+						<StatusBadge :status="r.status" />
+					</li>
+				</ul>
 			</div>
 
 			<div v-if="data.payments.length" class="mt-6">
@@ -157,7 +226,7 @@
 					<div class="min-w-0 flex-1 space-y-2 text-sm">
 						<p v-if="data.upi_qr" class="text-slate-600">
 							The tenant scans this with any UPI app;
-							{{ money(inv.outstanding_amount) }}
+							{{ money(data.pay_now) }}
 							is filled in. It's also printed on the invoice.
 						</p>
 						<template v-if="data.online.razorpay">
@@ -296,7 +365,7 @@ const data = ref(null);
 const inv = computed(() => data.value?.invoice);
 // a payment link is only offered when it is for the current balance
 const link = computed(() =>
-	inv.value?.payment_link_url && inv.value.payment_link_amount === inv.value.outstanding_amount
+	inv.value?.payment_link_url && inv.value.payment_link_amount === data.value.pay_now
 		? inv.value.payment_link_url
 		: null
 );
@@ -317,6 +386,13 @@ const reminding = useAction(() => post("send_rent_reminder", { name: props.name 
 		statuses.includes("Sent") ? "Reminder sent" : "Reminder could not be sent, see Settings",
 });
 const remind = () => reminding.run();
+const waiving = useAction(
+	(waive) => post("waive_late_fee", { name: props.name, waive: waive ? 1 : 0 }),
+	{
+		success: "Late fee updated",
+	}
+);
+const waive = (value) => waiving.run(value);
 async function copyLink() {
 	try {
 		await navigator.clipboard.writeText(link.value);

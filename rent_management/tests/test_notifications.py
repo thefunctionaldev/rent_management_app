@@ -115,7 +115,8 @@ class TestNotifications(IntegrationTestCase):
 		self.assertEqual(len(self.logs(rent_invoice=self.invoice.name)), 2)
 
 	def test_overdue_limit(self):
-		frappe.db.set_value("Tenant Rent Invoice", self.invoice.name, "due_date", add_days(nowdate(), -3))
+		due = add_days(nowdate(), -3)
+		frappe.db.set_value("Tenant Rent Invoice", self.invoice.name, {"due_date": due, "next_due_date": due})
 		self.invoice.reload()
 		settings = frappe.get_single("Rent Management Settings")
 		self.assertEqual(

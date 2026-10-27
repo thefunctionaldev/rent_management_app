@@ -278,6 +278,7 @@ class Demo:
 		self.make_food()
 		self.make_register()
 		self.make_staff()
+		self.make_fees()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -1083,6 +1084,40 @@ class Demo:
 			month = add_months(month, 1)
 		for advance in [a for a in advances if get_first_day(a[1]) > last]:
 			salaries.give_advance(advance[0], advance[2], advance[1], advance[3], "Cash", advance[4])
+
+	def make_fees(self):
+		"""One bill split into instalments, and a late fee for the defaulters."""
+		from rent_management import fees
+
+		# the app tenant asked to pay this month's rent in two parts
+		deepak = frappe.db.get_value("Tenant", {"email_id": "deepak.reddy@example.com"})
+		invoice = frappe.db.get_value(
+			INVOICE,
+			{"tenant": deepak, "docstatus": 1, "outstanding_amount": (">", 0), "paid_amount": 0},
+			["name", "final_amount"],
+			as_dict=True,
+			order_by="posting_date desc",
+		)
+		if invoice:
+			half = flt(invoice.final_amount // 2)
+			fees.split(
+				invoice.name,
+				[
+					{"due_date": add_days(self.today, 3), "amount": half},
+					{"due_date": add_days(self.today, 18), "amount": flt(invoice.final_amount - half, 2)},
+				],
+			)
+		frappe.db.set_single_value(
+			SETTINGS,
+			{
+				"late_fee_enabled": 1,
+				"late_fee_type": "Flat",
+				"late_fee_amount": 200,
+				"late_fee_grace_days": 3,
+			},
+		)
+		frappe.clear_document_cache(SETTINGS, SETTINGS)
+		fees.apply_late_fees()
 
 	# ------------------------------------------------------------ messages and logins
 
