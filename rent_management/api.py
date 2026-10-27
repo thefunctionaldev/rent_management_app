@@ -29,6 +29,7 @@ from rent_management import (
 	register,
 	rent_collection,
 	saas,
+	salaries,
 	subscription,
 )
 from rent_management.rent_management_system import billing
@@ -1829,3 +1830,73 @@ def visitor_out(name):
 def cancel_visitor(name):
 	check_access()
 	frappe.get_doc(register.VISITOR, name).db_set("status", "Cancelled")
+
+
+# ---------------------------------------------------------------- staff and salaries
+
+STAFF_FIELDS = ("staff_name", "role", "property", "mobile_no", "monthly_salary", "pay_day", "joining_date",
+	"leaving_date", "is_active", "payment_mode", "upi_id", "bank_account_no", "ifsc_code", "address",
+	"emergency_contact", "notes")  # fmt: skip
+
+
+@frappe.whitelist()
+def get_staff(property=None):
+	check_access()
+	return salaries.get_staff(property)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_staff(data):
+	check_access()
+	data = frappe.parse_json(data)
+	if data.get("name"):
+		doc = frappe.get_doc(salaries.STAFF, data["name"])
+		doc.update(pick(data, STAFF_FIELDS))
+		doc.save()
+	else:
+		doc = frappe.get_doc({"doctype": salaries.STAFF, **pick(data, STAFF_FIELDS)}).insert()
+	if "picture" in data:
+		pictures.set_picture(doc, data["picture"])
+	return doc.name
+
+
+@frappe.whitelist()
+def get_salaries(month=None, year=None, property=None):
+	check_access()
+	return salaries.get_salaries(month, year, property)
+
+
+@frappe.whitelist(methods=["POST"])
+def prepare_salaries(month, year, property=None):
+	check_access()
+	return salaries.prepare(month, year, property)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_salary_slip(name, data):
+	check_access()
+	return salaries.save_slip(name, data)
+
+
+@frappe.whitelist(methods=["POST"])
+def pay_salary(name, paid_on=None, mode_of_payment=None, reference_no=None):
+	check_access()
+	salaries.pay(name, paid_on, mode_of_payment, reference_no)
+
+
+@frappe.whitelist(methods=["POST"])
+def undo_salary_payment(name):
+	check_access()
+	salaries.undo_payment(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def give_advance(staff, amount, advance_date=None, recover_per_month=None, mode_of_payment="Cash", note=None):
+	check_access()
+	return salaries.give_advance(staff, amount, advance_date, recover_per_month, mode_of_payment, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_advance(name):
+	check_access()
+	salaries.delete_advance(name)

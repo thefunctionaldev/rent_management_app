@@ -23,12 +23,13 @@ FIELDS = {
 	# doctype: (field, private)
 	"Tenant": ("display_picture", True),
 	"Rent Property": ("image", False),
+	"Staff Member": ("display_picture", True),
 }
 DATA_URL = re.compile(r"^data:image/[a-z+]+;base64,(?P<data>.+)$", re.S)
 
 
 def set_picture(doc, picture: str | None):
-	"""Replace the photo of a Tenant or Rent Property with a data URL, or remove it ("")."""
+	"""Replace the photo of a Tenant, Rent Property or Staff Member with a data URL, or remove it ("")."""
 	field, private = FIELDS[doc.doctype]
 	set_image(doc, field, picture, private)
 
@@ -46,7 +47,9 @@ def set_image(doc, field, picture: str | None, private=True):
 
 def save_file(doc, field, private, picture) -> str:
 	content, extension = decode(picture)
-	slug = re.sub(r"[^a-z0-9]+", "-", str(doc.get("full_name") or doc.name).lower()).strip("-")
+	slug = re.sub(
+		r"[^a-z0-9]+", "-", str(doc.get("full_name") or doc.get("staff_name") or doc.name).lower()
+	).strip("-")
 	file = frappe.get_doc(
 		{
 			"doctype": "File",

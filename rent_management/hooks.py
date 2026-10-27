@@ -196,6 +196,9 @@ doc_events = {
 		"Tenant Leave",
 		"Visitor Log",
 		"Night Attendance",
+		"Staff Member",
+		"Staff Advance",
+		"Salary Slip",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
@@ -218,6 +221,7 @@ scheduler_events = {
 		"rent_management.subscription.daily",
 		"rent_management.rent_collection.reconcile_payment_links",
 		"rent_management.leads.reconcile_token_links",
+		"rent_management.salaries.remind_due",
 		"rent_management.notifications.send_due_reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",

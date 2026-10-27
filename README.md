@@ -178,6 +178,22 @@ visitors are allowed on each building (*Buildings > Edit > Listing page*).
   who is coming, which shows under *Expected* until the visitor arrives. Check-ins after visiting hours
   (and not overnight) are flagged.
 
+### Staff and salaries
+
+The **Staff** page (under Property) keeps who works at each building and pays them.
+
+- **Staff:** name, role (warden, cook, cleaner, security...), the building their salary is counted
+  under, monthly salary, the day of the month it's paid, and their UPI ID or bank account.
+- **Salaries:** every month, *Prepare salaries* makes a slip for everyone who worked that month,
+  pro-rated if they joined or left during it. Enter days off without pay, a bonus or a deduction, then
+  *Pay* (date, mode, UTR). Paid salaries can be sent as a payslip on WhatsApp, and undone if entered by
+  mistake. On each person's pay day, managers get a reminder if last month's salary isn't paid yet.
+- **Advances:** money given early is taken back from the next salaries, all at once or a fixed amount
+  a month (untick *Recover advances* on a slip to skip a month).
+- **Expenses:** an advance is a *Salaries* expense the day it's given, and a salary the day it's paid
+  (less what it recovered), so profit and loss shows what each building really spends on staff. These
+  expenses can only be changed from the Staff page.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

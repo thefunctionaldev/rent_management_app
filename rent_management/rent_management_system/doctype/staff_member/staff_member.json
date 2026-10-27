@@ -1,0 +1,199 @@
+{
+ "actions": [],
+ "autoname": "STAFF-.#####",
+ "creation": "2026-10-27 18:49:40.069957",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "staff_name",
+  "role",
+  "property",
+  "mobile_no",
+  "display_picture",
+  "column_break_staff",
+  "monthly_salary",
+  "pay_day",
+  "joining_date",
+  "leaving_date",
+  "is_active",
+  "payment_section",
+  "payment_mode",
+  "upi_id",
+  "column_break_payment",
+  "bank_account_no",
+  "ifsc_code",
+  "details_section",
+  "address",
+  "emergency_contact",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "staff_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "default": "Warden",
+   "fieldname": "role",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Role",
+   "options": "Warden\nCook\nCleaner\nSecurity Guard\nManager\nMaintenance\nOther"
+  },
+  {
+   "description": "The building their salary is counted under",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Works at",
+   "options": "Rent Property",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "display_picture",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Photo"
+  },
+  {
+   "fieldname": "column_break_staff",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_salary",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Monthly Salary",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Day of the next month the salary is paid",
+   "fieldname": "pay_day",
+   "fieldtype": "Int",
+   "label": "Paid on Day"
+  },
+  {
+   "default": "Today",
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Joined On",
+   "reqd": 1
+  },
+  {
+   "fieldname": "leaving_date",
+   "fieldtype": "Date",
+   "label": "Left On"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "default": "UPI",
+   "fieldname": "payment_mode",
+   "fieldtype": "Select",
+   "label": "Paid By",
+   "options": "Bank Transfer\nUPI\nCash\nCheque\nOther"
+  },
+  {
+   "fieldname": "upi_id",
+   "fieldtype": "Data",
+   "label": "UPI ID"
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No"
+  },
+  {
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "IFSC"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "emergency_contact",
+   "fieldtype": "Data",
+   "label": "Emergency Contact"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-27 18:49:40.069957",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Staff Member",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "role,property",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "staff_name"
+}

@@ -41,6 +41,7 @@ const colors = {
 	Trial: "sky",
 	Unknown: "slate",
 	Open: "amber",
+	Recovered: "green",
 	"In Progress": "sky",
 	Resolved: "green",
 	Closed: "slate",

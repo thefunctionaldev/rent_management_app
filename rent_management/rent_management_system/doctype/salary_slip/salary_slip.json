@@ -1,0 +1,256 @@
+{
+ "actions": [],
+ "autoname": "SAL-.YYYY.-.#####",
+ "creation": "2026-10-27 18:49:40.071505",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "staff",
+  "staff_name",
+  "role",
+  "property",
+  "salary_month",
+  "salary_year",
+  "column_break_slip",
+  "status",
+  "paid_on",
+  "mode_of_payment",
+  "reference_no",
+  "expense",
+  "pay_section",
+  "monthly_salary",
+  "days_in_month",
+  "days_employed",
+  "unpaid_days",
+  "days_paid",
+  "column_break_pay",
+  "earned",
+  "bonus",
+  "other_deduction",
+  "deduction_note",
+  "recover_advances",
+  "advance_recovery",
+  "net_pay",
+  "recoveries",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "staff",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Staff",
+   "options": "Staff Member",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "staff.staff_name",
+   "fieldname": "staff_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "staff.role",
+   "fieldname": "role",
+   "fieldtype": "Data",
+   "label": "Role",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "staff.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property",
+   "read_only": 1
+  },
+  {
+   "fieldname": "salary_month",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Month",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
+   "reqd": 1
+  },
+  {
+   "fieldname": "salary_year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_slip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPaid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_on",
+   "fieldtype": "Date",
+   "label": "Paid On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Select",
+   "label": "Paid By",
+   "options": "Bank Transfer\nUPI\nCash\nCheque\nOther",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expense",
+   "fieldtype": "Link",
+   "label": "Expense",
+   "options": "Property Expense",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pay_section",
+   "fieldtype": "Section Break",
+   "label": "Pay"
+  },
+  {
+   "fieldname": "monthly_salary",
+   "fieldtype": "Currency",
+   "label": "Monthly Salary"
+  },
+  {
+   "fieldname": "days_in_month",
+   "fieldtype": "Int",
+   "label": "Days in Month",
+   "read_only": 1
+  },
+  {
+   "description": "Fewer when they joined or left during the month",
+   "fieldname": "days_employed",
+   "fieldtype": "Int",
+   "label": "Days Employed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unpaid_days",
+   "fieldtype": "Float",
+   "label": "Days Off Without Pay"
+  },
+  {
+   "fieldname": "days_paid",
+   "fieldtype": "Float",
+   "label": "Days Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "earned",
+   "fieldtype": "Currency",
+   "label": "Salary for Days Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus",
+   "fieldtype": "Currency",
+   "label": "Bonus / Overtime"
+  },
+  {
+   "fieldname": "other_deduction",
+   "fieldtype": "Currency",
+   "label": "Other Deduction"
+  },
+  {
+   "fieldname": "deduction_note",
+   "fieldtype": "Data",
+   "label": "Deduction Note"
+  },
+  {
+   "default": "1",
+   "fieldname": "recover_advances",
+   "fieldtype": "Check",
+   "label": "Recover Advances"
+  },
+  {
+   "fieldname": "advance_recovery",
+   "fieldtype": "Currency",
+   "label": "Advance Recovered",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "net_pay",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Pay",
+   "read_only": 1
+  },
+  {
+   "fieldname": "recoveries",
+   "fieldtype": "Table",
+   "label": "Advances Recovered",
+   "options": "Salary Slip Advance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-27 18:49:40.071505",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Salary Slip",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "staff_name"
+}

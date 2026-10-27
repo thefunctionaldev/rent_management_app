@@ -277,6 +277,7 @@ class Demo:
 		self.make_checkins()
 		self.make_food()
 		self.make_register()
+		self.make_staff()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -440,7 +441,6 @@ class Demo:
 		month = self.window_start
 		while month <= self.current_month:
 			rows = [
-				(sun, 1, "Salaries", 26000, "Warden and cook", "Bank Transfer"),
 				(sun, 1, "Housekeeping & Cleaning", 5000, "Lakshmi (housekeeping)", "Cash"),
 				(
 					sun,
@@ -470,11 +470,9 @@ class Demo:
 					"Venkatesh Murthy (owner)",
 					"Bank Transfer",
 				),
-				(villa, 1, "Salaries", 10000, "Caretaker", "Bank Transfer"),
 				(villa, 1, "Housekeeping & Cleaning", 3500, "Cleaning staff", "Cash"),
 				(villa, 5, "Internet & Cable", 1999, "Airtel Xstream", "UPI"),
 				(villa, 9, "Electricity Bill", rng.randint(55, 75) * 100, "BESCOM", "UPI"),
-				(lake, 1, "Salaries", 4000, "Part-time caretaker", "UPI"),
 				(lake, 5, "Internet & Cable", 999, "ACT Fibernet", "UPI"),
 				(lake, 9, "Electricity Bill", rng.randint(25, 35) * 100, "BESCOM", "UPI"),
 			]
@@ -1017,6 +1015,74 @@ class Demo:
 				"source": "Manager",
 			}
 		).insert()
+
+	def make_staff(self):
+		"""The people who run the buildings, and their salaries since they joined."""
+		from rent_management import salaries
+
+		rng = random.Random(61)  # its own sequence, so the rest of the data stays the same
+		sun, villa, lake = (b[0] for b in BUILDINGS)
+		people = [
+			# name, role, building, salary, pay day, mode, gender
+			("Manjunath Gowda", "Warden", sun, 14000, 1, "Bank Transfer", "Male"),
+			("Lakshmamma", "Cook", sun, 12000, 5, "UPI", "Female"),
+			("Savitha Naik", "Warden", villa, 10000, 1, "Bank Transfer", "Female"),
+			("Ravi Kumar S", "Maintenance", lake, 4000, 3, "UPI", "Male"),
+		]
+		staff = {}
+		for name, role, building, salary, pay_day, mode, gender in people:
+			doc = frappe.get_doc(
+				{
+					"doctype": salaries.STAFF,
+					"staff_name": name,
+					"role": role,
+					"property": building,
+					"monthly_salary": salary,
+					"pay_day": pay_day,
+					"payment_mode": mode,
+					"joining_date": self.opened[building],
+					"mobile_no": f"9{rng.randint(10**8, 10**9 - 1)}",
+					"upi_id": f"{name.split()[0].lower()}@okaxis" if mode == "UPI" else None,
+					"bank_account_no": str(rng.randint(10**10, 10**11 - 1))
+					if mode == "Bank Transfer"
+					else None,
+					"ifsc_code": "SBIN0040123" if mode == "Bank Transfer" else None,
+				}
+			).insert()
+			set_picture(doc, demo_pictures.avatar(self.art, gender))
+			staff[name] = doc
+
+		cook = staff["Lakshmamma"].name
+		advances = [
+			(cook, add_months(self.current_month, -2), 6000, 2000, "For her daughter's school fees"),
+			(staff["Manjunath Gowda"].name, add_days(self.today, -6), 3000, None, "Festival"),
+		]
+		month = self.window_start
+		last = add_months(self.current_month, -1)
+		while month <= last:
+			for advance in [a for a in advances if get_first_day(a[1]) == month]:
+				salaries.give_advance(advance[0], advance[2], advance[1], advance[3], "Cash", advance[4])
+			name, year = MONTHS[month.month - 1], month.year
+			salaries.prepare(name, year)
+			for slip in frappe.get_all(
+				salaries.SLIP, filters={"salary_month": name, "salary_year": year}, pluck="name"
+			):
+				doc = frappe.get_doc(salaries.SLIP, slip)
+				doc.unpaid_days = rng.choice([0, 0, 0, 0, 1, 2])
+				if month == last or (
+					doc.role == "Cook" and rng.random() < 0.3
+				):  # a festival bonus last month
+					doc.bonus = rng.choice([500, 1000])
+				doc.save()
+				pay_on = add_days(
+					add_months(month, 1), frappe.get_cached_value(salaries.STAFF, doc.staff, "pay_day") - 1
+				)
+				# last month's for the part-timer is still to pay
+				if pay_on <= self.today and not (month == last and doc.property == lake):
+					salaries.pay(slip, pay_on, None, f"UTR{rng.randint(10**9, 10**10 - 1)}")
+			month = add_months(month, 1)
+		for advance in [a for a in advances if get_first_day(a[1]) > last]:
+			salaries.give_advance(advance[0], advance[2], advance[1], advance[3], "Cash", advance[4])
 
 	# ------------------------------------------------------------ messages and logins
 

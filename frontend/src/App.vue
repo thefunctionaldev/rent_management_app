@@ -162,6 +162,7 @@ import {
 	BarChart3,
 	Briefcase,
 	Building2,
+	Contact,
 	CreditCard,
 	DoorOpen,
 	ExternalLink,
@@ -225,6 +226,7 @@ const nav = computed(() => [
 			...(boot.properties.some((p) => p.food_included && p.is_active)
 				? [{ to: "/food", label: "Food", icon: UtensilsCrossed }]
 				: []),
+			{ to: "/staff", label: "Staff", icon: Contact },
 			{ to: "/buildings", label: "Buildings", icon: Building2 },
 			{ to: "/import", label: "Import", icon: FileUp },
 		],
@@ -312,6 +314,9 @@ const dialogs = {
 	moveInLead: lazy("MoveInLeadDialog"),
 	inspection: lazy("InspectionDialog"),
 	mealPlan: lazy("MealPlanDialog"),
+	staff: lazy("StaffDialog"),
+	advance: lazy("AdvanceDialog"),
+	paySalary: lazy("PaySalaryDialog"),
 };
 
 function logout() {
