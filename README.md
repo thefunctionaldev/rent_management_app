@@ -84,6 +84,29 @@ Managers invite a tenant from their profile; the tenant gets an email to set a p
 Tenants can see their stay and dues, pay online or report a UPI payment, download invoices and their
 agreement, raise and follow requests, and give notice. Every call only reaches the tenant's own records.
 
+### Listing page and bookings (`/stay`)
+
+Turn on *Settings > Listing page and bookings* to publish a page of your buildings at
+**`https://<site>/stay`**, with a page per building (`/stay/sunrise-pg`). It shows the building's photo,
+description, amenities, who it's for, food, a map link, and each room type with its rent, deposit and
+**live free beds**. Shared on WhatsApp, the link shows the building's photo and description.
+
+- Visitors **enquire** or **book a visit** (a day and time). Bots are kept out by a hidden field and rate
+  limits.
+- They can **hold a bed** by paying a token (*Token to hold a bed*, e.g. ₹2,000) straight to the landlord:
+  online with a Razorpay payment link (the landlord's own keys, above), or by UPI QR. For UPI they enter
+  the reference, and the manager confirms it. A held bed no longer shows as free.
+- Every enquiry is a **Rent Lead** in **Leads** (`/rent/leads`), and managers are emailed and notified.
+  Leads go New, Contacted, Visit Scheduled, Visited, Booked, then Moved In or Lost (with a reason).
+  Managers add walk-ins and phone calls too, call or WhatsApp the lead, record a token paid in cash, or
+  send a booking link to pay it.
+- **Move in** makes the tenant profile and allots the bed in one step. A paid token is recorded as rent:
+  on the first invoice, and the next one when moving in late in the month leaves the first one smaller.
+- Token payments are picked up from the return page, the landlord's Razorpay webhook (the same URL as
+  for rent, event `payment_link.paid`) and a daily check.
+
+Building details for the page are under *Buildings > Edit > Listing page*.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

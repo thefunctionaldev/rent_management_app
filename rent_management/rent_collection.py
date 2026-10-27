@@ -243,7 +243,16 @@ def razorpay_webhook():
 
 	invoice = frappe.db.get_value(INVOICE, {"payment_link_id": link["id"]})
 	if not invoice:
-		return {"status": "ignored"}
+		lead = frappe.db.get_value("Rent Lead", {"payment_link_id": link["id"]})
+		if not lead:
+			return {"status": "ignored"}
+		from rent_management import leads
+
+		frappe.set_user("Administrator")
+		leads.record_token_payment(
+			frappe.get_doc("Rent Lead", lead), payment["id"], flt(payment.get("amount")) / 100
+		)
+		return {"status": "ok"}
 	frappe.set_user("Administrator")
 	record_online_payment(invoice, payment["id"], flt(payment.get("amount")) / 100, payment.get("method"))
 	return {"status": "ok"}

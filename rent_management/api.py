@@ -17,6 +17,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 from rent_management import (
 	data_import,
 	gst,
+	leads,
 	notifications,
 	pictures,
 	portal,
@@ -59,7 +60,21 @@ ROOM_FIELDS = (
 	"has_meter",
 	"electricity_rate",
 )
-PROPERTY_FIELDS = ("property_name", "abbr", "address", "city", "state", "pincode", "is_active")
+PROPERTY_FIELDS = (
+	"property_name",
+	"abbr",
+	"address",
+	"city",
+	"state",
+	"pincode",
+	"is_active",
+	"show_on_listing",
+	"listing_for",
+	"food_included",
+	"map_link",
+	"description",
+	"amenities",
+)
 ROOM_TYPE_FIELDS = (
 	"type",
 	"description",
@@ -141,6 +156,7 @@ def get_boot():
 		"months": MONTHS,
 		"today": nowdate(),
 		"properties": get_properties(),
+		"new_leads": frappe.db.count(leads.LEAD, {"status": "New"}),
 		"is_control_site": saas.is_control_site() and "System Manager" in frappe.get_roles(),
 		"agreement_defaults": {
 			field: frappe.db.get_single_value("Rent Management Settings", f"default_{key}")
@@ -360,7 +376,9 @@ def get_properties():
 		row["beds"] += max(cint(room.capacity), 1)
 		row["occupied_beds"] += cint(room.occupied_beds)
 	properties = frappe.get_all(
-		"Rent Property", fields=["name", "image", *PROPERTY_FIELDS], order_by="is_active desc, creation asc"
+		"Rent Property",
+		fields=["name", "image", "listing_slug", *PROPERTY_FIELDS],
+		order_by="is_active desc, creation asc",
 	)
 	for prop in properties:
 		prop.update(rooms[prop.name])
@@ -1317,6 +1335,8 @@ SETTINGS_FIELDS = (
 	"default_notice_days",
 	"default_rent_increase_percent",
 	"agreement_terms",
+	"listing_enabled",
+	"booking_token_amount",
 )
 # write-only: the browser only learns whether they are set
 SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
@@ -1339,6 +1359,7 @@ def get_settings():
 		},
 		"email_configured": notifications.email_configured(),
 		"webhook_url": frappe.utils.get_url("/api/method/rent_management.rent_collection.razorpay_webhook"),
+		"listing_url": leads.listing_url(),
 	}
 
 
@@ -1530,3 +1551,69 @@ def create_subscription_checkout(plan, billing_cycle):
 def verify_subscription_payment(razorpay_order_id, razorpay_payment_id, razorpay_signature):
 	check_access()
 	return subscription.verify_checkout(razorpay_order_id, razorpay_payment_id, razorpay_signature)
+
+
+# ---------------------------------------------------------------- leads
+
+
+@frappe.whitelist()
+def get_leads(status=None, property=None):
+	check_access()
+	return leads.get_leads(status, property)
+
+
+@frappe.whitelist()
+def get_lead(name):
+	check_access()
+	lead = frappe.get_doc(leads.LEAD, name)
+	lead.check_permission("read")
+	data = lead.as_dict()
+	data.pop("access_key", None)
+	data["booking_url"] = None
+	if lead.token_status == "Pending":
+		slug = frappe.db.get_value("Rent Property", lead.property, "listing_slug")
+		data["booking_url"] = frappe.utils.get_url(f"/stay/{slug}?booking={lead.access_key}")
+	data["room_types"] = leads.get_room_types(lead.property)
+	return data
+
+
+@frappe.whitelist(methods=["POST"])
+def save_lead(data):
+	check_access()
+	return leads.save_lead(data)
+
+
+@frappe.whitelist(methods=["POST"])
+def record_lead_token(name, amount, mode="Cash", reference=None, paid_on=None):
+	check_access()
+	leads.record_token(name, amount, mode, reference, paid_on)
+
+
+@frappe.whitelist(methods=["POST"])
+def ask_lead_for_token(name, amount=None):
+	"""A booking link to send the lead (WhatsApp): it pays the token by Razorpay or UPI."""
+	check_access()
+	lead = frappe.get_doc(leads.LEAD, name)
+	if lead.token_status == "Paid":
+		frappe.throw(_("The token is already paid."))
+	amount = flt(amount) or flt(lead.token_amount) or leads.token_amount()
+	if amount <= 0:
+		frappe.throw(_("Enter the token amount."))
+	if not lead.room_type and not lead.room:
+		frappe.throw(_("Choose the room type the bed is held in first."))
+	if flt(lead.token_amount) != amount and lead.payment_link_id:
+		lead.payment_link_id = lead.payment_link_url = None  # a new link for the new amount
+	lead.update({"token_amount": amount, "token_status": "Pending"})
+	lead.save()
+	slug = frappe.db.get_value("Rent Property", lead.property, "listing_slug")
+	return frappe.utils.get_url(f"/stay/{slug}?booking={lead.access_key}")
+
+
+@frappe.whitelist(methods=["POST"])
+def move_in_lead(
+	name, room, allotment_date=None, bed_no=None, rent_amount=None, security_deposit=None, deposit_collected=0
+):
+	check_access()
+	return leads.move_in(
+		name, room, allotment_date, bed_no, rent_amount, security_deposit, cint(deposit_collected)
+	)

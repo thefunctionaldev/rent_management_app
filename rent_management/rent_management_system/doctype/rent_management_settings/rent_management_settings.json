@@ -44,7 +44,11 @@
   "default_notice_days",
   "default_rent_increase_percent",
   "agreement_terms_section",
-  "agreement_terms"
+  "agreement_terms",
+  "listing_settings_section",
+  "listing_enabled",
+  "column_break_listing_settings",
+  "booking_token_amount"
  ],
  "fields": [
   {
@@ -286,13 +290,37 @@
    "fieldname": "agreement_terms",
    "fieldtype": "Text Editor",
    "label": "House Rules and Terms"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "listing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Listing Page and Bookings"
+  },
+  {
+   "default": "0",
+   "description": "Your buildings, room types, prices and free beds at /stay, with an enquiry form.",
+   "fieldname": "listing_enabled",
+   "fieldtype": "Check",
+   "label": "Publish the Listing Page"
+  },
+  {
+   "fieldname": "column_break_listing_settings",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "2000",
+   "description": "Paid online or by UPI when booking from the listing page. 0 to take enquiries only.",
+   "fieldname": "booking_token_amount",
+   "fieldtype": "Currency",
+   "label": "Token to Hold a Bed"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-26 19:43:15.718938",
+ "modified": "2026-10-27 17:23:58.551490",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

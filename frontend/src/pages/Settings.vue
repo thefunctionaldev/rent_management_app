@@ -128,6 +128,51 @@
 
 				<!-- agreements -->
 				<section class="card p-6">
+					<h2 class="font-semibold">Listing page and bookings</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						A page with your buildings' photos, rooms, prices and free beds. People
+						enquire, book a visit or hold a bed with a token, and you follow them up in
+						Leads.
+					</p>
+					<div class="mt-2 divide-y divide-slate-100">
+						<Toggle
+							v-model="form.listing_enabled"
+							label="Publish the listing page"
+							hint="Describe each building and add its photo under Buildings"
+						/>
+						<div
+							v-if="form.listing_enabled"
+							class="flex items-center justify-between gap-4 py-3"
+						>
+							<div>
+								<p class="text-sm font-medium">Token to hold a bed</p>
+								<p class="text-xs text-slate-500">
+									Paid to you by UPI or Razorpay (above). 0: enquiries only.
+								</p>
+							</div>
+							<input
+								v-model.number="form.booking_token_amount"
+								type="number"
+								min="0"
+								class="input tabular w-32"
+							/>
+						</div>
+					</div>
+					<p
+						v-if="form.listing_enabled && data.listing_url"
+						class="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500"
+					>
+						Your page:
+						<a
+							:href="data.listing_url"
+							target="_blank"
+							class="font-medium break-all text-brand-700"
+							>{{ data.listing_url }}</a
+						>
+					</p>
+				</section>
+
+				<section class="card p-6">
 					<h2 class="font-semibold">Rental agreements</h2>
 					<p class="mt-1 text-sm text-slate-500">
 						Printed for every tenant from their profile. Check it suits your state's

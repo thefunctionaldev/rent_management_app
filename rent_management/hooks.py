@@ -57,6 +57,7 @@ app_license = "mit"
 website_route_rules = [
 	{"from_route": "/rent/<path:app_path>", "to_route": "rent"},
 	{"from_route": "/tenant/<path:app_path>", "to_route": "tenant"},
+	{"from_route": "/stay/<path:building>", "to_route": "stay"},  # the public listing page
 ]
 
 # tenants (website users) land in the tenant app after logging in
@@ -187,6 +188,7 @@ doc_events = {
 		"Rent Management Settings",
 		"Meter Reading",
 		"Property Expense",
+		"Rent Lead",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
@@ -208,6 +210,7 @@ scheduler_events = {
 		"rent_management.rent_management_system.billing.mark_overdue_invoices",
 		"rent_management.subscription.daily",
 		"rent_management.rent_collection.reconcile_payment_links",
+		"rent_management.leads.reconcile_token_links",
 		"rent_management.notifications.send_due_reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",

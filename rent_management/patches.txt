@@ -12,3 +12,4 @@ rent_management.patches.v1_4.set_settings_defaults
 rent_management.patches.v1_4.set_settings_defaults #2 agreement defaults
 rent_management.patches.v1_5.add_tenant_role
 rent_management.patches.v1_6.set_request_buildings
+rent_management.patches.v1_7.set_listing_slugs

@@ -65,6 +65,11 @@
 							:stroke-width="1.8"
 						/>
 						{{ item.label }}
+						<span
+							v-if="item.badge"
+							class="ml-auto rounded-full bg-brand-600 px-1.5 text-[11px] leading-5 font-semibold text-white"
+							>{{ item.badge }}</span
+						>
 					</RouterLink>
 				</div>
 			</nav>
@@ -173,6 +178,7 @@ import {
 	TrendingUp,
 	Users,
 	Wallet,
+	UserSearch,
 	Wrench,
 	Zap,
 } from "lucide-vue-next";
@@ -204,6 +210,7 @@ const nav = computed(() => [
 	{
 		label: "Property",
 		items: [
+			{ to: "/leads", label: "Leads", icon: UserSearch, badge: boot.new_leads },
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
 			{ to: "/requests", label: "Requests", icon: Wrench },
@@ -290,6 +297,8 @@ const dialogs = {
 	changeRent: lazy("ChangeRentDialog"),
 	expense: lazy("ExpenseDialog"),
 	request: lazy("RequestDialog"),
+	lead: lazy("LeadDialog"),
+	moveInLead: lazy("MoveInLeadDialog"),
 };
 
 function logout() {

@@ -50,7 +50,57 @@ LANDLORD = {
 	"default_lock_in_months": 3,
 	"default_notice_days": 30,
 	"default_rent_increase_percent": 5,
+	"listing_enabled": 1,
+	"booking_token_amount": 2000,
 }
+
+# the listing page, by building (in the order of BUILDINGS)
+LISTINGS = [
+	{
+		"listing_for": "Men",
+		"food_included": 1,
+		"description": "A friendly PG for working men in Koramangala, 10 minutes from the Forum "
+		"Mall and the tech parks on Hosur Road. Home-style breakfast and dinner every day.",
+		"amenities": "WiFi\nBreakfast and dinner\nWashing machine\nPower backup\nHot water\n"
+		"Housekeeping\nCCTV\nTwo-wheeler parking",
+	},
+	{
+		"listing_for": "Women",
+		"food_included": 0,
+		"description": "A safe, quiet hostel for women in HSR Layout Sector 2, close to cafes, "
+		"the metro and the outer ring road offices. Warden on site, biometric entry.",
+		"amenities": "WiFi\nWarden on site\nBiometric entry\nCCTV\nWashing machine\nRO water\nHousekeeping",
+	},
+	{
+		"listing_for": "Anyone",
+		"food_included": 0,
+		"description": "New co-living rooms in BTM 2nd Stage with private rooms and a shared "
+		"kitchen. Opened this year, fully furnished.",
+		"amenities": "WiFi\nShared kitchen\nAir conditioning\nWashing machine\nHousekeeping",
+	},
+]
+
+# days ago, name, mobile, status, room type, extras
+LEADS = [
+	(0, "Karan Malhotra", "9880011223", "New", "Double Sharing", {"message": "Is food included?"}),
+	(0, "Sana Sheikh", "9741200456", "New", "Single Room", {"move_in": 12}),
+	(1, "Ajay Kumar", "9900112233", "New", None, {"source": "Phone"}),
+	(2, "Isha Kapoor", "9611100789", "Visit Scheduled", "Double Sharing", {"visit_in": 1}),
+	(3, "Rahul Desai", "9845566778", "Visit Scheduled", "Triple Sharing", {"visit_in": 2}),
+	(4, "Tanvi Joshi", "9886677889", "Contacted", "Single Room", {"source": "Referral"}),
+	(
+		5,
+		"Mohit Arora",
+		"9008899001",
+		"Visited",
+		"Double Sharing",
+		{"notes": "Liked 102. Will confirm by Friday."},
+	),
+	(6, "Neel Banerjee", "9535522334", "Booked", "Double Sharing", {"token": "UPI", "move_in": 6}),
+	(1, "Ritika Sen", "9741166554", "New", "Triple Sharing", {"token": "Reported"}),
+	(9, "Farhan Ali", "9844433221", "Lost", "Single Room", {"lost": "Over budget"}),
+	(14, "Divya Menon", "9663344556", "Lost", "Double Sharing", {"lost": "Found another place"}),
+]
 
 # name, abbr, address, pincode, who it's for, opened (days ago)
 BUILDINGS = [
@@ -194,6 +244,7 @@ class Demo:
 			date, _order, _seq, action, payload = heapq.heappop(self.events)
 			getattr(self, action)(date, payload)
 		self.log_messages()
+		self.make_leads()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -254,6 +305,7 @@ class Demo:
 					"city": "Bengaluru",
 					"state": "Karnataka",
 					"pincode": pincode,
+					**LISTINGS[[b[0] for b in BUILDINGS].index(name)],
 				}
 			).insert()
 			set_picture(building, demo_pictures.building(self.art, floors=self.art.randint(3, 5)))
@@ -624,6 +676,79 @@ class Demo:
 			}
 		).insert()
 		self.backdate("Property Expense", doc.name, date)
+
+	# ------------------------------------------------------------ leads from the listing page
+
+	def make_leads(self):
+		rng = random.Random(11)  # its own sequence, so the rest of the data stays the same
+		buildings = [b[0] for b in BUILDINGS]
+		free = {}  # (building, room type) -> free beds
+		for room in frappe.get_all(
+			"Tenant Space",
+			filters={"status": ("!=", "Under Renovation")},
+			fields=["property", "room_type", "capacity", "occupied_beds"],
+		):
+			key = (room.property, room.room_type)
+			free[key] = free.get(key, 0) + room.capacity - room.occupied_beds
+		for days, name, mobile, status, room_type, extras in LEADS:
+			options = [b for b in buildings if not room_type or free.get((b, room_type), 0) > 0] or buildings
+			building = rng.choice(options)
+			if room_type and (building, room_type) not in free:
+				room_type = None
+			when = self.days_ago(days)
+			lead = frappe.get_doc(
+				{
+					"doctype": "Rent Lead",
+					"lead_name": name,
+					"mobile_no": mobile,
+					"email_id": f"{name.split()[0].lower()}@example.com",
+					"property": building,
+					"room_type": room_type,
+					"status": status,
+					"source": extras.get("source", "Listing"),
+					"message": extras.get("message"),
+					"notes": extras.get("notes"),
+					"lost_reason": extras.get("lost"),
+					"move_in_date": add_days(self.today, extras["move_in"]) if "move_in" in extras else None,
+					"visit_on": get_datetime(f"{add_days(self.today, extras['visit_in'])} 11:00:00")
+					if "visit_in" in extras
+					else None,
+				}
+			)
+			if extras.get("token") == "UPI":
+				lead.update({"token_amount": 2000, "token_status": "Paid", "token_mode": "UPI",
+					"token_reference": str(rng.randint(10**11, 10**12 - 1)), "token_paid_on": when})  # fmt: skip
+			elif extras.get("token") == "Reported":
+				lead.update({"token_amount": 2000, "token_status": "Reported", "token_mode": "UPI",
+					"token_reference": str(rng.randint(10**11, 10**12 - 1))})  # fmt: skip
+			lead.insert()
+			self.backdate("Rent Lead", lead.name, when)
+
+		# the two newest tenants came from the listing page
+		for allotment in frappe.get_all(
+			ALLOTMENT,
+			filters={"docstatus": 1, "status": "Active"},
+			fields=["name", "tenant", "tenant_name", "property", "room", "room_type", "allotment_date"],
+			order_by="allotment_date desc",
+			limit=2,
+		):
+			tenant = frappe.db.get_value("Tenant", allotment.tenant, ["mobile_no", "email_id"], as_dict=True)
+			lead = frappe.get_doc(
+				{
+					"doctype": "Rent Lead",
+					"lead_name": allotment.tenant_name,
+					"mobile_no": tenant.mobile_no,
+					"email_id": tenant.email_id,
+					"property": allotment.property,
+					"room_type": allotment.room_type,
+					"room": allotment.room,
+					"status": "Moved In",
+					"source": "Listing",
+					"tenant": allotment.tenant,
+					"allotment": allotment.name,
+				}
+			).insert()
+			self.backdate("Rent Lead", lead.name, add_days(allotment.allotment_date, -5))
 
 	# ------------------------------------------------------------ messages and logins
 

@@ -51,6 +51,16 @@ const colors = {
 	"Not Billable": "slate",
 	"Past Due": "amber",
 	Expired: "rose",
+	New: "sky",
+	Contacted: "amber",
+	"Visit Scheduled": "indigo",
+	Visited: "indigo",
+	Booked: "green",
+	"Moved In": "green",
+	Lost: "slate",
+	"Token Paid": "green",
+	"Token Reported": "sky",
+	"Token Pending": "amber",
 };
 
 const tone = computed(() => palette[colors[props.status] || "slate"]);

@@ -15,7 +15,16 @@
   "address",
   "city",
   "state",
-  "pincode"
+  "pincode",
+  "listing_section",
+  "show_on_listing",
+  "listing_for",
+  "food_included",
+  "map_link",
+  "listing_slug",
+  "column_break_listing",
+  "description",
+  "amenities"
  ],
  "fields": [
   {
@@ -72,6 +81,58 @@
    "fieldtype": "Attach Image",
    "hidden": 1,
    "label": "Photo"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "listing_section",
+   "fieldtype": "Section Break",
+   "label": "Listing Page"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_on_listing",
+   "fieldtype": "Check",
+   "label": "Show on Listing Page"
+  },
+  {
+   "fieldname": "listing_for",
+   "fieldtype": "Select",
+   "label": "For",
+   "options": "\nMen\nWomen\nAnyone"
+  },
+  {
+   "fieldname": "food_included",
+   "fieldtype": "Check",
+   "label": "Food Included"
+  },
+  {
+   "fieldname": "map_link",
+   "fieldtype": "Data",
+   "label": "Map Link",
+   "options": "URL"
+  },
+  {
+   "description": "The building's page is /stay/<this>.",
+   "fieldname": "listing_slug",
+   "fieldtype": "Data",
+   "label": "Page Address",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_listing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "description": "One per line, e.g. WiFi, Laundry, Power backup",
+   "fieldname": "amenities",
+   "fieldtype": "Small Text",
+   "label": "Amenities"
   }
  ],
  "grid_page_length": 50,
@@ -83,7 +144,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-27 16:58:30.844404",
+ "modified": "2026-10-27 17:23:58.550674",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",
