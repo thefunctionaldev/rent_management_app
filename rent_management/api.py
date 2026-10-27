@@ -20,6 +20,7 @@ from rent_management import (
 	gst,
 	inspections,
 	leads,
+	mess,
 	notifications,
 	pictures,
 	portal,
@@ -81,6 +82,13 @@ PROPERTY_FIELDS = (
 	"map_link",
 	"description",
 	"amenities",
+	"serves_breakfast",
+	"breakfast_time",
+	"serves_lunch",
+	"lunch_time",
+	"serves_dinner",
+	"dinner_time",
+	"meal_skip_cutoff_hours",
 )
 ROOM_TYPE_FIELDS = (
 	"type",
@@ -520,6 +528,8 @@ def get_tenant(name):
 			"agreement_months",
 			"agreement_end_date",
 			"lock_in_months",
+			"meal_plan",
+			"meal_charge",
 			"notice_period_days",
 			"rent_increase_percent",
 			"next_rent_increase_date",
@@ -1701,3 +1711,52 @@ def get_checklist_deductions(allotment):
 		"deductions": inspections.settlement_deductions(allotment),
 		"move_out": inspections.checklist_status(allotment)["Move-out"],
 	}
+
+
+# ---------------------------------------------------------------- food
+
+
+@frappe.whitelist()
+def get_food(day=None, property=None):
+	"""The Food page: what each kitchen cooks today (or another day), the menu and the costs."""
+	check_access()
+	day = getdate(day or nowdate())
+	filters = {"is_active": 1, "food_included": 1}
+	if property:
+		filters["name"] = property
+	buildings = []
+	for name in frappe.get_all("Rent Property", filters=filters, pluck="name", order_by="creation asc"):
+		buildings.append(
+			{
+				"name": name,
+				"meals": mess.kitchen_count(name, day),
+				"menu": mess.get_menu(name),
+				"today": mess.menu_for(name, day),
+				"costs": mess.food_costs(name, day),
+				"cutoff_hours": frappe.db.get_value("Rent Property", name, "meal_skip_cutoff_hours"),
+			}
+		)
+	return {"day": str(day), "weekday": mess.DAYS[day.weekday()], "buildings": buildings}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_menu(property, menu):
+	check_access()
+	mess.save_menu(property, menu)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_meal_plan(allotment, meal_plan=None, meal_charge=0):
+	check_access()
+	doc = frappe.get_doc("Tenant Space Allotment", allotment)
+	doc.check_permission("write")
+	doc.meal_plan = meal_plan or ""
+	doc.meal_charge = flt(meal_charge)
+	doc.save()
+
+
+@frappe.whitelist(methods=["POST"])
+def skip_meal_for(allotment, date, meal, skip=1):
+	"""A manager marks a meal skipped for a tenant (any time, e.g. they called)."""
+	check_access()
+	mess.set_skip(allotment, date, meal, cint(skip), source="Manager")

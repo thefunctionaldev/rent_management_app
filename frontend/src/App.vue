@@ -179,6 +179,7 @@ import {
 	Users,
 	Wallet,
 	UserSearch,
+	UtensilsCrossed,
 	Wrench,
 	Zap,
 } from "lucide-vue-next";
@@ -214,6 +215,9 @@ const nav = computed(() => [
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
 			{ to: "/tenants", label: "Tenants", icon: Users },
 			{ to: "/requests", label: "Requests", icon: Wrench },
+			...(boot.properties.some((p) => p.food_included && p.is_active)
+				? [{ to: "/food", label: "Food", icon: UtensilsCrossed }]
+				: []),
 			{ to: "/buildings", label: "Buildings", icon: Building2 },
 			{ to: "/import", label: "Import", icon: FileUp },
 		],
@@ -300,6 +304,7 @@ const dialogs = {
 	lead: lazy("LeadDialog"),
 	moveInLead: lazy("MoveInLeadDialog"),
 	inspection: lazy("InspectionDialog"),
+	mealPlan: lazy("MealPlanDialog"),
 };
 
 function logout() {

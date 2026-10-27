@@ -34,6 +34,10 @@ class TenantRentInvoice(Document):
 		# electricity from meter readings since the last invoice
 		if self.tenant_space_allotment and not self.flags.skip_meter_charges:
 			add_meter_charges(self)
+		if self.tenant_space_allotment:
+			from rent_management.mess import add_meal_charges
+
+			add_meal_charges(self)  # a meal plan paid monthly
 
 	def on_update(self):
 		link_meter_charges(self)

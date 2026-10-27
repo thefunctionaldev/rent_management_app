@@ -144,6 +144,22 @@ keys..., with quantities and a replacement cost. New rooms start with the usual 
 
 Every checklist is a **Room Inspection** with its items and photos (private files).
 
+### Food and mess
+
+Tick *Food included* on a building (*Buildings > Edit > Listing page*) and choose the meals it serves
+(breakfast, lunch, dinner), their times, and until how many hours before a meal tenants can skip it.
+
+- **Meal plans**, per stay (tenant's profile > Current stay > Food): *Included in rent* (the default in a
+  building with food), *Paid monthly* (added to every rent invoice as a Food charge, for the days stayed)
+  or *No meals*.
+- **Weekly menu** on the **Food** page, shown to tenants in the tenant app.
+- **Skipping meals:** tenants tap a meal in the tenant app (Food tab) to skip it, up to the cutoff;
+  managers can mark one for them any time.
+- **The kitchen count** on the Food page: for today or tomorrow, how many to cook for at each meal and who
+  is skipping.
+- **Food cost:** this month's *Food & Groceries* expenses divided by the meals actually served, per meal
+  and per tenant per month.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

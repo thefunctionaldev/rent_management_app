@@ -19,7 +19,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Charge Type",
-   "options": "Electricity\nWater\nMaintenance\nParking\nLate Fee\nOther",
+   "options": "Electricity\nWater\nMaintenance\nParking\nFood\nLate Fee\nOther",
    "reqd": 1
   },
   {
@@ -54,7 +54,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-26 19:31:50.858125",
+ "modified": "2026-10-27 18:22:37.776684",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Rent Invoice Charge",

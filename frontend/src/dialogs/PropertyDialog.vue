@@ -65,6 +65,38 @@
 						/>
 						Food included
 					</label>
+					<div v-if="form.food_included" class="space-y-3 rounded-lg bg-slate-50 p-3">
+						<div class="grid gap-3 sm:grid-cols-3">
+							<label
+								v-for="meal in ['breakfast', 'lunch', 'dinner']"
+								:key="meal"
+								class="space-y-1.5 text-sm"
+							>
+								<span class="flex items-center gap-2 capitalize">
+									<input
+										v-model="form[`serves_${meal}`]"
+										type="checkbox"
+										class="size-4 accent-brand-600"
+									/>
+									{{ meal }}
+								</span>
+								<input
+									v-model="form[`${meal}_time`]"
+									type="time"
+									class="input"
+									:disabled="!form[`serves_${meal}`]"
+								/>
+							</label>
+						</div>
+						<Field label="Tenants can skip a meal until" hint="hours before it">
+							<input
+								v-model.number="form.meal_skip_cutoff_hours"
+								class="input tabular w-28"
+								type="number"
+								min="0"
+							/>
+						</Field>
+					</div>
 					<Field label="Description">
 						<textarea
 							v-model="form.description"
@@ -126,6 +158,13 @@ const form = reactive({
 	map_link: p.map_link || "",
 	description: p.description || "",
 	amenities: p.amenities || "",
+	serves_breakfast: p.serves_breakfast ?? 1,
+	breakfast_time: (p.breakfast_time || "08:00").slice(0, 5),
+	serves_lunch: p.serves_lunch ?? 1,
+	lunch_time: (p.lunch_time || "13:00").slice(0, 5),
+	serves_dinner: p.serves_dinner ?? 1,
+	dinner_time: (p.dinner_time || "20:30").slice(0, 5),
+	meal_skip_cutoff_hours: p.meal_skip_cutoff_hours ?? 4,
 });
 const picture = ref(p.image || "");
 
@@ -138,6 +177,9 @@ const { loading, run } = useAction(
 				is_active: form.is_active ? 1 : 0,
 				show_on_listing: form.show_on_listing ? 1 : 0,
 				food_included: form.food_included ? 1 : 0,
+				serves_breakfast: form.serves_breakfast ? 1 : 0,
+				serves_lunch: form.serves_lunch ? 1 : 0,
+				serves_dinner: form.serves_dinner ? 1 : 0,
 				...(picture.value !== (p.image || "") && { picture: picture.value }),
 			},
 		}),

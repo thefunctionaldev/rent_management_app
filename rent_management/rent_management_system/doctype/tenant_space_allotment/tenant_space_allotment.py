@@ -17,6 +17,12 @@ class TenantSpaceAllotment(Document):
 		self.validate_room_is_free()
 		self.set_agreement_terms()
 		self.set_defaults_from_room()
+		if self.is_new() and not self.meal_plan and self.property:
+			# a building with food: meals come with the rent unless set otherwise
+			if frappe.db.get_value("Rent Property", self.property, "food_included"):
+				self.meal_plan = "Included in Rent"
+		if self.meal_plan != "Paid Monthly":
+			self.meal_charge = 0
 		if self.docstatus == 0:
 			self.status = "Draft"
 
@@ -86,6 +92,8 @@ class TenantSpaceAllotment(Document):
 		self.next_rent_increase_date = add_months(start, every) if flt(self.rent_increase_percent) else None
 
 	def before_update_after_submit(self):
+		if self.meal_plan != "Paid Monthly":
+			self.meal_charge = 0
 		self.validate_rent_change()
 
 	def validate_rent_change(self):

@@ -10,6 +10,7 @@ const routes = [
 		props: true,
 	},
 	{ path: "/requests", name: "requests", component: () => import("./pages/Requests.vue") },
+	{ path: "/food", name: "food", component: () => import("./pages/Food.vue") },
 	{ path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];

@@ -150,6 +150,32 @@
 										{{ date(current.next_rent_increase_date) }}
 									</dd>
 								</div>
+								<div
+									v-if="servesFood || current.meal_plan"
+									class="flex justify-between"
+								>
+									<dt class="text-slate-500">Food</dt>
+									<dd>
+										{{
+											current.meal_plan === "Paid Monthly"
+												? `${money(current.meal_charge)} a month`
+												: current.meal_plan || "No meals"
+										}}
+										<button
+											class="ml-1 text-xs font-medium text-brand-600 hover:underline"
+											@click="
+												openDialog('mealPlan', {
+													stay: {
+														...current,
+														tenant_name: tenant.full_name,
+													},
+												})
+											"
+										>
+											Change
+										</button>
+									</dd>
+								</div>
 							</dl>
 							<div
 								v-if="current.expected_vacate_date"
@@ -541,7 +567,7 @@ import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import Tabs from "@/components/Tabs.vue";
 import { openDialog } from "@/dialogs";
-import { bumpData, toast } from "@/store";
+import { boot, bumpData, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money } from "@/utils";
 
@@ -617,6 +643,9 @@ const stats = computed(() => [
 	},
 ]);
 const checkin = computed(() => data.value.checkin);
+const servesFood = computed(
+	() => boot.properties.find((p) => p.name === current.value?.property)?.food_included
+);
 // the current stay, or the last one while its deposit isn't settled
 const checklistStay = computed(
 	() =>

@@ -43,7 +43,10 @@
 		<nav
 			class="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur"
 		>
-			<div class="mx-auto grid max-w-lg grid-cols-4">
+			<div
+				class="mx-auto grid max-w-lg"
+				:class="nav.length === 5 ? 'grid-cols-5' : 'grid-cols-4'"
+			>
 				<RouterLink
 					v-for="item in nav"
 					:key="item.to"
@@ -66,7 +69,14 @@
 </template>
 
 <script setup>
-import { Home, MessageSquareWarning, ReceiptText, UserRound } from "lucide-vue-next";
+import {
+	Home,
+	MessageSquareWarning,
+	ReceiptText,
+	UserRound,
+	UtensilsCrossed,
+} from "lucide-vue-next";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import Avatar from "@/components/Avatar.vue";
@@ -75,12 +85,13 @@ import Toasts from "@/components/Toasts.vue";
 import { me } from "./store";
 
 const route = useRoute();
-const nav = [
+const nav = computed(() => [
 	{ to: "/", label: "Home", icon: Home },
 	{ to: "/invoices", label: "Bills", icon: ReceiptText },
+	...(me.food ? [{ to: "/food", label: "Food", icon: UtensilsCrossed }] : []),
 	{ to: "/requests", label: "Requests", icon: MessageSquareWarning },
 	{ to: "/profile", label: "Profile", icon: UserRound },
-];
+]);
 const isActive = (item) => (item.to === "/" ? route.path === "/" : route.path.startsWith(item.to));
 const hour = new Date().getHours();
 const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";

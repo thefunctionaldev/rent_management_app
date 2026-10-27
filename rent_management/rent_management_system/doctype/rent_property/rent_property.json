@@ -24,7 +24,16 @@
   "listing_slug",
   "column_break_listing",
   "description",
-  "amenities"
+  "amenities",
+  "food_section",
+  "serves_breakfast",
+  "breakfast_time",
+  "serves_lunch",
+  "lunch_time",
+  "serves_dinner",
+  "dinner_time",
+  "column_break_food",
+  "meal_skip_cutoff_hours"
  ],
  "fields": [
   {
@@ -133,6 +142,63 @@
    "fieldname": "amenities",
    "fieldtype": "Small Text",
    "label": "Amenities"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "food_included",
+   "fieldname": "food_section",
+   "fieldtype": "Section Break",
+   "label": "Food"
+  },
+  {
+   "default": "1",
+   "fieldname": "serves_breakfast",
+   "fieldtype": "Check",
+   "label": "Serves Breakfast"
+  },
+  {
+   "default": "08:00:00",
+   "depends_on": "serves_breakfast",
+   "fieldname": "breakfast_time",
+   "fieldtype": "Time",
+   "label": "Breakfast Time"
+  },
+  {
+   "default": "1",
+   "fieldname": "serves_lunch",
+   "fieldtype": "Check",
+   "label": "Serves Lunch"
+  },
+  {
+   "default": "13:00:00",
+   "depends_on": "serves_lunch",
+   "fieldname": "lunch_time",
+   "fieldtype": "Time",
+   "label": "Lunch Time"
+  },
+  {
+   "default": "1",
+   "fieldname": "serves_dinner",
+   "fieldtype": "Check",
+   "label": "Serves Dinner"
+  },
+  {
+   "default": "20:30:00",
+   "depends_on": "serves_dinner",
+   "fieldname": "dinner_time",
+   "fieldtype": "Time",
+   "label": "Dinner Time"
+  },
+  {
+   "fieldname": "column_break_food",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "4",
+   "description": "Tenants can skip a meal in the tenant app until this many hours before it.",
+   "fieldname": "meal_skip_cutoff_hours",
+   "fieldtype": "Int",
+   "label": "Skip a Meal Up To (Hours Before)"
   }
  ],
  "grid_page_length": 50,
@@ -144,7 +210,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-27 17:23:58.550674",
+ "modified": "2026-10-27 18:22:37.774937",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",

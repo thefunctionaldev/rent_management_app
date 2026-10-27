@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "creation": "2026-10-27 18:22:37.777125",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day",
+  "meal",
+  "dishes"
+ ],
+ "fields": [
+  {
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday",
+   "reqd": 1
+  },
+  {
+   "fieldname": "meal",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Meal",
+   "options": "Breakfast\nLunch\nDinner",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dishes",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Dishes"
+  }
+ ],
+ "grid_page_length": 50,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-27 18:22:37.777125",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Mess Menu Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

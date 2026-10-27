@@ -61,6 +61,12 @@ LISTINGS = [
 	{
 		"listing_for": "Men",
 		"food_included": 1,
+		"serves_breakfast": 1,
+		"breakfast_time": "08:00:00",
+		"serves_lunch": 0,
+		"serves_dinner": 1,
+		"dinner_time": "20:30:00",
+		"meal_skip_cutoff_hours": 4,
 		"description": "A friendly PG for working men in Koramangala, 10 minutes from the Forum "
 		"Mall and the tech parks on Hosur Road. Home-style breakfast and dinner every day.",
 		"amenities": "WiFi\nBreakfast and dinner\nWashing machine\nPower backup\nHot water\n"
@@ -268,6 +274,7 @@ class Demo:
 		self.log_messages()
 		self.make_leads()
 		self.make_checkins()
+		self.make_food()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -872,6 +879,37 @@ class Demo:
 					}
 				)
 			self.backdate(checkin.CHECKIN, doc.name, stay.allotment_date)
+
+	# ------------------------------------------------------------ food
+
+	def make_food(self):
+		"""Sunrise PG's weekly menu, and the meals tenants skipped this month."""
+		from rent_management import mess
+
+		building = BUILDINGS[0][0]
+		breakfast = ["Idli, sambar, chutney", "Poha, banana", "Masala dosa, chutney", "Upma, kesari bath",
+			"Aloo paratha, curd", "Pongal, vada", "Puri, potato sagu"]  # fmt: skip
+		dinner = ["Chapati, dal tadka, rice", "Rice, sambar, beans palya", "Veg pulao, raita",
+			"Chapati, paneer butter masala, rice", "Rice, rasam, cabbage poriyal", "Ghee rice, kurma",
+			"Chicken biryani or veg biryani, raita"]  # fmt: skip
+		mess.save_menu(
+			building,
+			{day: {"Breakfast": breakfast[i], "Dinner": dinner[i]} for i, day in enumerate(mess.DAYS)},
+		)
+		rng = random.Random(41)  # its own sequence, so the rest of the data stays the same
+		start = get_first_day(self.today)
+		for stay in frappe.get_all(
+			ALLOTMENT,
+			filters={"docstatus": 1, "status": "Active", "property": building, "meal_plan": ("is", "set")},
+			fields=["name", "allotment_date"],
+		):
+			day = max(start, getdate(stay.allotment_date))
+			while day <= add_days(self.today, 2):
+				for meal in ("Breakfast", "Dinner"):
+					if rng.random() < (0.12 if meal == "Breakfast" else 0.07):
+						frappe.get_doc({"doctype": "Meal Opt-out", "allotment": stay.name, "date": day, "meal": meal,
+							"source": "Tenant App"}).insert()  # fmt: skip
+				day = add_days(day, 1)
 
 	# ------------------------------------------------------------ messages and logins
 

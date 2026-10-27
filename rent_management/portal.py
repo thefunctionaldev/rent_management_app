@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, nowdate, random_string
 
-from rent_management import rent_collection, subscription
+from rent_management import mess, rent_collection, subscription
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -166,6 +166,7 @@ def get_boot():
 		"currency": currency,
 		"currency_symbol": frappe.db.get_value("Currency", currency, "symbol") or currency,
 		"online": rent_collection.get_payment_options(),
+		"food": bool(stay and stay.get("meal_plan") and mess.meals_of(stay.property)),
 		"read_only": subscription.skip_if_lapsed(),
 		"today": nowdate(),
 	}
@@ -506,3 +507,24 @@ def notify_managers(subject, message):
 				"email_content": message,
 			}
 		).insert(ignore_permissions=True)
+
+
+# ---------------------------------------------------------------- food
+
+
+@frappe.whitelist()
+def get_food():
+	stay = current_stay(current_tenant().name)
+	if not (stay and stay.get("meal_plan")):
+		frappe.throw(_("You don't have a meal plan."))
+	return mess.tenant_week(stay)
+
+
+@frappe.whitelist(methods=["POST"])
+def skip_meal(date, meal, skip=1):
+	stay = current_stay(current_tenant().name)
+	if not stay:
+		frappe.throw(_("You have no current stay."))
+	subscription.check_writable()
+	mess.set_skip(stay.name, date, meal, cint(skip))
+	return mess.tenant_week(stay)
