@@ -441,6 +441,12 @@ function when(value) {
 }
 
 onMounted(async () => {
+	if (!key) {
+		error.value =
+			"The link is missing its code. Open the full link your landlord sent you, or ask them to send it again.";
+		loading.value = false;
+		return;
+	}
 	try {
 		apply(await get(METHOD + "get_checkin", { key }));
 		step.value = data.value.status === "Details Submitted" ? 2 : 0;

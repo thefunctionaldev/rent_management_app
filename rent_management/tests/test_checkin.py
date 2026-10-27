@@ -72,6 +72,7 @@ class TestCheckin(IntegrationTestCase):
 
 		frappe.db.set_value(checkin.CHECKIN, again["name"], "expires_on", add_days(nowdate(), -1))
 		self.assertRaises(frappe.DoesNotExistError, self.as_guest, checkin.get_checkin, self.key)
+		self.assertRaises(frappe.DoesNotExistError, self.as_guest, checkin.get_checkin)  # no key at all
 		self.assertTrue(api.get_tenant(self.tenant.name)["checkin"]["expired"])
 		self.assertNotEqual(api.send_checkin(self.stay.name)["name"], again["name"])  # a fresh one
 

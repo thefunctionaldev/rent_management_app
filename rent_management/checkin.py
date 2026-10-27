@@ -194,7 +194,7 @@ def render_agreement(stay) -> str:
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=300, seconds=60 * 60)
-def get_checkin(key):
+def get_checkin(key=None):
 	doc = by_key(key)
 	tenant = frappe.get_doc("Tenant", doc.tenant)
 	stay = frappe.get_doc(ALLOTMENT, doc.allotment)
@@ -226,7 +226,7 @@ def get_checkin(key):
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60 * 60)
-def save_details(key, details, aadhaar_number=None, aadhaar_card=None, photo=None):
+def save_details(key=None, details=None, aadhaar_number=None, aadhaar_card=None, photo=None):
 	"""Step 1 and 2: the tenant's details, Aadhaar and photo. Images are data URLs."""
 	doc = by_key(key)
 	if doc.status == "Signed":
@@ -275,7 +275,7 @@ def code_hash(doc, code) -> str:
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=60 * 60)
-def send_code(key):
+def send_code(key=None):
 	"""A one-time code to sign the agreement."""
 	doc = by_key(key)
 	if doc.status != "Details Submitted":
@@ -324,7 +324,7 @@ def same_name(typed, full_name) -> bool:
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=20, seconds=60 * 60)
-def sign(key, name, agree=0, code=None):
+def sign(key=None, name=None, agree=0, code=None):
 	"""Step 3: sign the agreement by typing their name, ticking the box and entering the code."""
 	doc = frappe.get_doc(CHECKIN, by_key(key).name, for_update=True)
 	if doc.status == "Signed":
