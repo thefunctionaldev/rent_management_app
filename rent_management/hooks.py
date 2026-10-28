@@ -199,6 +199,7 @@ doc_events = {
 		"Staff Member",
 		"Staff Advance",
 		"Salary Slip",
+		"Rent Referral",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
@@ -209,7 +210,23 @@ doc_events["Rent Property"]["validate"] = [
 	"rent_management.subscription.check_writable",
 	"rent_management.subscription.check_property_limit",
 ]
-doc_events["Rent Payment"]["on_submit"] = "rent_management.notifications.on_payment_submit"
+doc_events["Rent Payment"]["on_submit"] = [
+	"rent_management.notifications.on_payment_submit",
+	"rent_management.referrals.on_payment",
+]
+doc_events["Rent Payment"]["on_cancel"] = "rent_management.referrals.on_payment"
+# referral credits on rent invoices, see rent_management/referrals.py
+doc_events["Tenant Rent Invoice"].update(
+	{
+		"after_insert": "rent_management.referrals.link_credits",
+		"on_cancel": "rent_management.referrals.release_credits",
+		"on_trash": [
+			"rent_management.subscription.check_writable",
+			"rent_management.referrals.release_credits",
+		],
+	}
+)
+doc_events["Rent Lead"]["on_update"] = "rent_management.referrals.sync_lead"
 doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
 
 # Scheduled Tasks

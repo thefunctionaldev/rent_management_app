@@ -43,6 +43,18 @@
 						<option v-for="s in sources" :key="s">{{ s }}</option>
 					</select>
 				</Field>
+				<Field
+					v-if="form.source === 'Referral'"
+					label="Referred by"
+					hint="A tenant who gets the referral reward"
+				>
+					<select v-model="form.referred_by" class="input" :disabled="moved">
+						<option value="">Nobody here</option>
+						<option v-for="t in tenants" :key="t.name" :value="String(t.name)">
+							{{ t.full_name }}<template v-if="t.room"> · {{ t.room }}</template>
+						</option>
+					</select>
+				</Field>
 			</div>
 
 			<div class="grid gap-4 sm:grid-cols-3">
@@ -222,6 +234,7 @@ const fields = [
 	"mobile_no",
 	"email_id",
 	"source",
+	"referred_by",
 	"property",
 	"room_type",
 	"move_in_date",
@@ -237,6 +250,7 @@ const form = reactive({
 	mobile_no: "",
 	email_id: "",
 	source: "Walk-in",
+	referred_by: "",
 	property: ui.property || activeProperties()[0]?.name || "",
 	room_type: "",
 	move_in_date: "",
@@ -248,11 +262,16 @@ const form = reactive({
 const token = reactive({ amount: "", mode: "Cash", reference: "" });
 const moved = computed(() => lead.value?.status === "Moved In");
 const roomTypes = useResource(() => get("get_room_types"), { initial: [] }).data;
+const tenants = useResource(
+	() => get("get_tenants", { status: "Active" }).then((r) => r.tenants || r),
+	{ initial: [] }
+).data;
 
 async function load() {
 	const data = await get("get_lead", { name: props.name });
 	lead.value = data;
 	for (const f of fields) form[f] = data[f] ?? "";
+	form.referred_by = data.referred_by ? String(data.referred_by) : ""; // tenant ids are numbers
 	form.visit_on = data.visit_on ? data.visit_on.slice(0, 16).replace(" ", "T") : "";
 	token.amount = data.token_amount || "";
 	if (data.token_status === "Reported") token.mode = "UPI";

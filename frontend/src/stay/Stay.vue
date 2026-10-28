@@ -1,5 +1,16 @@
 <template>
 	<div class="min-h-screen bg-slate-50 text-slate-900">
+		<p
+			v-if="listing?.referred_by"
+			class="bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium text-white"
+		>
+			{{ listing.referred_by.name }} sent you here<template
+				v-if="listing.referred_by.discount"
+			>
+				· you get {{ money(listing.referred_by.discount) }} off your first month when you
+				move in</template
+			>
+		</p>
 		<div v-if="loading" class="grid min-h-screen place-items-center">
 			<div
 				class="size-8 animate-spin rounded-full border-2 border-slate-200 border-t-brand-600"
@@ -483,6 +494,15 @@ import { money } from "@/utils";
 const METHOD = "rent_management.leads.";
 const slug = decodeURIComponent(window.location.pathname.replace(/^\/stay\/?/, "").split("/")[0]);
 const params = new URLSearchParams(window.location.search);
+// a tenant's referral link: kept while they look around the buildings
+const referralCode = (() => {
+	try {
+		if (params.get("ref")) sessionStorage.setItem("ref", params.get("ref"));
+		return params.get("ref") || sessionStorage.getItem("ref");
+	} catch {
+		return params.get("ref");
+	}
+})();
 
 const loading = ref(true);
 const error = ref("");
@@ -573,6 +593,7 @@ async function submit() {
 			building: slug,
 			...form,
 			book: form.book && canBook.value ? 1 : 0,
+			ref: referralCode,
 			visit_on:
 				wantsVisit.value && visitDay.value
 					? `${visitDay.value} ${visitTime.value}:00`
@@ -634,7 +655,10 @@ async function reportPaid() {
 
 onMounted(async () => {
 	try {
-		listing.value = await get(METHOD + "get_listing", slug ? { building: slug } : {});
+		listing.value = await get(METHOD + "get_listing", {
+			...(slug && { building: slug }),
+			...(referralCode && { ref: referralCode }),
+		});
 		if (params.get("booking")) await loadBooking(params.get("booking"));
 		const type = params.get("room");
 		if (type && building.value?.room_types.some((r) => r.type === type)) form.room_type = type;

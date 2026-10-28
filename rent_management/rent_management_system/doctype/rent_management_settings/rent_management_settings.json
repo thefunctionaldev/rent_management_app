@@ -65,7 +65,12 @@
   "owner_summary_day",
   "column_break_owner_summary",
   "owner_summary_phone",
-  "owner_summary_email"
+  "owner_summary_email",
+  "referrals_section",
+  "referrals_enabled",
+  "referral_reward",
+  "column_break_referrals",
+  "referral_friend_discount"
  ],
  "fields": [
   {
@@ -439,13 +444,43 @@
    "fieldtype": "Data",
    "label": "Owner's Email",
    "options": "Email"
+  },
+  {
+   "fieldname": "referrals_section",
+   "fieldtype": "Section Break",
+   "label": "Referrals"
+  },
+  {
+   "fieldname": "referrals_enabled",
+   "fieldtype": "Check",
+   "label": "Reward Tenants for Referring Friends"
+  },
+  {
+   "default": "1000",
+   "depends_on": "referrals_enabled",
+   "description": "Off the referrer's next rent, once their friend moves in and pays the first rent",
+   "fieldname": "referral_reward",
+   "fieldtype": "Currency",
+   "label": "Reward"
+  },
+  {
+   "fieldname": "column_break_referrals",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "500",
+   "depends_on": "referrals_enabled",
+   "description": "Off the friend's first rent",
+   "fieldname": "referral_friend_discount",
+   "fieldtype": "Currency",
+   "label": "Friend's Discount"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-28 09:50:59.526784",
+ "modified": "2026-10-28 09:57:14.153578",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

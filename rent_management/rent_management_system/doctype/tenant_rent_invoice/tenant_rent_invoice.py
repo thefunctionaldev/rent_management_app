@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, date_diff, flt, get_last_day, getdate, nowdate
 
-from rent_management import fees
+from rent_management import fees, referrals
 from rent_management.rent_management_system.doctype.meter_reading.meter_reading import (
 	add_meter_charges,
 	link_meter_charges,
@@ -28,6 +28,9 @@ class TenantRentInvoice(Document):
 		self.validate_duplicate()
 		self.set_billing_period()
 		self.calculate_totals()
+		if self.is_new() and not self.flags.skip_referral_credits:
+			referrals.add_credits(self)  # a friend's discount, or a reward for referring one
+			self.calculate_totals()
 		self.set_due_date()
 		if self.docstatus == 0:
 			fees.set_offer(self)

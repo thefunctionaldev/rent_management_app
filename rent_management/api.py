@@ -29,6 +29,7 @@ from rent_management import (
 	portal,
 	profit,
 	razorpay,
+	referrals,
 	register,
 	rent_collection,
 	saas,
@@ -1420,6 +1421,9 @@ SETTINGS_FIELDS = (
 	"owner_summary_day",
 	"owner_summary_phone",
 	"owner_summary_email",
+	"referrals_enabled",
+	"referral_reward",
+	"referral_friend_discount",
 )
 # write-only: the browser only learns whether they are set
 SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
@@ -1979,3 +1983,18 @@ def get_owner_summary(month=None, year=None, property=None):
 def send_owner_summary(month=None, year=None):
 	check_access()
 	return owner_summary.send(month, year)
+
+
+# ---------------------------------------------------------------- referrals
+
+
+@frappe.whitelist()
+def get_referrals(property=None):
+	check_access()
+	return referrals.get_referrals(property)
+
+
+@frappe.whitelist(methods=["POST"])
+def pay_out_referral(name, note=None):
+	check_access()
+	referrals.pay_out(name, note)

@@ -30,7 +30,7 @@ from frappe.utils import (
 	validate_email_address,
 )
 
-from rent_management import razorpay, rent_collection, subscription
+from rent_management import razorpay, referrals, rent_collection, subscription
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
 
 LEAD = "Rent Lead"
@@ -144,7 +144,7 @@ def get_building(slug):
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=600, seconds=60 * 60)
-def get_listing(building=None):
+def get_listing(building=None, ref=None):
 	only_when_listed()
 	settings = frappe.get_single(SETTINGS)
 	options = rent_collection.get_payment_options()
@@ -161,6 +161,7 @@ def get_listing(building=None):
 		"token": token_amount() if (options["razorpay"] or options["upi"]) else 0,
 		"currency_symbol": frappe.db.get_value("Currency", "INR", "symbol") or "₹",
 		"today": nowdate(),
+		"referred_by": referrals.referrer_on_listing(ref),
 	}
 
 
@@ -181,6 +182,7 @@ def enquire(
 	gender=None,
 	book=0,
 	website=None,
+	ref=None,
 ):
 	"""An enquiry from the listing page. `website` is a honeypot: people leave it empty."""
 	only_when_listed()
@@ -227,6 +229,7 @@ def enquire(
 	)
 	if not lead.lead_name:
 		frappe.throw(_("Please enter your name."))
+	referrals.on_enquiry(lead, ref)  # came through a tenant's link
 	lead.flags.ignore_permissions = True
 	lead.insert()
 
@@ -433,6 +436,7 @@ LEAD_FIELDS = (
 	"occupation",
 	"status",
 	"source",
+	"referred_by",
 	"visit_on",
 	"lost_reason",
 	"property",
@@ -446,6 +450,7 @@ LEAD_FIELDS = (
 LIST_FIELDS = [
 	"name",
 	*LEAD_FIELDS,
+	"referred_by_name",
 	"token_status",
 	"token_paid_on",
 	"token_mode",
@@ -550,6 +555,7 @@ def move_in(
 		notes=_("Booked through {0}").format(lead.name),
 	)
 
+	referrals.on_move_in(lead, tenant.name, allotment)  # before the first invoice, for the friend's discount
 	payments = record_token_as_rent(lead, tenant.name, allotment, allotment_date)
 
 	lead.update(

@@ -50,7 +50,66 @@
 			</button>
 		</div>
 
-		<div class="card">
+		<div v-if="status === 'referrals'" class="card">
+			<p
+				v-if="referrals.data"
+				class="border-b border-slate-100 px-5 py-3 text-sm text-slate-600"
+			>
+				{{ referrals.data.moved_in }} moved in through a friend ·
+				{{ money(referrals.data.rewarded) }} rewarded<template
+					v-if="referrals.data.to_reward"
+				>
+					· {{ money(referrals.data.to_reward) }} to credit on their next rent</template
+				>
+				<RouterLink
+					v-if="!referrals.data.enabled"
+					to="/settings"
+					class="ml-1 font-medium text-brand-600 hover:underline"
+					>Turn on rewards in Settings</RouterLink
+				>
+			</p>
+			<EmptyState
+				v-if="referrals.data && !referrals.data.referrals.length"
+				:icon="Gift"
+				title="No referrals yet"
+				description="Tenants share their link from the tenant app. When a friend moves in and pays, they get money off their rent."
+			/>
+			<ul v-else class="divide-y divide-slate-100">
+				<li
+					v-for="r in referrals.data?.referrals || []"
+					:key="r.name"
+					class="flex flex-wrap items-center gap-3 px-5 py-3"
+				>
+					<div class="min-w-48 flex-1">
+						<p class="font-medium">
+							{{ r.friend_name }}
+							<span class="text-sm font-normal text-slate-500"
+								>· referred by {{ r.referrer_name }}</span
+							>
+						</p>
+						<p class="text-xs text-slate-500">
+							{{ [r.property, r.friend_mobile].filter(Boolean).join(" · ") }} ·
+							{{ ago(r.creation) }}
+							<template v-if="r.reward_mode === 'Rent Credit'">
+								· credited on {{ r.reward_invoice }}</template
+							>
+							<template v-else-if="r.reward_mode === 'Paid Out'">
+								· paid out</template
+							>
+						</p>
+					</div>
+					<span v-if="r.reward_amount" class="tabular text-sm">{{
+						money(r.reward_amount)
+					}}</span>
+					<StatusBadge :status="r.status" />
+					<Button v-if="r.status === 'Earned'" size="sm" @click="payOut(r)"
+						>Paid in cash</Button
+					>
+				</li>
+			</ul>
+		</div>
+
+		<div v-else class="card">
 			<div v-if="loading && !leads.length" class="space-y-3 p-5">
 				<Skeleton v-for="i in 4" :key="i" class="h-12" />
 			</div>
@@ -80,7 +139,11 @@
 							<template v-if="l.move_in_date">
 								· moving in {{ shortDate(l.move_in_date) }}</template
 							>
-							· {{ l.source }} · {{ ago(l.creation) }}
+							· {{ l.source
+							}}<template v-if="l.referred_by_name">
+								by {{ l.referred_by_name }}</template
+							>
+							· {{ ago(l.creation) }}
 						</p>
 						<p
 							v-if="l.visit_on && l.status === 'Visit Scheduled'"
@@ -106,11 +169,11 @@
 </template>
 
 <script setup>
-import { CalendarClock, Globe, Plus, Share2, UserSearch } from "lucide-vue-next";
-import { computed, ref, watch } from "vue";
+import { CalendarClock, Gift, Globe, Plus, Share2, UserSearch } from "lucide-vue-next";
+import { computed, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import { get } from "@/api";
+import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
 import EmptyState from "@/components/EmptyState.vue";
@@ -118,16 +181,17 @@ import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import { openDialog } from "@/dialogs";
-import { boot, scope, toast } from "@/store";
+import { boot, bumpData, scope, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { money, shortDate } from "@/utils";
 
 const route = useRoute();
 const status = ref("open");
 const { data, loading, reload } = useResource(() =>
-	get("get_leads", { status: status.value, ...scope() })
+	get("get_leads", { status: status.value === "referrals" ? "open" : status.value, ...scope() })
 );
-watch(status, reload);
+watch(status, (value) => value !== "referrals" && reload());
+const referrals = reactive(useResource(() => get("get_referrals", scope())));
 watch(data, (d) => d && (boot.new_leads = d.counts.New || 0)); // the sidebar badge
 const leads = computed(() => data.value?.leads || []);
 const counts = computed(() => data.value?.counts || {});
@@ -139,7 +203,22 @@ const filters = computed(() => [
 		count: counts.value[s] || 0,
 	})),
 	{ value: "", label: "All", count: Object.values(counts.value).reduce((s, n) => s + n, 0) },
+	...(referrals.data?.enabled || referrals.data?.referrals.length
+		? [{ value: "referrals", label: "Referrals", count: referrals.data.referrals.length }]
+		: []),
 ]);
+
+async function payOut(r) {
+	if (!confirm(`Mark ${r.referrer_name}'s ${money(r.reward_amount)} reward as paid in cash?`))
+		return;
+	try {
+		await post("pay_out_referral", { name: r.name });
+		toast("Reward paid out");
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 
 const tokenClass = {
 	Paid: "bg-emerald-50 text-emerald-700",

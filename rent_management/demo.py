@@ -279,6 +279,7 @@ class Demo:
 		self.make_register()
 		self.make_staff()
 		self.make_fees()
+		self.make_referrals()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -1118,6 +1119,51 @@ class Demo:
 		)
 		frappe.clear_document_cache(SETTINGS, SETTINGS)
 		fees.apply_late_fees()
+
+	def make_referrals(self):
+		"""Deepak referred two friends: one moved in and paid, one has enquired."""
+		from rent_management import referrals
+
+		frappe.db.set_single_value(
+			SETTINGS, {"referrals_enabled": 1, "referral_reward": 1000, "referral_friend_discount": 500}
+		)
+		frappe.clear_document_cache(SETTINGS, SETTINGS)
+		deepak = frappe.db.get_value("Tenant", {"email_id": "deepak.reddy@example.com"})
+		friend = frappe.db.get_value(
+			ALLOTMENT,
+			{
+				"docstatus": 1,
+				"status": "Active",
+				"tenant": ("!=", deepak),
+				"allotment_date": (">=", add_months(self.today, -2)),
+			},
+			["name", "tenant", "tenant_name", "property", "allotment_date"],
+			as_dict=True,
+			order_by="allotment_date asc",
+		)
+		if not (deepak and friend):
+			return
+		referrals.code_for(deepak)
+		doc = frappe.get_doc(
+			{
+				"doctype": referrals.REFERRAL,
+				"referrer": deepak,
+				"friend_name": friend.tenant_name,
+				"friend_mobile": frappe.db.get_value("Tenant", friend.tenant, "mobile_no"),
+				"new_tenant": friend.tenant,
+				"allotment": friend.name,
+				"property": friend.property,
+				"status": "Earned",  # moved in and paid: off Deepak's next rent
+				"reward_amount": 1000,
+				"earned_on": add_days(friend.allotment_date, 2),
+			}
+		).insert()
+		self.backdate(referrals.REFERRAL, doc.name, add_days(friend.allotment_date, -12))
+		lead = frappe.db.get_value("Rent Lead", {"status": "New"}, order_by="creation desc")
+		if lead:
+			doc = frappe.get_doc("Rent Lead", lead)
+			doc.update({"source": "Referral", "referred_by": deepak})
+			doc.save()
 
 	# ------------------------------------------------------------ messages and logins
 

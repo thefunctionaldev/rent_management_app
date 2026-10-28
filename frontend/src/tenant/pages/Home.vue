@@ -130,6 +130,23 @@
 		</RouterLink>
 
 		<RouterLink
+			v-if="me.referrals"
+			to="/refer"
+			class="card flex items-center gap-3 p-4 transition hover:bg-slate-50"
+		>
+			<span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"
+				><Gift class="size-5"
+			/></span>
+			<div class="flex-1">
+				<p class="font-medium">Refer a friend</p>
+				<p class="text-sm text-slate-500">
+					Get {{ money(me.referral_reward) }} off your rent when they move in
+				</p>
+			</div>
+			<ChevronRight class="size-5 text-slate-400" />
+		</RouterLink>
+
+		<RouterLink
 			to="/away"
 			class="card flex items-center gap-3 p-4 transition hover:bg-slate-50"
 		>
@@ -164,7 +181,7 @@
 </template>
 
 <script setup>
-import { ChevronRight, CircleCheck, Luggage, PenLine, Wrench } from "lucide-vue-next";
+import { ChevronRight, CircleCheck, Gift, Luggage, PenLine, Wrench } from "lucide-vue-next";
 import { computed } from "vue";
 
 import { get } from "@/api";

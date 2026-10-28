@@ -1,0 +1,192 @@
+{
+ "actions": [],
+ "autoname": "REF-.YYYY.-.#####",
+ "creation": "2026-10-28 09:57:14.150484",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "referrer",
+  "referrer_name",
+  "friend_name",
+  "friend_mobile",
+  "status",
+  "column_break_referral",
+  "lead",
+  "new_tenant",
+  "allotment",
+  "property",
+  "reward_section",
+  "reward_amount",
+  "earned_on",
+  "reward_invoice",
+  "rewarded_on",
+  "reward_mode",
+  "column_break_reward",
+  "friend_discount",
+  "friend_discount_invoice",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "referrer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Referred By",
+   "options": "Tenant",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "referrer.full_name",
+   "fieldname": "referrer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Referred By (Name)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "friend_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Friend"
+  },
+  {
+   "fieldname": "friend_mobile",
+   "fieldtype": "Data",
+   "label": "Friend's Mobile",
+   "options": "Phone"
+  },
+  {
+   "default": "Enquired",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Enquired\nMoved In\nEarned\nRewarded\nNot Eligible"
+  },
+  {
+   "fieldname": "column_break_referral",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Rent Lead"
+  },
+  {
+   "fieldname": "new_tenant",
+   "fieldtype": "Link",
+   "label": "New Tenant",
+   "options": "Tenant"
+  },
+  {
+   "fieldname": "allotment",
+   "fieldtype": "Link",
+   "label": "Their Stay",
+   "options": "Tenant Space Allotment"
+  },
+  {
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "label": "Building",
+   "options": "Rent Property"
+  },
+  {
+   "fieldname": "reward_section",
+   "fieldtype": "Section Break",
+   "label": "Reward"
+  },
+  {
+   "fieldname": "reward_amount",
+   "fieldtype": "Currency",
+   "label": "Reward for the Referrer"
+  },
+  {
+   "fieldname": "earned_on",
+   "fieldtype": "Date",
+   "label": "Earned On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reward_invoice",
+   "fieldtype": "Link",
+   "label": "Credited On Invoice",
+   "options": "Tenant Rent Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rewarded_on",
+   "fieldtype": "Date",
+   "label": "Rewarded On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reward_mode",
+   "fieldtype": "Select",
+   "label": "Rewarded As",
+   "options": "\nRent Credit\nPaid Out",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_reward",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "friend_discount",
+   "fieldtype": "Currency",
+   "label": "Friend's First Month Discount"
+  },
+  {
+   "fieldname": "friend_discount_invoice",
+   "fieldtype": "Link",
+   "label": "Discount On Invoice",
+   "options": "Tenant Rent Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-28 09:57:14.150484",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Referral",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "friend_name"
+}

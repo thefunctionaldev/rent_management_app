@@ -207,6 +207,44 @@
 					</div>
 				</section>
 
+				<!-- referrals -->
+				<section class="card p-6">
+					<h2 class="font-semibold">Referrals</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						Tenants share a link to your listing page from the tenant app. You follow
+						referrals under Leads.
+					</p>
+					<div class="mt-2 divide-y divide-slate-100">
+						<Toggle
+							v-model="form.referrals_enabled"
+							label="Reward tenants for referring friends"
+							:hint="
+								form.listing_enabled
+									? 'Once the friend moves in and pays their first rent'
+									: 'Needs the listing page (below) to be published'
+							"
+						/>
+						<div v-if="form.referrals_enabled" class="grid gap-3 py-3 sm:grid-cols-2">
+							<Field label="Reward" hint="off the referrer's next rent">
+								<input
+									v-model.number="form.referral_reward"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+							<Field label="Friend's discount" hint="off their first rent">
+								<input
+									v-model.number="form.referral_friend_discount"
+									type="number"
+									min="0"
+									class="input tabular"
+								/>
+							</Field>
+						</div>
+					</div>
+				</section>
+
 				<!-- online collection -->
 				<section class="card p-6">
 					<h2 class="font-semibold">Online rent collection</h2>

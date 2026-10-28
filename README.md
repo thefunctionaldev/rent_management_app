@@ -241,6 +241,27 @@ day) and the owner's WhatsApp number (default: the landlord phone) and email. It
 WhatsApp account and email as reminders; the WhatsApp template is `rent_owner_summary` (see
 `owner_summary.py`).
 
+### Referrals
+
+Turn on **Settings > Referrals** (it needs the listing page) and set the reward for the tenant who
+refers (default ₹1,000 off their next rent) and the friend's discount (default ₹500 off their first
+rent).
+
+- **Tenants** share their link from the tenant app (*Refer a friend*): on WhatsApp, by copying it,
+  or with the phone's share sheet. The link opens the listing page with their code (`/stay?ref=CODE`)
+  and a note of who sent the friend and the discount they get.
+- **An enquiry** through the link is a lead from *Referral*, referred by that tenant. Managers can
+  also mark a walk-in or phone lead as referred by a tenant. Referring yourself (same mobile) doesn't
+  count, nor does a friend someone else already referred.
+- **When the friend moves in**, their first rent invoice gets the discount. **When they've paid a rent
+  invoice in full**, the reward is earned: the referrer is told (WhatsApp template
+  `rent_referral_reward`, see `referrals.py`) and managers get a notification. The reward comes off the
+  referrer's next rent invoice. If they have moved out, *Paid in cash* records it as a Marketing
+  expense.
+- Discounts and rewards are *Referral Credit* lines on the invoice. A cancelled or deleted invoice
+  gives them back, and they never take an invoice below zero (they wait for the next one).
+- **Leads > Referrals** lists every referral, what's been rewarded and what's waiting.
+
 ### Reminders and receipts (WhatsApp and email)
 
 A daily job sends rent reminders before the due date, on the due date and while overdue (interval and

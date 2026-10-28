@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate, random_string
 
-from rent_management import fees, mess, register, rent_collection, subscription
+from rent_management import fees, leads, mess, referrals, register, rent_collection, subscription
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -167,6 +167,8 @@ def get_boot():
 		"currency_symbol": frappe.db.get_value("Currency", currency, "symbol") or currency,
 		"online": rent_collection.get_payment_options(),
 		"food": bool(stay and stay.get("meal_plan") and mess.meals_of(stay.property)),
+		"referrals": referrals.enabled() and leads.listing_enabled(),
+		"referral_reward": flt(frappe.db.get_single_value("Rent Management Settings", "referral_reward")),
 		"read_only": subscription.skip_if_lapsed(),
 		"today": nowdate(),
 	}
@@ -631,3 +633,14 @@ def cancel_visitor(name):
 		frappe.throw(_("Visitor not found."), frappe.PermissionError)
 	frappe.db.set_value(register.VISITOR, name, "status", "Cancelled")
 	return get_register()
+
+
+# ---------------------------------------------------------------- referrals
+
+
+@frappe.whitelist()
+def get_referral():
+	tenant = current_tenant()
+	if not (referrals.enabled() and leads.listing_enabled()):
+		frappe.throw(_("Referrals aren't on."))
+	return referrals.for_tenant(tenant.name)
