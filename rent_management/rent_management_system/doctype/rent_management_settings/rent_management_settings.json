@@ -59,7 +59,13 @@
   "early_discount_enabled",
   "early_discount_type",
   "early_discount_value",
-  "early_discount_days"
+  "early_discount_days",
+  "owner_summary_section",
+  "owner_summary_enabled",
+  "owner_summary_day",
+  "column_break_owner_summary",
+  "owner_summary_phone",
+  "owner_summary_email"
  ],
  "fields": [
   {
@@ -396,13 +402,50 @@
    "fieldname": "early_discount_days",
    "fieldtype": "Int",
    "label": "Days Before the Due Date"
+  },
+  {
+   "fieldname": "owner_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Monthly Summary for the Owner"
+  },
+  {
+   "fieldname": "owner_summary_enabled",
+   "fieldtype": "Check",
+   "label": "Send the Owner a Monthly Summary"
+  },
+  {
+   "default": "2",
+   "depends_on": "owner_summary_enabled",
+   "description": "Day of the month the summary of last month is sent",
+   "fieldname": "owner_summary_day",
+   "fieldtype": "Int",
+   "label": "On Day"
+  },
+  {
+   "fieldname": "column_break_owner_summary",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "owner_summary_enabled",
+   "description": "Empty: the landlord phone",
+   "fieldname": "owner_summary_phone",
+   "fieldtype": "Data",
+   "label": "Owner's WhatsApp",
+   "options": "Phone"
+  },
+  {
+   "depends_on": "owner_summary_enabled",
+   "fieldname": "owner_summary_email",
+   "fieldtype": "Data",
+   "label": "Owner's Email",
+   "options": "Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-27 18:59:50.874577",
+ "modified": "2026-10-28 09:50:59.526784",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

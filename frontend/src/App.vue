@@ -162,6 +162,7 @@ import {
 	BarChart3,
 	Briefcase,
 	Building2,
+	ClipboardList,
 	Contact,
 	CreditCard,
 	DoorOpen,
@@ -179,9 +180,9 @@ import {
 	Sparkles,
 	TrendingUp,
 	Users,
-	Wallet,
 	UserSearch,
 	UtensilsCrossed,
+	Wallet,
 	Wrench,
 	Zap,
 } from "lucide-vue-next";
@@ -208,7 +209,10 @@ const nav = computed(() => [
 		: []),
 	{
 		label: "Overview",
-		items: [{ to: "/", label: "Dashboard", icon: LayoutDashboard }],
+		items: [
+			{ to: "/", label: "Dashboard", icon: LayoutDashboard },
+			{ to: "/summary", label: "Monthly report", icon: ClipboardList },
+		],
 	},
 	{
 		label: "Property",

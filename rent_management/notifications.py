@@ -14,6 +14,9 @@ Templates (create them in WhatsApp Manager, category Utility, language as config
 	rent_overdue   Hello {{1}}, your rent of {{2}} for {{3}} at {{4}} was due on {{5}} and is still unpaid. {{6}}
 	rent_receipt   Hello {{1}}, we have received {{2}} for your rent for {{3}} at {{4}}. Balance due: {{5}}. Thank you!
 	rent_request_update  Hello {{1}}, your request "{{2}}" is now {{3}}. {{4}}
+
+The owner's monthly summary (owner_summary.py) and referral rewards (referrals.py) have their
+own templates, listed there.
 """
 
 import re
@@ -33,6 +36,8 @@ TEMPLATES = {
 	"Overdue": "rent_overdue",
 	"Receipt": "rent_receipt",
 	"Request Update": "rent_request_update",
+	"Owner Summary": "rent_owner_summary",
+	"Referral": "rent_referral_reward",
 }
 GRAPH_URL = "https://graph.facebook.com"
 
@@ -148,7 +153,9 @@ def reminder_text(message_type, ctx, hint) -> tuple[str, list[str]]:
 	return text.format(*params), params
 
 
-def send(message_type, tenant, text, params, invoice=None, payment=None, subject=None) -> list[str]:
+def send(
+	message_type, tenant, text, params, invoice=None, payment=None, subject=None, html=None
+) -> list[str]:
 	"""Send one message on every enabled channel and log each attempt."""
 	settings = frappe.get_single(SETTINGS)
 	statuses = []
@@ -177,7 +184,7 @@ def send(message_type, tenant, text, params, invoice=None, payment=None, subject
 				log["provider_message_id"] = send_whatsapp(recipient, TEMPLATES[message_type], params)
 			else:
 				frappe.sendmail(
-					recipients=[recipient], subject=subject or text[:120], message=f"<p>{text}</p>"
+					recipients=[recipient], subject=subject or text[:120], message=html or f"<p>{text}</p>"
 				)
 			log["status"] = "Sent"
 		except Exception as e:

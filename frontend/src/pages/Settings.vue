@@ -159,6 +159,54 @@
 					</div>
 				</section>
 
+				<!-- owner's monthly summary -->
+				<section class="card p-6">
+					<h2 class="font-semibold">Monthly summary for the owner</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						Collected, spent, profit, beds taken and who still owes, on WhatsApp and by
+						email. See it any time under
+						<RouterLink to="/summary" class="text-brand-600 hover:underline"
+							>Monthly report</RouterLink
+						>.
+					</p>
+					<div class="mt-2 divide-y divide-slate-100">
+						<Toggle
+							v-model="form.owner_summary_enabled"
+							label="Send it every month"
+							hint="Last month's summary, on the day you choose"
+						/>
+						<div
+							v-if="form.owner_summary_enabled"
+							class="grid gap-3 py-3 sm:grid-cols-3"
+						>
+							<Field label="On day">
+								<input
+									v-model.number="form.owner_summary_day"
+									type="number"
+									min="1"
+									max="28"
+									class="input tabular"
+								/>
+							</Field>
+							<Field label="Owner's WhatsApp" hint="empty: landlord phone">
+								<input
+									v-model="form.owner_summary_phone"
+									type="tel"
+									class="input"
+									:placeholder="form.landlord_phone"
+								/>
+							</Field>
+							<Field label="Owner's email">
+								<input
+									v-model="form.owner_summary_email"
+									type="email"
+									class="input"
+								/>
+							</Field>
+						</div>
+					</div>
+				</section>
+
 				<!-- online collection -->
 				<section class="card p-6">
 					<h2 class="font-semibold">Online rent collection</h2>

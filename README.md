@@ -225,6 +225,22 @@ Set them up in **Settings > Late fees and discounts**.
 Late fees and discounts show on the invoice, the printed invoice and the tenant's bill, and count as
 rent invoiced in profit and loss.
 
+### Monthly report for the owner
+
+**Monthly report** (under Overview) shows how a month went, for all buildings or the one chosen at
+the top:
+- money collected against invoiced, money spent and where it went, and profit, each compared with
+  the month before
+- beds taken, a line per building, and who still owes and since when
+- who moved in and out, who leaves in the next 30 days, new enquiries and open requests
+
+*Open in WhatsApp* opens the summary as a ready message to the owner. That needs no WhatsApp
+account, only WhatsApp on the phone or computer. To have it sent automatically, turn on
+**Settings > Monthly summary for the owner**. Choose the day (last month's summary is sent once that
+day) and the owner's WhatsApp number (default: the landlord phone) and email. It's sent with the same
+WhatsApp account and email as reminders; the WhatsApp template is `rent_owner_summary` (see
+`owner_summary.py`).
+
 ### Reminders and receipts (WhatsApp and email)
 
 A daily job sends rent reminders before the due date, on the due date and while overdue (interval and

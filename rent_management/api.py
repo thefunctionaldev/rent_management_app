@@ -9,6 +9,7 @@ invoices, overpayment...) apply exactly as they do in the desk.
 """
 
 from collections import defaultdict
+from urllib.parse import quote
 
 import frappe
 from frappe import _
@@ -23,6 +24,7 @@ from rent_management import (
 	leads,
 	mess,
 	notifications,
+	owner_summary,
 	pictures,
 	portal,
 	profit,
@@ -1414,6 +1416,10 @@ SETTINGS_FIELDS = (
 	"early_discount_type",
 	"early_discount_value",
 	"early_discount_days",
+	"owner_summary_enabled",
+	"owner_summary_day",
+	"owner_summary_phone",
+	"owner_summary_email",
 )
 # write-only: the browser only learns whether they are set
 SECRET_FIELDS = ("razorpay_key_secret", "razorpay_webhook_secret", "whatsapp_token")
@@ -1938,3 +1944,38 @@ def split_invoice(name, instalments):
 	"""Split an invoice into instalments; an empty list removes them."""
 	check_access()
 	fees.split(name, instalments)
+
+
+# ---------------------------------------------------------------- the owner's monthly summary
+
+
+@frappe.whitelist()
+def get_owner_summary(month=None, year=None, property=None):
+	check_access()
+	summary = owner_summary.build(month, year, property)
+	owner = owner_summary.owner_contact()
+	text = owner_summary.text(summary)
+	number = notifications.whatsapp_number(owner.mobile_no)
+	return {
+		"summary": summary,
+		"text": text,
+		"whatsapp_url": f"https://wa.me/{number or ''}?text={quote(text)}",
+		"owner": {"mobile_no": owner.mobile_no, "email_id": owner.email_id},
+		"can_send": bool(
+			(owner.mobile_no and notifications.get_whatsapp_account())
+			or (owner.email_id and notifications.email_configured())
+		),
+		"last_sent": frappe.db.get_value(
+			notifications.LOG,
+			{"message_type": "Owner Summary", "status": "Sent"},
+			["creation", "channel", "recipient"],
+			as_dict=True,
+			order_by="creation desc",
+		),
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def send_owner_summary(month=None, year=None):
+	check_access()
+	return owner_summary.send(month, year)

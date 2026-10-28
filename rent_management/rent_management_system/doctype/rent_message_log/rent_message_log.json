@@ -27,7 +27,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Message",
-   "options": "Reminder\nDue Today\nOverdue\nReceipt\nRequest Update",
+   "options": "Reminder\nDue Today\nOverdue\nReceipt\nRequest Update\nOwner Summary\nReferral",
    "read_only": 1
   },
   {
@@ -115,7 +115,7 @@
  "grid_page_length": 50,
  "in_create": 1,
  "links": [],
- "modified": "2026-10-26 19:53:58.782637",
+ "modified": "2026-10-28 09:50:59.528403",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Message Log",
