@@ -77,13 +77,14 @@
 			<div class="border-t border-slate-100 p-3">
 				<RouterLink
 					v-if="!pwa.installed && (pwa.installPrompt || isIOS)"
-					to="/settings#this-phone"
+					:to="boot.access ? '/#this-phone' : '/settings#this-phone'"
 					class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-50"
 					@click="menuOpen = false"
 				>
 					<Smartphone class="size-4" /> Install the app
 				</RouterLink>
 				<a
+					v-if="!boot.access"
 					href="/app/tenant-space-allotment"
 					class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
 				>
@@ -125,7 +126,7 @@
 		<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 			<OfflineBanner />
 			<div
-				v-if="banner && $route.name !== 'billing'"
+				v-if="banner && !boot.access && $route.name !== 'billing'"
 				class="mb-6 flex flex-col gap-3 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
 				:class="bannerTones[banner.tone]"
 			>
@@ -206,14 +207,23 @@ import OfflineBanner from "./components/OfflineBanner.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";
 import { forgetOfflineData, isIOS, pwa } from "./pwa";
-import { activeProperties, boot, setProperty, ui } from "./store";
+import { activeProperties, boot, canUse, setProperty, ui } from "./store";
 import { date } from "./utils";
 
 const logo = `${import.meta.env.BASE_URL}favicon.svg`;
 const menuOpen = ref(false);
 const buildings = computed(() => activeProperties());
 
-const nav = computed(() => [
+// staff logins see only the pages of their areas
+const nav = computed(() =>
+	allNav.value
+		.map((group) => ({
+			...group,
+			items: group.items.filter((item) => item.everyone || canUse(item.area)),
+		}))
+		.filter((group) => group.items.length)
+);
+const allNav = computed(() => [
 	...(boot.is_control_site
 		? [
 				{
@@ -225,26 +235,38 @@ const nav = computed(() => [
 	{
 		label: "Overview",
 		items: [
-			{ to: "/", label: "Dashboard", icon: LayoutDashboard },
+			{
+				to: "/",
+				label: boot.access ? "Today" : "Dashboard",
+				icon: LayoutDashboard,
+				everyone: true,
+			},
 			{ to: "/summary", label: "Monthly report", icon: ClipboardList },
 		],
 	},
 	{
 		label: "Property",
 		items: [
-			{ to: "/leads", label: "Leads", icon: UserSearch, badge: boot.new_leads },
-			{ to: "/rooms", label: "Rooms", icon: DoorOpen },
-			{ to: "/tenants", label: "Tenants", icon: Users },
-			{ to: "/requests", label: "Requests", icon: Wrench },
+			{
+				to: "/leads",
+				label: "Leads",
+				icon: UserSearch,
+				badge: boot.new_leads,
+				area: "leads",
+			},
+			{ to: "/rooms", label: "Rooms", icon: DoorOpen, area: ["rooms", "leads"] },
+			{ to: "/tenants", label: "Tenants", icon: Users, area: ["rooms", "payments"] },
+			{ to: "/requests", label: "Requests", icon: Wrench, area: "requests" },
 			{
 				to: "/register",
 				label: "Register",
 				icon: NotebookPen,
 				badge: boot.leave_requests,
+				area: "register",
 			},
-			{ to: "/notices", label: "Notices", icon: Megaphone },
+			{ to: "/notices", label: "Notices", icon: Megaphone, area: "notices" },
 			...(boot.properties.some((p) => p.food_included && p.is_active)
-				? [{ to: "/food", label: "Food", icon: UtensilsCrossed }]
+				? [{ to: "/food", label: "Food", icon: UtensilsCrossed, area: "food" }]
 				: []),
 			{ to: "/staff", label: "Staff", icon: Contact },
 			{ to: "/buildings", label: "Buildings", icon: Building2 },
@@ -254,12 +276,12 @@ const nav = computed(() => [
 	{
 		label: "Billing",
 		items: [
-			{ to: "/invoices", label: "Invoices", icon: FileText },
-			{ to: "/payments", label: "Payments", icon: Wallet },
+			{ to: "/invoices", label: "Invoices", icon: FileText, area: "payments" },
+			{ to: "/payments", label: "Payments", icon: Wallet, area: "payments" },
 			{ to: "/deposits", label: "Deposits", icon: ShieldCheck },
-			{ to: "/electricity", label: "Electricity", icon: Zap },
-			{ to: "/outstanding", label: "Outstanding", icon: BarChart3 },
-			{ to: "/expenses", label: "Expenses", icon: Receipt },
+			{ to: "/electricity", label: "Electricity", icon: Zap, area: "meters" },
+			{ to: "/outstanding", label: "Outstanding", icon: BarChart3, area: "payments" },
+			{ to: "/expenses", label: "Expenses", icon: Receipt, area: "expenses" },
 			{ to: "/profit", label: "Profit & loss", icon: TrendingUp },
 		],
 	},
@@ -339,6 +361,7 @@ const dialogs = {
 	paySalary: lazy("PaySalaryDialog"),
 	splitInvoice: lazy("SplitInvoiceDialog"),
 	announcement: lazy("AnnouncementDialog"),
+	staffLogin: lazy("StaffLoginDialog"),
 };
 
 async function logout() {

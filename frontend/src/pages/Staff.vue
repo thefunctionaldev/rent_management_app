@@ -251,12 +251,15 @@
 					>
 				</p>
 				<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					<button
+					<div
 						v-for="s in staff.data.staff"
 						:key="s.name"
-						class="card flex flex-col p-5 text-left transition hover:ring-brand-200"
+						role="button"
+						tabindex="0"
+						class="card flex cursor-pointer flex-col p-5 text-left transition hover:ring-brand-200"
 						:class="!s.is_active && 'opacity-60'"
 						@click="openDialog('staff', { staff: s })"
+						@keydown.enter="openDialog('staff', { staff: s })"
 					>
 						<div class="flex items-center gap-3">
 							<Avatar :name="s.staff_name" :image="s.display_picture" size="lg" />
@@ -295,7 +298,30 @@
 								</dd>
 							</div>
 						</dl>
-					</button>
+						<button
+							v-if="s.is_active"
+							class="mt-4 flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-xs hover:bg-slate-50"
+							@click.stop="openDialog('staffLogin', { staff: s })"
+						>
+							<KeyRound
+								class="size-4 shrink-0"
+								:class="s.user ? 'text-emerald-600' : 'text-slate-400'"
+							/>
+							<span class="min-w-0 flex-1">
+								<template v-if="s.user">
+									<span class="block truncate font-medium text-slate-700">{{
+										s.user
+									}}</span>
+									<span class="block truncate text-slate-500">{{
+										areaList(s)
+									}}</span>
+								</template>
+								<span v-else class="font-medium text-brand-700"
+									>Give an app login</span
+								>
+							</span>
+						</button>
+					</div>
 				</div>
 			</template>
 		</template>
@@ -364,6 +390,7 @@ import {
 	Clock,
 	Contact,
 	HandCoins,
+	KeyRound,
 	MessageCircle,
 	Plus,
 	Trash2,
@@ -479,6 +506,28 @@ async function removeAdvance(a) {
 		toast(e.message, "error");
 	}
 }
+
+const AREA_NAMES = {
+	rooms: "Rooms",
+	payments: "Payments",
+	register: "Register",
+	requests: "Requests",
+	food: "Food",
+	leads: "Leads",
+	meters: "Electricity",
+	expenses: "Expenses",
+	notices: "Notices",
+};
+const areaList = (s) =>
+	[
+		...(s.app_areas || "")
+			.split(",")
+			.filter(Boolean)
+			.map((a) => AREA_NAMES[a] || a),
+		s.app_all_buildings ? "all buildings" : null,
+	]
+		.filter(Boolean)
+		.join(" · ");
 
 const ordinal = (n) => {
 	const s = ["th", "st", "nd", "rd"];

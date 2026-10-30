@@ -297,7 +297,7 @@ def get_staff(property=None) -> dict:
 		filters=filters,
 		fields=["name", "staff_name", "role", "property", "mobile_no", "display_picture", "monthly_salary",
 			"pay_day", "joining_date", "leaving_date", "is_active", "payment_mode", "upi_id", "bank_account_no",
-			"ifsc_code", "address", "emergency_contact", "notes"],
+			"ifsc_code", "address", "emergency_contact", "notes", "user", "app_areas", "app_all_buildings"],
 		order_by="is_active desc, staff_name asc",
 	)  # fmt: skip
 	advances = frappe.get_all(

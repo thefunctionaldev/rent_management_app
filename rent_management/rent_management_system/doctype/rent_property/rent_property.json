@@ -237,7 +237,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-27 18:32:04.480746",
+ "modified": "2026-10-30 17:20:35.512467",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",
@@ -267,6 +267,11 @@
    "role": "Rent Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Rent Staff"
   }
  ],
  "row_format": "Dynamic",

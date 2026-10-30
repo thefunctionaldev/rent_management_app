@@ -343,7 +343,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-27 18:22:37.776074",
+ "modified": "2026-10-30 17:20:35.412096",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",
@@ -376,6 +376,18 @@
    "report": 1,
    "role": "Rent Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Staff",
    "submit": 1,
    "write": 1
   }

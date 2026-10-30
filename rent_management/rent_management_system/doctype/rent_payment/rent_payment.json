@@ -163,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 18:58:16.113271",
+ "modified": "2026-10-30 17:20:35.501748",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Payment",
@@ -197,6 +197,18 @@
    "report": 1,
    "role": "Rent Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Staff",
    "submit": 1,
    "write": 1
   }

@@ -194,6 +194,29 @@ The **Staff** page (under Property) keeps who works at each building and pays th
   (less what it recovered), so profit and loss shows what each building really spends on staff. These
   expenses can only be changed from the Staff page.
 
+### Staff logins (limited access)
+
+Give a staff member their own login to the manager app on the **Staff** page: *Give an app login* on
+their card. Enter their email, tick what they can use, and send them the link to set a password (by
+email automatically, or *Send it on WhatsApp*).
+- **Areas:** rooms and tenants; rent and payments; night attendance, leave and visitors; requests
+  and repairs; food and menu; leads and bookings; electricity readings; expenses; the notice board.
+  Their role pre-ticks a sensible set (a warden gets rooms, payments, the register, requests,
+  electricity and notices; a cook gets food).
+- **Building:** a login is for the building they work at, unless *All buildings* is ticked.
+- **Never for staff:** profit and loss, the monthly report, staff and salaries, deposits, buildings,
+  import and export, settings, the subscription, Aadhaar numbers, and making or deleting invoices.
+
+Staff open the app at `/rent` (and install it on their phone). They see a **Today** page with their
+quick actions: attendance status, leave requests, visitors inside, payments to confirm, open requests
+and the kitchen count. They get the notifications of their areas for their building. Change a login
+or *Remove login* (they're logged out at once) from the same card. Staff logins don't count towards
+the plan's user limit, which is for managers.
+
+The server enforces this, not just the menus. Every endpoint checks the login's areas, a one-building
+login can only ask for its building, and Frappe's record permissions (the `Rent Staff` role, no Desk)
+only show the records of their areas and building. See `rent_management/access.py`.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

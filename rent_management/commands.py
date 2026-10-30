@@ -200,6 +200,8 @@ def rent_demo_data(context, password="demo@1234"):
 		)
 		click.echo(f"Manager app: {frappe.utils.get_url('/rent')}  {summary['manager_login']} / {password}")
 		click.echo(f"Tenant app:  {frappe.utils.get_url('/tenant')}  {summary['tenant_login']} / {password}")
+		if summary.get("staff_login"):
+			click.echo(f"Warden:      {frappe.utils.get_url('/rent')}  {summary['staff_login']} / {password}")
 		click.echo("Administrator can see everything too.")
 	finally:
 		frappe.destroy()

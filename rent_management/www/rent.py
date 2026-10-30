@@ -12,7 +12,7 @@ def get_context(context):
 		frappe.local.flags.redirect_location = "/login?redirect-to=" + frappe.utils.quote(frappe.request.path)
 		raise frappe.Redirect
 
-	if not set(frappe.get_roles()) & {"System Manager", "Rent Manager"}:
+	if not set(frappe.get_roles()) & {"System Manager", "Rent Manager", "Rent Staff"}:
 		frappe.throw(_("You need the Rent Manager role to open this page."), frappe.PermissionError)
 
 	context.csrf_token = frappe.sessions.get_csrf_token()

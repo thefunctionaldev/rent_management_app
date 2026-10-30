@@ -1273,7 +1273,20 @@ class Demo:
 			).insert(ignore_permissions=True)
 		update_password(tenant.email_id, self.password)
 		tenant.db_set("user", tenant.email_id)
-		return {"manager_login": manager, "tenant_login": tenant.email_id, "password": self.password}
+		# the warden of Sunrise PG has a login for the register, payments, requests...
+		from rent_management import access
+
+		warden = frappe.db.get_value("Staff Member", {"staff_name": "Manjunath Gowda"})
+		staff_login = "warden@example.com"
+		if warden:
+			access.give_login(warden, staff_login, access.PRESETS["Warden"])
+			update_password(staff_login, self.password)
+		return {
+			"manager_login": manager,
+			"tenant_login": tenant.email_id,
+			"staff_login": staff_login,
+			"password": self.password,
+		}
 
 
 VERHOEFF_D = [

@@ -16,6 +16,7 @@ from frappe import _
 from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, nowdate
 
 from rent_management import (
+	access,
 	checkin,
 	data_import,
 	fees,
@@ -146,7 +147,8 @@ PAYMENT_LIST_FIELDS = [
 
 
 def check_access():
-	frappe.only_for(ALLOWED_ROLES)
+	"""Managers can use every endpoint; staff logins only those of their areas (access.py)."""
+	access.check_access()
 
 
 def has_app_permission():
@@ -185,8 +187,9 @@ def get_boot():
 		"months": MONTHS,
 		"today": nowdate(),
 		"properties": get_properties(),
-		"new_leads": frappe.db.count(leads.LEAD, {"status": "New"}),
-		"leave_requests": frappe.db.count(register.LEAVE, {"status": "Requested"}),
+		"new_leads": frappe.db.count(leads.LEAD, {"status": "New"}) if can("leads") else 0,
+		"leave_requests": frappe.db.count(register.LEAVE, {"status": "Requested"}) if can("register") else 0,
+		"access": staff_boot(),
 		"is_control_site": saas.is_control_site() and "System Manager" in frappe.get_roles(),
 		"agreement_defaults": {
 			field: frappe.db.get_single_value("Rent Management Settings", f"default_{key}")
@@ -199,6 +202,58 @@ def get_boot():
 		},
 		"subscription": subscription.get_state(),
 	}
+
+
+def can(area) -> bool:
+	"""Whether this login can use an area (managers can use all)."""
+	staff = access.staff_access()
+	return staff is None or area in staff.areas
+
+
+def staff_boot() -> dict | None:
+	staff = access.staff_access()
+	if staff is None:
+		return None
+	return {"areas": sorted(staff.areas), "building": staff.building, "staff_name": staff.staff_name}
+
+
+@frappe.whitelist()
+def get_staff_home(property=None):
+	"""A staff login's home page: what needs doing today, in their areas."""
+	check_access()
+	staff = access.staff_access()
+	areas = staff.areas if staff else set(access.AREAS)
+	base = {"property": property} if property else {}
+	home = {}
+	if "register" in areas:
+		home["register"] = {
+			"leave_requests": frappe.db.count(register.LEAVE, {**base, "status": "Requested"}),
+			"visitors_inside": frappe.db.count(register.VISITOR, {**base, "status": "Inside"}),
+			"attendance_taken": bool(
+				frappe.db.exists(register.ATTENDANCE, {**base, "date": nowdate()})
+				if property
+				else frappe.db.count(register.ATTENDANCE, {"date": nowdate()})
+			),
+		}
+	if "requests" in areas:
+		home["requests"] = frappe.get_all(
+			"Maintenance Request",
+			filters={**base, "status": ("in", ("Open", "In Progress"))},
+			fields=["name", "subject", "room", "priority", "status", "creation"],
+			order_by="creation desc",
+			limit=5,
+		)
+	if "payments" in areas:
+		home["payments_to_confirm"] = frappe.db.count("Rent Payment", {**base, "docstatus": 0})
+		home["overdue"] = frappe.db.count(
+			"Tenant Rent Invoice",
+			{**base, "docstatus": 1, "outstanding_amount": (">", 0), "next_due_date": ("<", nowdate())},
+		)
+	if "leads" in areas:
+		home["new_leads"] = frappe.db.count(leads.LEAD, {**base, "status": "New"})
+	if "food" in areas and property:
+		home["food"] = mess.kitchen_count(property, nowdate()) if mess.meals_of(property) else []
+	return home
 
 
 # ---------------------------------------------------------------- dashboard
@@ -444,6 +499,9 @@ def get_properties():
 		fields=["name", "image", "listing_slug", *PROPERTY_FIELDS],
 		order_by="is_active desc, creation asc",
 	)
+	staff = access.staff_access()
+	if staff and staff.building:
+		properties = [p for p in properties if p.name == staff.building]  # a staff login for one building
 	for prop in properties:
 		prop.update(rooms[prop.name])
 	return properties
@@ -2036,3 +2094,24 @@ def take_down_notice(name):
 def delete_notice(name):
 	check_access()
 	notices.delete(name)
+
+
+# ---------------------------------------------------------------- staff logins (managers only)
+
+
+@frappe.whitelist()
+def get_staff_access_options():
+	check_access()
+	return {"areas": [{"value": k, "label": v} for k, v in access.AREAS.items()], "presets": access.PRESETS}
+
+
+@frappe.whitelist(methods=["POST"])
+def give_staff_login(staff, email, areas, all_buildings=0):
+	check_access()
+	return access.give_login(staff, email, areas, all_buildings)
+
+
+@frappe.whitelist(methods=["POST"])
+def remove_staff_login(staff):
+	check_access()
+	access.remove_login(staff)

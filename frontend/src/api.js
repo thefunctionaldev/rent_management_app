@@ -4,6 +4,11 @@ const APP_METHOD = "rent_management.api.";
 
 export class ApiError extends Error {}
 
+// sent with every call: a staff login for one building always asks for that building
+// (endpoints that don't take an argument ignore it)
+const fixedArgs = {};
+export const setFixedArgs = (args) => Object.assign(fixedArgs, args);
+
 function csrfToken() {
 	const token = window.csrf_token;
 	// the placeholder is left as-is when running under `yarn dev`
@@ -29,6 +34,7 @@ function errorMessage(data, response) {
 }
 
 async function request(method, args = {}, httpMethod = "POST") {
+	args = { ...args, ...fixedArgs };
 	let url = `/api/method/${method.includes(".") ? method : APP_METHOD + method}`;
 	const options = {
 		method: httpMethod,

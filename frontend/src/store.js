@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 
-import { get } from "./api";
+import { get, setFixedArgs } from "./api";
 
 export const boot = reactive({
 	loaded: false,
@@ -45,7 +45,20 @@ export const activeProperties = () => boot.properties.filter((p) => p.is_active)
 
 export async function loadBoot() {
 	Object.assign(boot, await get("get_boot"), { loaded: true });
-	if (ui.property && !boot.properties.some((p) => p.name === ui.property)) setProperty("");
+	if (boot.access?.building) {
+		// a staff login for one building: always that building
+		ui.property = boot.access.building;
+		setFixedArgs({ property: boot.access.building });
+	} else if (ui.property && !boot.properties.some((p) => p.name === ui.property))
+		setProperty("");
+}
+
+// staff logins can use only their areas (rent_management/access.py); managers everything.
+// `areas` is one area or a list (any of them will do); none means managers only.
+export function canUse(areas) {
+	if (!boot.access) return true;
+	if (!areas) return false;
+	return [].concat(areas).some((a) => boot.access.areas.includes(a));
 }
 
 export async function reloadProperties() {

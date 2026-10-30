@@ -383,6 +383,8 @@ def notify_managers(doc, subject):
 		subject,
 		subject + ". " + _("See their profile: {0}").format(get_url(f"/rent/tenants/{tenant}")),
 		link=f"/rent/tenants/{tenant}",
+		area="rooms",
+		property=frappe.db.get_value("Tenant Space Allotment", doc.allotment, "property"),
 	)
 
 

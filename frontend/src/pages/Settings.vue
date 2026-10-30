@@ -497,28 +497,7 @@
 
 			<div class="space-y-6">
 				<!-- this phone: install and notifications -->
-				<section id="this-phone" class="card space-y-4 p-5">
-					<h2 class="font-semibold">This phone</h2>
-					<InstallCard />
-					<div class="border-t border-slate-100 pt-4">
-						<Toggle
-							:model-value="pwa.push === 'on'"
-							:disabled="
-								pushBusy || pwa.push === 'unsupported' || pwa.push === 'blocked'
-							"
-							label="Notifications on this phone"
-							:hint="pushHint"
-							@update:model-value="togglePush"
-						/>
-						<button
-							v-if="pwa.push === 'on'"
-							class="text-xs font-medium text-brand-600 hover:underline"
-							@click="testPush"
-						>
-							Send a test notification
-						</button>
-					</div>
-				</section>
+				<ThisPhone />
 
 				<!-- message log -->
 				<aside class="card h-fit">
@@ -562,9 +541,8 @@ import Field from "@/components/Field.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import SecretField from "@/components/SecretField.vue";
 import Skeleton from "@/components/Skeleton.vue";
-import InstallCard from "@/components/InstallCard.vue";
+import ThisPhone from "@/components/ThisPhone.vue";
 import Toggle from "@/components/Toggle.vue";
-import { disablePush, enablePush, isIOS, pwa } from "@/pwa";
 import { toast } from "@/store";
 import { useResource } from "@/useResource";
 import { shortDate } from "@/utils";
@@ -603,40 +581,6 @@ const whatsappHint = computed(() => {
 		return "Available on Growth and Pro, or with your own WhatsApp Business number";
 	return "Not set up yet";
 });
-
-// ---------------------------------------------------------------- this phone
-
-const pushBusy = ref(false);
-const pushHint = computed(
-	() =>
-		({
-			on: "New leads, leave requests and payments to confirm",
-			off: "New leads, leave requests and payments to confirm, even when the app is closed",
-			blocked: "Blocked for this site. Allow notifications in the browser's site settings.",
-			unsupported: isIOS
-				? "On iPhone, add the app to your home screen first, then turn them on from there"
-				: "This browser can't show notifications",
-		}[pwa.push] || "")
-);
-async function togglePush(on) {
-	pushBusy.value = true;
-	try {
-		await (on ? enablePush() : disablePush());
-		toast(on ? "Notifications are on for this phone" : "Notifications are off for this phone");
-	} catch (e) {
-		toast(e.message, "error");
-	} finally {
-		pushBusy.value = false;
-	}
-}
-async function testPush() {
-	try {
-		await post("rent_management.pwa.test_push");
-		toast("Sent. It should show on this phone in a few seconds");
-	} catch (e) {
-		toast(e.message, "error");
-	}
-}
 
 const saving = ref(false);
 async function save() {

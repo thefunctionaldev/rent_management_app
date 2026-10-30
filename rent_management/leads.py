@@ -425,6 +425,8 @@ def notify_managers(lead, subject, message):
 		subject,
 		message + " " + _("Open it in Leads: {0}").format(get_url(f"/rent/leads?lead={lead.name}")),
 		link=f"/rent/leads?lead={lead.name}",
+		area="leads",
+		property=lead.property,
 	)
 
 

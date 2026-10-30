@@ -16,6 +16,10 @@
   "joining_date",
   "leaving_date",
   "is_active",
+  "login_section",
+  "user",
+  "app_areas",
+  "app_all_buildings",
   "payment_section",
   "payment_mode",
   "upi_id",
@@ -153,11 +157,39 @@
    "fieldname": "notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "login_section",
+   "fieldtype": "Section Break",
+   "label": "App Login"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "Login",
+   "options": "User",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "description": "Areas of the manager app, set from the Staff page",
+   "fieldname": "app_areas",
+   "fieldtype": "Small Text",
+   "label": "Can Use",
+   "read_only": 1
+  },
+  {
+   "description": "Off: only the building they work at",
+   "fieldname": "app_all_buildings",
+   "fieldtype": "Check",
+   "label": "All Buildings",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-27 18:49:40.069957",
+ "modified": "2026-10-30 17:20:35.513957",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Staff Member",

@@ -63,8 +63,19 @@ website_route_rules = [
 # the apps' manifests and service workers (/rent/sw.js...), see rent_management/pwa.py
 page_renderer = ["rent_management.pwa.AppFilesRenderer"]
 
-# tenants (website users) land in the tenant app after logging in
-role_home_page = {"Rent Tenant": "tenant"}
+# tenants (website users) land in the tenant app after logging in, staff logins in the manager app
+role_home_page = {"Rent Tenant": "tenant", "Rent Staff": "rent"}
+
+# staff logins only see the records of their areas and building, see rent_management/access.py
+_staff_doctypes = (
+	"Tenant", "Tenant Space Allotment", "Tenant Space", "Room Inspection", "Tenant Check-in",
+	"Tenant Rent Invoice", "Rent Payment", "Night Attendance", "Tenant Leave", "Visitor Log", "Meal Opt-out",
+	"Mess Menu", "Maintenance Request", "Rent Lead", "Meter Reading", "Property Expense", "Rent Notice",
+)  # fmt: skip
+has_permission = {doctype: "rent_management.access.has_permission" for doctype in _staff_doctypes}
+permission_query_conditions = {
+	doctype: "rent_management.access.query_conditions" for doctype in _staff_doctypes
+}
 
 add_to_apps_screen = [
 	{

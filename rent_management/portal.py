@@ -385,6 +385,8 @@ def report_payment(name, amount, reference_no=None, payment_date=None, mode_of_p
 			payment.reference_no or "-"
 		),
 		link="/rent/payments",
+		area="payments",
+		property=invoice.property,
 	)
 	return payment.name
 
@@ -486,6 +488,8 @@ def create_request(subject, category, description=None, priority="Medium"):
 		_("New request from {0}: {1}").format(tenant.full_name, request.subject),
 		_("Room {0} · {1} · {2} priority").format(request.room or "-", category, priority),
 		link="/rent/requests",
+		area="requests",
+		property=request.get("property"),
 	)
 	return request.name
 
@@ -509,16 +513,22 @@ def give_notice(vacate_date=None):
 			stay.room, frappe.utils.formatdate(result["expected_vacate_date"])
 		),
 		link=f"/rent/tenants/{tenant.name}",
+		area="rooms",
+		property=stay.property,
 	)
 	return result
 
 
-def notify_managers(subject, message, link=None):
-	"""An email and an app notification (and a phone notification, see pwa.py) to every manager.
-	`link` is the page in the manager app it opens, like /rent/register?tab=leave."""
+def notify_managers(subject, message, link=None, area=None, property=None):
+	"""An email and an app notification (and a phone notification, see pwa.py) to every manager,
+	and to the staff logins for that area (and building). `link` is the page in the manager app
+	it opens, like /rent/register?tab=leave."""
+	from rent_management import access
 	from rent_management.notifications import email_configured
 
 	recipients = subscription.get_manager_users()
+	if area:
+		recipients += [u for u in access.staff_users(area, property) if u not in recipients]
 	if recipients and email_configured():
 		frappe.sendmail(recipients=recipients, subject=subject, message=f"<p>{message}</p>")
 	for user in recipients:
