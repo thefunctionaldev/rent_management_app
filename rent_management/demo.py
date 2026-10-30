@@ -260,6 +260,7 @@ class Demo:
 		self.check = random.Random(31)  # and so do the room checklists
 
 	def run(self) -> dict:
+		frappe.flags.no_activity_log = True  # six months made at once; a recent week is written at the end
 		settings = frappe.get_single(SETTINGS)
 		send_receipts = settings.send_receipts
 		settings.update({**LANDLORD, "send_receipts": 0})  # no receipts for the past
@@ -282,6 +283,8 @@ class Demo:
 		self.make_referrals()
 		self.make_notices()
 		logins = self.make_logins()
+		frappe.flags.no_activity_log = False
+		self.make_activity(logins["manager_login"], logins.get("staff_login"))
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
 		frappe.clear_messages()
@@ -1239,6 +1242,58 @@ class Demo:
 			}
 		).insert(ignore_permissions=True)
 		self.backdate("Rent Message Log", doc.name, date)
+
+	def make_activity(self, manager, warden):
+		"""The last week of the activity log, from what really happened in it."""
+		from rent_management import activity
+
+		rng = random.Random(83)  # its own sequence, so the rest of the data stays the same
+		since = add_days(self.today, -7)
+
+		def at(day, user, write):
+			"""Write one entry as that user, dated on the day."""
+			before = set(frappe.get_all(activity.ACTIVITY, pluck="name"))
+			frappe.set_user(user or "Administrator")
+			try:
+				write()
+			finally:
+				frappe.set_user("Administrator")
+			day = min(getdate(day), getdate(self.today))  # never in the future
+			for name in set(frappe.get_all(activity.ACTIVITY, pluck="name")) - before:
+				when = get_datetime(f"{day} {rng.randint(8, 21):02d}:{rng.randint(0, 59):02d}:00")
+				frappe.db.set_value(
+					activity.ACTIVITY, name, {"creation": when, "modified": when}, update_modified=False
+				)
+
+		for name in frappe.get_all(
+			"Rent Payment", filters={"docstatus": 1, "payment_date": (">=", since)}, pluck="name"
+		):
+			doc = frappe.get_doc("Rent Payment", name)
+			at(doc.payment_date, doc.collected_by or manager, lambda doc=doc: activity.payment_submitted(doc))
+		for name in frappe.get_all("Property Expense", filters={"expense_date": (">=", since)}, pluck="name"):
+			doc = frappe.get_doc("Property Expense", name)
+			at(doc.expense_date, doc.paid_by or manager, lambda doc=doc: activity.expense_added(doc))
+		for name in frappe.get_all(
+			"Cash Handover", filters={"handed_on": (">=", add_days(self.today, -40))}, pluck="name"
+		):
+			doc = frappe.get_doc("Cash Handover", name)
+			at(doc.handed_on, doc.from_user, lambda doc=doc: activity.handover_added(doc))
+		leave = frappe.db.get_value(
+			"Tenant Leave", {"status": "Approved", "from_date": (">=", since)}, "name"
+		)
+		if leave and warden:
+			doc = frappe.get_doc("Tenant Leave", leave)
+			at(add_days(self.today, -2), warden, lambda doc=doc: activity.log("Register",
+				f"approved the leave of {doc.tenant_name} ({activity.day(doc.from_date)} to "
+				f"{activity.day(doc.to_date)})", doc))  # fmt: skip
+		at(add_days(self.today, -3), manager, lambda: activity.log("Settings",
+			"changed the settings: Charge a Late Fee: on; Late Fee Amount: (empty) → 200; Grace Days: 3"))  # fmt: skip
+		tenant = frappe.db.get_value(
+			"Tenant", {"email_id": "deepak.reddy@example.com"}, ["name", "full_name"], as_dict=True
+		)
+		if tenant:
+			at(add_days(self.today, -1), manager, lambda: activity.log("Privacy",
+				f"viewed the Aadhaar number of {tenant.full_name}", tenant=tenant.name))  # fmt: skip
 
 	def make_cash(self, manager, warden):
 		"""The warden collects Sunrise PG's cash and hands it to the manager; the manager the rest."""

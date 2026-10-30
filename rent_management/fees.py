@@ -215,6 +215,17 @@ def waive_late_fee(name, waive=1):
 	invoice.db_set("late_fee_waived", cint(waive), update_modified=False)
 	invoice.set_status(update=True)
 	invoice.add_comment("Info", _("Late fee waived") if cint(waive) else _("Late fee charged again"))
+	from rent_management import activity
+
+	activity.log(
+		"Invoices",
+		(
+			_("waived the late fee on the {0} {1} invoice of {2}")
+			if cint(waive)
+			else _("charged the late fee again on the {0} {1} invoice of {2}")
+		).format(invoice.billing_month, invoice.billing_year, invoice.tenant_name),
+		invoice,
+	)
 
 
 # ---------------------------------------------------------------- instalments
@@ -260,6 +271,15 @@ def split(name, instalments):
 	invoice.early_discount_offer = 0
 	recalculate(invoice, update=True)
 	invoice.set_status(update=True)
+	from rent_management import activity
+
+	activity.log(
+		"Invoices",
+		_("split the {0} {1} invoice of {2} into {3} instalments").format(
+			invoice.billing_month, invoice.billing_year, invoice.tenant_name, len(rows)
+		),
+		invoice,
+	)
 	invoice.add_comment(
 		"Info",
 		_("Split into {0} instalments: {1}").format(

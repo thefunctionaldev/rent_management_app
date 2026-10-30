@@ -17,6 +17,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 
 from rent_management import (
 	access,
+	activity,
 	cash,
 	checkin,
 	data_import,
@@ -680,7 +681,12 @@ def save_tenant(data):
 @frappe.whitelist(methods=["POST"])
 def reveal_aadhaar(name):
 	check_access()
-	return frappe.get_doc("Tenant", name).reveal_aadhar()
+	tenant = frappe.get_doc("Tenant", name)
+	number = tenant.reveal_aadhar()
+	activity.log(
+		"Privacy", _("viewed the Aadhaar number of {0}").format(tenant.full_name), tenant, tenant=tenant.name
+	)
+	return number
 
 
 # ---------------------------------------------------------------- allotments
@@ -2143,3 +2149,12 @@ def confirm_cash_handover(name, accept=1):
 def cancel_cash_handover(name):
 	check_access()
 	cash.cancel(name)
+
+
+# ---------------------------------------------------------------- activity log (managers only)
+
+
+@frappe.whitelist()
+def get_activity(property=None, user=None, category=None, from_date=None, to_date=None):
+	check_access()
+	return activity.get_activity(property, user, category, from_date, to_date)

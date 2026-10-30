@@ -181,6 +181,7 @@ import {
 	FileText,
 	FileUp,
 	HandCoins,
+	History,
 	LayoutDashboard,
 	Lock,
 	LogOut,
@@ -243,6 +244,7 @@ const allNav = computed(() => [
 				everyone: true,
 			},
 			{ to: "/summary", label: "Monthly report", icon: ClipboardList },
+			{ to: "/activity", label: "Activity", icon: History },
 		],
 	},
 	{

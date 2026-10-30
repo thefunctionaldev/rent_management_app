@@ -256,6 +256,16 @@ def give_login(staff_name, email, areas, all_buildings=0) -> dict:
 		}
 	)
 	frappe.local.rent_staff_access = {}
+	from rent_management import activity
+
+	what = ", ".join(str(AREAS[a]).lower() for a in areas)
+	activity.log(
+		"Staff",
+		(
+			_("gave {0} a login ({1}) for {2}") if new_login else _("changed the login of {0} ({1}) to {2}")
+		).format(staff.staff_name, user.name, what),
+		staff,
+	)
 	if not new_login:
 		return {"user": user.name, "link": None}  # only what they can do changed
 
@@ -294,6 +304,9 @@ def remove_login(staff_name):
 		clear_sessions(user.name, force=True)
 	staff.db_set({"user": None, "app_areas": None})
 	frappe.local.rent_staff_access = {}
+	from rent_management import activity
+
+	activity.log("Staff", _("removed the login of {0}").format(staff.staff_name), staff)
 
 
 def staff_users(area, property=None) -> list[str]:

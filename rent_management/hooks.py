@@ -251,8 +251,45 @@ doc_events["Tenant Rent Invoice"].update(
 )
 doc_events["Rent Lead"]["on_update"] = "rent_management.referrals.sync_lead"
 doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
+# the activity log keeps its entries when what they name is cancelled or deleted
+ignore_links_on_delete = ["Rent Activity"]
+
 # app notifications also go to managers' phones
 doc_events["Notification Log"] = {"after_insert": "rent_management.pwa.on_notification"}
+
+
+# the activity log for owners, see rent_management/activity.py (keep in step with activity.HANDLERS)
+def _also(doctype, event, method):
+	events = doc_events.setdefault(doctype, {})
+	current = events.get(event)
+	events[event] = [*([current] if isinstance(current, str) else current or []), method]
+
+
+for _doctype, _event in (
+	("Rent Payment", "on_submit"),
+	("Rent Payment", "on_cancel"),
+	("Rent Payment", "on_trash"),
+	("Tenant Rent Invoice", "on_submit"),
+	("Tenant Rent Invoice", "on_cancel"),
+	("Tenant Rent Invoice", "on_trash"),
+	("Tenant Space Allotment", "on_submit"),
+	("Tenant Space Allotment", "on_update_after_submit"),
+	("Security Deposit Settlement", "on_submit"),
+	("Security Deposit Settlement", "on_cancel"),
+	("Property Expense", "after_insert"),
+	("Property Expense", "on_update"),
+	("Property Expense", "on_trash"),
+	("Salary Slip", "on_update"),
+	("Staff Advance", "after_insert"),
+	("Tenant Leave", "on_update"),
+	("Cash Handover", "after_insert"),
+	("Cash Handover", "on_update"),
+	("Tenant", "after_insert"),
+	("Tenant", "on_trash"),
+	("Rent Management Settings", "on_update"),
+	("Rent Notice", "on_trash"),
+):
+	_also(_doctype, _event, "rent_management.activity.on_event")
 
 # Scheduled Tasks
 # ---------------

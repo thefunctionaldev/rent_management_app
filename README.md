@@ -233,6 +233,26 @@ only show the records of their areas and building. See `rent_management/access.p
 
 Cash recorded before this was added counts as held by whoever recorded it.
 
+### Activity log
+
+**Activity** (under Overview, managers only) shows who did what and when, in plain words. Filter by
+person, building, type and dates. For example: "Manjunath Gowda recorded ₹5,000 in cash from Deepak
+Reddy for October 2026".
+
+It records:
+- **Payments:** recorded, received online, cancelled, and reported payments turned down
+- **Invoices:** issued, cancelled and deleted; a month's generation as one entry; late fees waived or
+  charged again; splits into instalments
+- **Stays and tenants:** move-ins and move-outs, rent changes, notices given and withdrawn, deposits
+  collected and settled, tenants added and deleted
+- **Expenses, staff and cash:** expenses added, changed and deleted; salaries paid and undone, advances,
+  staff logins given, changed and removed; cash handed over and confirmed
+- **The rest:** leave approved or turned down, notices published and deleted, settings changes (old →
+  new, with passwords and keys only noted as changed), and every view of an Aadhaar number (*Privacy*)
+
+Entries can't be edited. Only a System Manager can delete them, and they stay when the record they
+name is cancelled or deleted.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

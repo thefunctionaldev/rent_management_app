@@ -90,6 +90,7 @@ const routes = [
 	},
 	{ path: "/staff", name: "staff", component: () => import("./pages/Staff.vue") },
 	{ path: "/summary", name: "summary", component: () => import("./pages/Summary.vue") },
+	{ path: "/activity", name: "activity", component: () => import("./pages/Activity.vue") },
 	{
 		path: "/cash",
 		name: "cash",

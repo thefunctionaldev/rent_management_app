@@ -61,6 +61,7 @@ def generate_invoices(billing_month: str, billing_year: int, submit: bool = Fals
 	)
 
 	created = []
+	frappe.flags.generating_invoices = True  # one activity log entry for the run, not one each
 	for allotment in allotments:
 		if allotment in already_billed:
 			continue
@@ -83,7 +84,25 @@ def generate_invoices(billing_month: str, billing_year: int, submit: bool = Fals
 			# skip just this allotment, keep the invoices already created
 			frappe.db.rollback(save_point="rent_invoice")
 			frappe.log_error(title=_("Rent Invoice generation failed for {0}").format(allotment))
+	frappe.flags.generating_invoices = False
 
+	if created:
+		from rent_management import activity
+
+		total = sum(
+			frappe.get_all("Tenant Rent Invoice", filters={"name": ("in", created)}, pluck="final_amount")
+		)
+		activity.log(
+			"Invoices",
+			_("{0} {1} rent invoices for {2} {3}: {4}").format(
+				_("issued") if submit else _("made draft"),
+				len(created),
+				billing_month,
+				billing_year,
+				activity.money(total),
+			),
+			amount=total,
+		)
 	return created
 
 

@@ -68,6 +68,11 @@ def publish(name):
 		}
 	)
 	doc.save()
+	from rent_management import activity
+
+	activity.log(
+		"Notices", _('published the notice "{0}" to {1} tenants').format(doc.title, len(tenants)), doc
+	)
 	frappe.enqueue(
 		"rent_management.notices.deliver",
 		name=doc.name,
