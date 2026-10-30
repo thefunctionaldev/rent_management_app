@@ -61,6 +61,7 @@
 			</div>
 		</nav>
 		<Toasts />
+		<InstallSheet name="My Rent" />
 	</div>
 	<div v-else class="grid min-h-screen place-items-center">
 		<div
@@ -81,6 +82,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import Avatar from "@/components/Avatar.vue";
+import InstallSheet from "@/components/InstallSheet.vue";
 import OfflineBanner from "@/components/OfflineBanner.vue";
 import Toasts from "@/components/Toasts.vue";
 

@@ -30,13 +30,20 @@
 					{{ next.billing_month }} {{ next.billing_year }} ·
 					{{ overdue ? "was due" : "due" }} {{ date(nextDue) }}
 				</p>
-				<p
-					v-if="next && next.pay_now < next.outstanding_amount"
-					class="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
-				>
-					Pay {{ money(next.pay_now) }} by {{ date(next.early_discount_until) }} and save
-					{{ money(next.outstanding_amount - next.pay_now) }}.
-				</p>
+				<template v-if="next && next.pay_now < next.outstanding_amount">
+					<!-- less to pay now: a discount for paying early, or the next instalment -->
+					<p
+						v-if="next.early_discount_until"
+						class="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+					>
+						Pay {{ money(next.pay_now) }} by {{ date(next.early_discount_until) }} and
+						save {{ money(next.outstanding_amount - next.pay_now) }}.
+					</p>
+					<p v-else class="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800">
+						Paying in instalments: {{ money(next.pay_now) }} now, by
+						{{ date(nextDue) }}.
+					</p>
+				</template>
 				<Button
 					variant="primary"
 					size="lg"

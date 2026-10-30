@@ -266,6 +266,11 @@ rent).
 
 The manager app (`/rent`) and the tenant app (`/tenant`) install like phone apps from the browser,
 with no app store. They open full screen from the home screen with their own icon.
+- **Install popup:** on a phone, both apps ask to be installed every time they're opened in the
+  browser. Android gets an *Install* button (Chrome's own dialog). iPhone gets the steps (Share >
+  *Add to Home Screen*) with an arrow to Safari's Share button. Inside WhatsApp's or Instagram's browser,
+  it asks to open the page in Safari or Chrome first. *Not now* hides it until the next visit, and
+  *Don't ask again* hides it on that phone for good.
 - **Installing:** on Android (Chrome), use the *Install the app* button (sidebar, or **Settings >
   This phone**; tenants have it on their Profile) or the browser menu's *Install app*. On iPhone
   (Safari), use Share > *Add to Home Screen*.

@@ -156,6 +156,7 @@
 			@close="closeDialog"
 		/>
 		<Toasts />
+		<InstallSheet name="Rent Management" />
 	</div>
 
 	<div v-else class="grid min-h-screen place-items-center">
@@ -199,6 +200,7 @@ import {
 import { computed, defineAsyncComponent, ref } from "vue";
 
 import Avatar from "./components/Avatar.vue";
+import InstallSheet from "./components/InstallSheet.vue";
 import OfflineBanner from "./components/OfflineBanner.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";

@@ -12,7 +12,16 @@ export const pwa = reactive({
 	push: "unknown", // unsupported, blocked, off, on
 });
 
-export const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const ua = navigator.userAgent;
+// iPadOS says it's a Mac, but has a touch screen
+export const isIOS =
+	/iphone|ipad|ipod/i.test(ua) || (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+export const isAndroid = /android/i.test(ua);
+export const isPhone = isIOS || isAndroid;
+// the browsers inside WhatsApp, Instagram, Facebook... can't add to the home screen
+export const inAppBrowser = /FBAN|FBAV|Instagram|Line\/|WhatsApp|Snapchat|; wv\)/i.test(ua);
+// on iPhone, Safari has the Share button at the bottom; other iOS browsers at the top
+export const iosSafari = isIOS && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
 
 export function setupPwa(app) {
 	pwa.app = app;
