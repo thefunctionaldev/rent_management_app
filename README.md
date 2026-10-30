@@ -253,6 +253,29 @@ It records:
 Entries can't be edited. Only a System Manager can delete them, and they stay when the record they
 name is cancelled or deleted.
 
+### Rent receipts for income tax (HRA)
+
+Salaried tenants claim HRA with rent receipts. In the tenant app, **Bills > Rent receipts for HRA**
+lists each month they paid rent in a financial year (April to March). They can download a receipt
+for one month or one for the whole year. Managers get the same on the tenant's page (**Rent
+receipts** tab).
+
+A receipt shows:
+- the tenant, and who the rent is paid to with their PAN and address
+- the property and room
+- each month's rent, with when and how it was paid (UTRs included)
+- the total in figures and words
+- a revenue stamp box when a cash payment is over ₹5,000
+- the landlord's signature if you add one
+
+Only rent counts, less any discounts and up to what was paid. Electricity, food and late fees are
+left out.
+
+Set it up in **Settings > Rental agreements**: *Landlord PAN* and *Signature on rent receipts*. For a
+building owned by someone else, add the owner's name, PAN and address on the building (*Buildings >
+Edit*). Its receipts then name the owner. When a tenant's rent is over ₹1,00,000 in a year and no
+PAN is set, both apps warn, because employers need the landlord's PAN for that.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

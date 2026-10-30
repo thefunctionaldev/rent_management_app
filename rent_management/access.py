@@ -53,12 +53,13 @@ ENDPOINTS = {
 		"get_rooms", "get_room_items", "get_tenants", "get_tenant", "save_tenant", "allot_room",
 		"vacate_room", "give_notice", "withdraw_notice", "download_agreement", "mark_deposit_collected",
 		"invite_tenant", "send_checkin", "get_room_inspection", "save_room_inspection",
-		"get_checklist_deductions", "get_billable_allotments",
+		"get_checklist_deductions", "get_billable_allotments", "get_rent_receipts", "download_rent_receipt",
 	),
 	"payments": (
 		"get_tenants", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
 		"get_payments_to_confirm", "confirm_payment", "reject_payment", "send_rent_reminder",
 		"get_payment_link", "check_online_payment", "get_outstanding", "get_cash_book", "hand_over_cash",
+		"get_rent_receipts", "download_rent_receipt",
 		"confirm_cash_handover", "cancel_cash_handover",
 	),
 	"register": (

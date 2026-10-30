@@ -41,10 +41,18 @@ ALLOTMENT = "Tenant Space Allotment"
 INVOICE = "Tenant Rent Invoice"
 MONTHS_OF_HISTORY = 6
 
+OWNERS = {
+	"Green Villa Hostel": {
+		"owner_name": "Venkatesh Murthy",
+		"owner_pan": "AFZPM4821K",
+		"owner_address": "No. 8, 2nd Main, Jayanagar 4th Block, Bengaluru 560011",
+	}
+}
 LANDLORD = {
 	"landlord_name": "Ravi Kumar",
 	"landlord_phone": "9845012345",
 	"landlord_address": "14, 5th Cross, Koramangala 4th Block, Bengaluru 560034",
+	"landlord_pan": "ABCPK1234L",
 	"upi_id": "sunrisepg@okicici",
 	"upi_payee_name": "Sunrise PG",
 	"electricity_rate": 9,
@@ -345,6 +353,8 @@ class Demo:
 					"state": "Karnataka",
 					"pincode": pincode,
 					**LISTINGS[[b[0] for b in BUILDINGS].index(name)],
+					# Green Villa is leased: its rent receipts name the owner
+					**(OWNERS.get(name) or {}),
 				}
 			).insert()
 			set_picture(building, demo_pictures.building(self.art, floors=self.art.randint(3, 5)))

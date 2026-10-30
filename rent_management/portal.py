@@ -14,7 +14,17 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate, random_string
 
-from rent_management import fees, leads, mess, notices, referrals, register, rent_collection, subscription
+from rent_management import (
+	fees,
+	leads,
+	mess,
+	notices,
+	receipts,
+	referrals,
+	register,
+	rent_collection,
+	subscription,
+)
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -674,3 +684,19 @@ def get_notices():
 	rows = notices.for_tenant(tenant.name, stay)
 	notices.mark_read(tenant.name, [r.name for r in rows if r.unread])
 	return rows
+
+
+# ---------------------------------------------------------------- rent receipts for income tax
+
+
+@frappe.whitelist()
+def get_rent_receipts(fy=None):
+	return receipts.summary(current_tenant().name, fy)
+
+
+@frappe.whitelist()
+def download_rent_receipt(fy, invoice=None):
+	tenant = current_tenant()
+	if invoice:
+		own_invoice(invoice)  # their own
+	receipts.send_pdf(tenant.name, fy, invoice)

@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Rent receipt {{ r.number }}</title>
+<style>
+	body { font-family: "Helvetica Neue", Arial, sans-serif; color: #0f172a; font-size: 13px; margin: 0; }
+	.page { padding: 36px 44px; }
+	/* wkhtmltopdf's old WebKit: tables, not flexbox */
+	.head { border-collapse: collapse; border-bottom: 2px solid #4f46e5; }
+	.head td { vertical-align: top; padding-bottom: 14px; }
+	h1 { font-size: 24px; margin: 0; letter-spacing: 0.5px; }
+	.muted { color: #64748b; }
+	.small { font-size: 11px; }
+	.right { text-align: right; }
+	.parties { width: 100%; margin-top: 20px; border-collapse: collapse; }
+	.parties td { vertical-align: top; width: 50%; padding: 0 12px 0 0; }
+	.label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 4px; }
+	.statement { margin: 22px 0 16px; line-height: 1.7; font-size: 14px; }
+	table.months { width: 100%; border-collapse: collapse; margin-top: 8px; }
+	table.months th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #64748b; text-align: left; border-bottom: 1px solid #cbd5e1; padding: 6px 6px; }
+	table.months td { border-bottom: 1px solid #e2e8f0; padding: 7px 6px; }
+	table.months .total td { font-weight: bold; border-bottom: none; border-top: 2px solid #0f172a; }
+	.amount { text-align: right; white-space: nowrap; }
+	.foot { width: 100%; margin-top: 34px; border-collapse: collapse; }
+	.foot td { vertical-align: bottom; }
+	.stamp { width: 92px; height: 92px; border: 1px dashed #94a3b8; color: #94a3b8; font-size: 10px; text-align: center; vertical-align: middle; }
+	.sign img { max-height: 60px; max-width: 200px; }
+	.sign .line { border-top: 1px solid #0f172a; width: 220px; padding-top: 4px; margin-left: auto; }
+	.note { margin-top: 26px; font-size: 10.5px; color: #64748b; line-height: 1.5; }
+	.warn { margin-top: 14px; padding: 8px 10px; background: #fef3c7; color: #92400e; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="page">
+	<table class="head" width="100%"><tr>
+		<td>
+			<h1>Rent Receipt</h1>
+			<div class="muted">
+				{% if r.single %}For {{ r.period }}{% else %}Financial year {{ r.fy }} ({{ r.period }}){% endif %}
+			</div>
+		</td>
+		<td class="right small">
+			<div><b>Receipt no.</b> {{ r.number }}</div>
+			<div><b>Date</b> {{ frappe.utils.formatdate(r.date, "dd MMM yyyy") }}</div>
+		</td>
+	</tr></table>
+
+	<table class="parties">
+		<tr>
+			<td>
+				<div class="label">Received from (tenant)</div>
+				<div><b>{{ r.tenant.full_name }}</b></div>
+				{% if r.tenant.mobile_no %}<div class="muted">{{ r.tenant.mobile_no }}</div>{% endif %}
+			</td>
+			<td>
+				<div class="label">Paid to (landlord)</div>
+				<div><b>{{ r.payee.name or "" }}</b></div>
+				<div>PAN: <b>{{ r.payee.pan or "Not provided" }}</b></div>
+				{% if r.payee.address %}<div class="muted">{{ r.payee.address }}</div>{% endif %}
+			</td>
+		</tr>
+	</table>
+
+	<div class="statement">
+		Received with thanks from <b>{{ r.tenant.full_name }}</b> a sum of
+		<b>{{ r.inr(r.total) }}</b> ({{ r.total_words }}) towards the rent of
+		<b>{{ r.payee.property_address }}</b>{% if r.single %}, room {{ r.months[0].room }},{% endif %}
+		for {% if r.single %}{{ r.period }}{% else %}the period {{ r.period }}{% endif %}.
+	</div>
+
+	<table class="months">
+		<tr>
+			<th>Month</th>
+			<th>Room</th>
+			<th>Paid on</th>
+			<th>Paid by</th>
+			<th class="amount">Rent paid</th>
+		</tr>
+		{% for m in r.months %}
+		<tr>
+			<td>{{ m.label }}{% if not m.fully_paid %} <span class="muted small">(part of {{ r.inr(m.rent) }})</span>{% endif %}</td>
+			<td>{{ m.room }}</td>
+			<td>{{ frappe.utils.formatdate(m.paid_on, "dd MMM yyyy") if m.paid_on else "" }}</td>
+			<td>{{ ", ".join(m.modes) }}{% for p in m.payments if p.reference_no %}<span class="muted small"> · {{ p.reference_no }}</span>{% endfor %}</td>
+			<td class="amount">{{ r.inr(m.paid) }}</td>
+		</tr>
+		{% endfor %}
+		<tr class="total">
+			<td colspan="4">Total rent received</td>
+			<td class="amount">{{ r.inr(r.total) }}</td>
+		</tr>
+	</table>
+
+	<table class="foot">
+		<tr>
+			<td>
+				{% if r.stamp %}<table><tr><td class="stamp">Revenue stamp<br />(cash over ₹5,000)</td></tr></table>{% endif %}
+			</td>
+			<td class="right sign">
+				{% if r.signature %}<img src="{{ r.signature }}" alt="" /><br />{% endif %}
+				<div class="line">{{ r.payee.name or "" }}<br /><span class="muted small">Landlord's signature</span></div>
+			</td>
+		</tr>
+	</table>
+
+	{% if r.pan_missing %}
+	<div class="warn">
+		The rent for this year is over ₹1,00,000, so your employer will ask for the landlord's PAN.
+		Ask your landlord to add it, then download this receipt again.
+	</div>
+	{% endif %}
+
+	<div class="note">
+		Only rent is shown. Electricity, food, maintenance and late fees are not part of the rent.
+		{% if not r.signature %}This receipt is issued from the landlord's rent records.{% endif %}
+	</div>
+</div>
+</body>
+</html>

@@ -361,6 +361,22 @@
 						<Field label="Landlord phone">
 							<input v-model="form.landlord_phone" class="input" />
 						</Field>
+						<Field label="Landlord PAN" hint="On tenants' rent receipts for HRA">
+							<input
+								v-model="form.landlord_pan"
+								class="input uppercase"
+								maxlength="10"
+								placeholder="ABCDE1234F"
+							/>
+						</Field>
+						<Field label="Signature on rent receipts" hint="A photo of your signature">
+							<PictureInput
+								:model-value="data?.receipt_signature || ''"
+								buttons-only
+								name="Signature"
+								@update:model-value="saveSignature"
+							/>
+						</Field>
 						<Field
 							label="Landlord address"
 							hint="Blank: the building's address"
@@ -541,6 +557,7 @@ import Field from "@/components/Field.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import SecretField from "@/components/SecretField.vue";
 import Skeleton from "@/components/Skeleton.vue";
+import PictureInput from "@/components/PictureInput.vue";
 import ThisPhone from "@/components/ThisPhone.vue";
 import Toggle from "@/components/Toggle.vue";
 import { toast } from "@/store";
@@ -581,6 +598,15 @@ const whatsappHint = computed(() => {
 		return "Available on Growth and Pro, or with your own WhatsApp Business number";
 	return "Not set up yet";
 });
+
+async function saveSignature(picture) {
+	try {
+		data.value.receipt_signature = await post("save_receipt_signature", { picture });
+		toast(picture ? "Signature saved" : "Signature removed");
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
 
 const saving = ref(false);
 async function save() {

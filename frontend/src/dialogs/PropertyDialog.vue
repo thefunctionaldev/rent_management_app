@@ -113,6 +113,29 @@
 							placeholder="Near the metro, 5 minutes from tech parks..."
 						/>
 					</Field>
+					<div class="space-y-3 rounded-lg bg-slate-50 p-3">
+						<p class="text-sm font-medium text-slate-700">
+							Owner, if not you
+							<span class="block text-xs font-normal text-slate-500"
+								>Rent receipts for this building show who the rent is paid to</span
+							>
+						</p>
+						<div class="grid gap-3 sm:grid-cols-2">
+							<Field label="Owner name">
+								<input v-model="form.owner_name" class="input" />
+							</Field>
+							<Field label="Owner PAN">
+								<input
+									v-model="form.owner_pan"
+									class="input uppercase"
+									maxlength="10"
+								/>
+							</Field>
+						</div>
+						<Field label="Owner address">
+							<textarea v-model="form.owner_address" class="input" rows="2" />
+						</Field>
+					</div>
 					<Field label="Amenities" hint="One per line">
 						<textarea
 							v-model="form.amenities"
@@ -175,6 +198,9 @@ const form = reactive({
 	meal_skip_cutoff_hours: p.meal_skip_cutoff_hours ?? 4,
 	curfew_time: (p.curfew_time || "22:30").slice(0, 5),
 	visitors_until: (p.visitors_until || "21:00").slice(0, 5),
+	owner_name: p.owner_name || "",
+	owner_pan: p.owner_pan || "",
+	owner_address: p.owner_address || "",
 });
 const picture = ref(p.image || "");
 

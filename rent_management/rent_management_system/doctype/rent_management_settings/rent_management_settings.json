@@ -37,7 +37,9 @@
   "agreement_section",
   "landlord_name",
   "landlord_phone",
+  "landlord_pan",
   "landlord_address",
+  "receipt_signature",
   "column_break_agreement",
   "default_agreement_months",
   "default_lock_in_months",
@@ -497,13 +499,25 @@
    "hidden": 1,
    "label": "Push Private Key",
    "read_only": 1
+  },
+  {
+   "description": "On tenants' rent receipts (needed by their employer when the rent is over ₹1,00,000 a year)",
+   "fieldname": "landlord_pan",
+   "fieldtype": "Data",
+   "label": "Landlord PAN"
+  },
+  {
+   "fieldname": "receipt_signature",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Signature for Rent Receipts"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-30 09:42:16.489263",
+ "modified": "2026-10-30 18:07:16.789335",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

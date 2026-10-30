@@ -1,6 +1,11 @@
 <template>
 	<div class="card">
-		<h1 class="px-5 pt-5 text-lg font-semibold">Your bills</h1>
+		<div class="flex items-center justify-between px-5 pt-5">
+			<h1 class="text-lg font-semibold">Your bills</h1>
+			<RouterLink to="/receipts" class="text-sm font-medium text-brand-600"
+				>Rent receipts for HRA</RouterLink
+			>
+		</div>
 		<div v-if="!data" class="space-y-3 p-5">
 			<Skeleton v-for="i in 4" :key="i" class="h-12" />
 		</div>

@@ -485,6 +485,7 @@
 							</li>
 						</ul>
 					</div>
+					<RentReceipts v-else-if="tab === 'receipts'" :tenant="name" />
 					<div v-else>
 						<EmptyState
 							v-if="!data.allotments.length"
@@ -562,6 +563,7 @@ import { computed, ref } from "vue";
 import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
+import RentReceipts from "@/components/RentReceipts.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
@@ -632,6 +634,7 @@ const tabs = computed(() => [
 	{ value: "invoices", label: "Invoices", count: data.value?.invoices.length },
 	{ value: "payments", label: "Payments", count: data.value?.payments.length },
 	{ value: "stays", label: "Stays", count: data.value?.allotments.length },
+	{ value: "receipts", label: "Rent receipts" },
 ]);
 const stats = computed(() => [
 	{ label: "Total invoiced", value: data.value.totals.invoiced, class: "" },

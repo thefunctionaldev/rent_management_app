@@ -33,6 +33,7 @@ from rent_management import (
 	portal,
 	profit,
 	razorpay,
+	receipts,
 	referrals,
 	register,
 	rent_collection,
@@ -101,6 +102,9 @@ PROPERTY_FIELDS = (
 	"meal_skip_cutoff_hours",
 	"curfew_time",
 	"visitors_until",
+	"owner_name",
+	"owner_pan",
+	"owner_address",
 )
 ROOM_TYPE_FIELDS = (
 	"type",
@@ -1483,6 +1487,7 @@ SETTINGS_FIELDS = (
 	"early_discount_type",
 	"early_discount_value",
 	"early_discount_days",
+	"landlord_pan",
 	"owner_summary_enabled",
 	"owner_summary_day",
 	"owner_summary_phone",
@@ -1505,6 +1510,7 @@ def get_settings():
 	own_whatsapp = bool(settings.whatsapp_phone_number_id and values["whatsapp_token_set"])
 	return {
 		"settings": values,
+		"receipt_signature": settings.receipt_signature,
 		"whatsapp": {
 			"available": bool(notifications.get_whatsapp_account()),
 			"source": "own" if own_whatsapp else ("plan" if notifications.get_whatsapp_account() else None),
@@ -2158,3 +2164,27 @@ def cancel_cash_handover(name):
 def get_activity(property=None, user=None, category=None, from_date=None, to_date=None):
 	check_access()
 	return activity.get_activity(property, user, category, from_date, to_date)
+
+
+# ---------------------------------------------------------------- rent receipts for income tax
+
+
+@frappe.whitelist()
+def get_rent_receipts(tenant, fy=None):
+	check_access()
+	return receipts.summary(tenant, fy)
+
+
+@frappe.whitelist()
+def download_rent_receipt(tenant, fy, invoice=None):
+	check_access()
+	receipts.send_pdf(tenant, fy, invoice)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_receipt_signature(picture=None):
+	"""Settings: the landlord's signature on rent receipts (a data URL, or "" to remove it)."""
+	check_access()
+	settings = frappe.get_single("Rent Management Settings")
+	pictures.set_image(settings, "receipt_signature", picture, private=True)
+	return frappe.db.get_single_value("Rent Management Settings", "receipt_signature")

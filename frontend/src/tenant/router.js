@@ -14,6 +14,7 @@ const routes = [
 	{ path: "/away", name: "away", component: () => import("./pages/Register.vue") },
 	{ path: "/refer", name: "refer", component: () => import("./pages/Refer.vue") },
 	{ path: "/notices", name: "notices", component: () => import("./pages/Notices.vue") },
+	{ path: "/receipts", name: "receipts", component: () => import("./pages/Receipts.vue") },
 	{ path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];

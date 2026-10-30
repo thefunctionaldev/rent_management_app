@@ -37,7 +37,12 @@
   "register_section",
   "curfew_time",
   "column_break_register",
-  "visitors_until"
+  "visitors_until",
+  "owner_section",
+  "owner_name",
+  "owner_pan",
+  "column_break_owner",
+  "owner_address"
  ],
  "fields": [
   {
@@ -226,6 +231,32 @@
    "fieldname": "visitors_until",
    "fieldtype": "Time",
    "label": "Visitors Until"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "owner_section",
+   "fieldtype": "Section Break",
+   "label": "Owner (for rent receipts)"
+  },
+  {
+   "description": "Who the rent is paid to, if not the landlord in Settings",
+   "fieldname": "owner_name",
+   "fieldtype": "Data",
+   "label": "Owner Name"
+  },
+  {
+   "fieldname": "owner_pan",
+   "fieldtype": "Data",
+   "label": "Owner PAN"
+  },
+  {
+   "fieldname": "column_break_owner",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "owner_address",
+   "fieldtype": "Small Text",
+   "label": "Owner Address"
   }
  ],
  "grid_page_length": 50,
@@ -237,7 +268,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-30 17:20:35.512467",
+ "modified": "2026-10-30 18:07:16.790672",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",

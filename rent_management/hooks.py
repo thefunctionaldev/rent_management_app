@@ -291,6 +291,10 @@ for _doctype, _event in (
 ):
 	_also(_doctype, _event, "rent_management.activity.on_event")
 
+# PANs on rent receipts look right, see rent_management/receipts.py
+_also("Rent Management Settings", "validate", "rent_management.receipts.check_pan")
+_also("Rent Property", "validate", "rent_management.receipts.check_pan")
+
 # Scheduled Tasks
 # ---------------
 
