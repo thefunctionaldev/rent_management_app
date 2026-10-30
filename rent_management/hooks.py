@@ -71,6 +71,7 @@ _staff_doctypes = (
 	"Tenant", "Tenant Space Allotment", "Tenant Space", "Room Inspection", "Tenant Check-in",
 	"Tenant Rent Invoice", "Rent Payment", "Night Attendance", "Tenant Leave", "Visitor Log", "Meal Opt-out",
 	"Mess Menu", "Maintenance Request", "Rent Lead", "Meter Reading", "Property Expense", "Rent Notice",
+	"Cash Handover",
 )  # fmt: skip
 has_permission = {doctype: "rent_management.access.has_permission" for doctype in _staff_doctypes}
 permission_query_conditions = {
@@ -215,6 +216,7 @@ doc_events = {
 		"Salary Slip",
 		"Rent Referral",
 		"Rent Notice",
+		"Cash Handover",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
@@ -230,6 +232,12 @@ doc_events["Rent Payment"]["on_submit"] = [
 	"rent_management.referrals.on_payment",
 ]
 doc_events["Rent Payment"]["on_cancel"] = "rent_management.referrals.on_payment"
+# who holds the cash, for the cash book (rent_management/cash.py)
+doc_events["Rent Payment"]["before_submit"] = "rent_management.cash.set_collected_by"
+doc_events["Property Expense"]["validate"] = [
+	"rent_management.subscription.check_writable",
+	"rent_management.cash.set_paid_by",
+]
 # referral credits on rent invoices, see rent_management/referrals.py
 doc_events["Tenant Rent Invoice"].update(
 	{

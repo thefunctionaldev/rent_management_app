@@ -13,6 +13,7 @@
   "column_break_expense",
   "paid_to",
   "mode_of_payment",
+  "paid_by",
   "reference_no",
   "details_section",
   "description",
@@ -87,11 +88,20 @@
    "fieldname": "receipt",
    "fieldtype": "Attach",
    "label": "Bill / Receipt"
+  },
+  {
+   "depends_on": "eval:doc.mode_of_payment=='Cash'",
+   "fieldname": "paid_by",
+   "fieldtype": "Link",
+   "label": "Cash Paid By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-30 17:20:35.510842",
+ "modified": "2026-10-30 17:36:04.233077",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Property Expense",

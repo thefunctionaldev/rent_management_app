@@ -217,6 +217,22 @@ The server enforces this, not just the menus. Every endpoint checks the login's 
 login can only ask for its building, and Frappe's record permissions (the `Rent Staff` role, no Desk)
 only show the records of their areas and building. See `rent_management/access.py`.
 
+### Cash book
+
+**Cash book** (under Billing) tracks who holds the cash.
+- **Collected:** a cash payment is held by whoever recorded it, or confirmed it if the tenant reported it.
+- **Spent:** a cash expense comes out of whoever recorded it, including salaries and advances paid in
+  cash.
+- **Handing over:** *Hand over cash* sends an amount to a manager (or another staff login) with a
+  note. They get a notification and tap *I have it* or *Didn't get it*. The money moves only once
+  they confirm, and until then it shows as on its way. The one handing over can cancel while it waits.
+- **Managers** see what each person holds now (collected, spent, received, handed over), what was
+  handed to them, and a day-by-day book of every cash movement for any dates and building. Someone
+  who paid more than they collected shows as owed money.
+- **Staff logins** with payments or expenses see their own cash only.
+
+Cash recorded before this was added counts as held by whoever recorded it.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

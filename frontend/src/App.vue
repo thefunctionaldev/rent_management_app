@@ -180,6 +180,7 @@ import {
 	ExternalLink,
 	FileText,
 	FileUp,
+	HandCoins,
 	LayoutDashboard,
 	Lock,
 	LogOut,
@@ -278,6 +279,7 @@ const allNav = computed(() => [
 		items: [
 			{ to: "/invoices", label: "Invoices", icon: FileText, area: "payments" },
 			{ to: "/payments", label: "Payments", icon: Wallet, area: "payments" },
+			{ to: "/cash", label: "Cash book", icon: HandCoins, area: ["payments", "expenses"] },
 			{ to: "/deposits", label: "Deposits", icon: ShieldCheck },
 			{ to: "/electricity", label: "Electricity", icon: Zap, area: "meters" },
 			{ to: "/outstanding", label: "Outstanding", icon: BarChart3, area: "payments" },

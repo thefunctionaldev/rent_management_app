@@ -58,7 +58,8 @@ ENDPOINTS = {
 	"payments": (
 		"get_tenants", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
 		"get_payments_to_confirm", "confirm_payment", "reject_payment", "send_rent_reminder",
-		"get_payment_link", "check_online_payment", "get_outstanding",
+		"get_payment_link", "check_online_payment", "get_outstanding", "get_cash_book", "hand_over_cash",
+		"confirm_cash_handover", "cancel_cash_handover",
 	),
 	"register": (
 		"get_register", "save_attendance", "add_leave", "decide_leave", "cancel_leave", "visitor_in",
@@ -68,7 +69,7 @@ ENDPOINTS = {
 	"food": ("get_food", "save_menu", "set_meal_plan", "skip_meal_for"),
 	"leads": ("get_leads", "get_lead", "save_lead", "record_lead_token", "ask_lead_for_token", "move_in_lead", "get_rooms"),
 	"meters": ("get_meter_rooms", "save_meter_readings", "get_meter_readings", "delete_meter_reading"),
-	"expenses": ("get_expenses", "save_expense"),
+	"expenses": ("get_expenses", "save_expense", "get_cash_book", "hand_over_cash", "confirm_cash_handover", "cancel_cash_handover"),
 	"notices": ("get_notices", "save_notice", "publish_notice", "take_down_notice", "delete_notice"),
 }  # fmt: skip
 
@@ -169,6 +170,8 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 	access = staff_access(user)
 	if access is None:
 		return True
+	if doc.doctype == "Cash Handover":  # their own only
+		return (user or frappe.session.user) in (doc.from_user, doc.to_user)
 	if not access.areas & set(DOCTYPES.get(doc.doctype, ())):
 		return False
 	building = doc.get("property") if doc.meta.has_field("property") else None
@@ -179,6 +182,9 @@ def query_conditions(user=None, doctype=None):
 	access = staff_access(user)
 	if access is None or not doctype:
 		return ""
+	if doctype == "Cash Handover":  # their own only
+		me = frappe.db.escape(user or frappe.session.user)
+		return f"(`tabCash Handover`.`from_user` = {me} or `tabCash Handover`.`to_user` = {me})"
 	if not access.areas & set(DOCTYPES.get(doctype, ())):
 		return "1=0"
 	if access.building and frappe.get_meta(doctype).has_field("property"):

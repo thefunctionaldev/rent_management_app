@@ -91,6 +91,12 @@ const routes = [
 	{ path: "/staff", name: "staff", component: () => import("./pages/Staff.vue") },
 	{ path: "/summary", name: "summary", component: () => import("./pages/Summary.vue") },
 	{
+		path: "/cash",
+		name: "cash",
+		meta: { area: ["payments", "expenses"] },
+		component: () => import("./pages/Cash.vue"),
+	},
+	{
 		path: "/notices",
 		meta: { area: "notices" },
 		name: "notices",

@@ -1240,6 +1240,53 @@ class Demo:
 		).insert(ignore_permissions=True)
 		self.backdate("Rent Message Log", doc.name, date)
 
+	def make_cash(self, manager, warden):
+		"""The warden collects Sunrise PG's cash and hands it to the manager; the manager the rest."""
+		from rent_management import cash
+
+		sun = BUILDINGS[0][0]
+		frappe.db.sql(
+			"""update `tabRent Payment` set collected_by = if(property = %s, %s, %s)
+			where mode_of_payment = 'Cash' and docstatus = 1""",
+			(sun, warden, manager),
+		)
+		# the warden pays the small things from the cash box; the manager the rest
+		frappe.db.sql(
+			"""update `tabProperty Expense` set paid_by = if(property = %s and category in ('Water',
+			'Repairs & Maintenance'), %s, %s) where mode_of_payment = 'Cash'""",
+			(sun, warden, manager),
+		)
+		last_month = get_first_day(add_months(self.today, -1))
+		collected = flt(
+			frappe.db.sql(
+				"""select sum(amount) from `tabRent Payment` where collected_by = %s and docstatus = 1
+				and mode_of_payment = 'Cash' and payment_date < %s""",
+				(warden, get_first_day(self.today)),
+			)[0][0]
+		)
+		spent = flt(
+			frappe.db.sql(
+				"""select sum(amount) from `tabProperty Expense` where paid_by = %s and mode_of_payment = 'Cash'
+				and expense_date < %s""",
+				(warden, get_first_day(self.today)),
+			)[0][0]
+		)
+		for amount, day, status, note in (
+			(
+				flt((collected - spent) // 100 * 100),
+				add_days(last_month, 27),
+				"Confirmed",
+				"Cash up to last month",
+			),
+			(3000, add_days(self.today, -1), "Pending", "This week's cash"),
+		):
+			if amount > 0:
+				frappe.get_doc(
+					{"doctype": cash.HANDOVER, "from_user": warden, "to_user": manager, "amount": amount,
+						"handed_on": day, "status": status, "note": note, "property": sun,
+						"confirmed_on": get_datetime(f"{day} 19:30:00") if status == "Confirmed" else None}
+				).insert()  # fmt: skip
+
 	def make_logins(self) -> dict:
 		from rent_management.portal import TENANT_ROLE, ensure_tenant_role
 
@@ -1281,6 +1328,7 @@ class Demo:
 		if warden:
 			access.give_login(warden, staff_login, access.PRESETS["Warden"])
 			update_password(staff_login, self.password)
+			self.make_cash(manager, staff_login)
 		return {
 			"manager_login": manager,
 			"tenant_login": tenant.email_id,

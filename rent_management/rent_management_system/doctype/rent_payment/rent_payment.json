@@ -17,6 +17,7 @@
   "column_break_payment",
   "payment_date",
   "mode_of_payment",
+  "collected_by",
   "amount",
   "reference_section",
   "reference_no",
@@ -157,13 +158,23 @@
    "label": "Building",
    "options": "Rent Property",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.mode_of_payment=='Cash'",
+   "description": "Who holds this cash, for the cash book",
+   "fieldname": "collected_by",
+   "fieldtype": "Link",
+   "label": "Cash Collected By",
+   "no_copy": 1,
+   "options": "User",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-30 17:20:35.501748",
+ "modified": "2026-10-30 17:36:04.231935",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Payment",

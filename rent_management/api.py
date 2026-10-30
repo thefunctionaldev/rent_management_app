@@ -17,6 +17,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 
 from rent_management import (
 	access,
+	cash,
 	checkin,
 	data_import,
 	fees,
@@ -2115,3 +2116,30 @@ def give_staff_login(staff, email, areas, all_buildings=0):
 def remove_staff_login(staff):
 	check_access()
 	access.remove_login(staff)
+
+
+# ---------------------------------------------------------------- cash book
+
+
+@frappe.whitelist()
+def get_cash_book(property=None, from_date=None, to_date=None):
+	check_access()
+	return cash.get_cash_book(property, from_date, to_date)
+
+
+@frappe.whitelist(methods=["POST"])
+def hand_over_cash(to_user, amount, note=None, handed_on=None):
+	check_access()
+	return cash.hand_over(to_user, amount, note, handed_on)
+
+
+@frappe.whitelist(methods=["POST"])
+def confirm_cash_handover(name, accept=1):
+	check_access()
+	cash.confirm(name, accept)
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_cash_handover(name):
+	check_access()
+	cash.cancel(name)
