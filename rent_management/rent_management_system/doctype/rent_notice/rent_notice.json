@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "autoname": "NOTICE-.YYYY.-.#####",
+ "creation": "2026-10-30 15:21:21.899284",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "message",
+  "category",
+  "property",
+  "column_break_notice",
+  "status",
+  "pinned",
+  "expires_on",
+  "send_whatsapp",
+  "published_section",
+  "published_on",
+  "published_by",
+  "column_break_published",
+  "recipients",
+  "messages_sent",
+  "seen"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message",
+   "reqd": 1
+  },
+  {
+   "default": "General",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Category",
+   "options": "General\nWater\nElectricity\nMaintenance\nFood\nRules\nEvent\nUrgent"
+  },
+  {
+   "description": "Empty: all buildings",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Building",
+   "options": "Rent Property"
+  },
+  {
+   "fieldname": "column_break_notice",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPublished",
+   "read_only": 1
+  },
+  {
+   "description": "Stays at the top of the tenants' notice board",
+   "fieldname": "pinned",
+   "fieldtype": "Check",
+   "label": "Pinned"
+  },
+  {
+   "description": "Empty: until removed",
+   "fieldname": "expires_on",
+   "fieldtype": "Date",
+   "label": "Show Until"
+  },
+  {
+   "fieldname": "send_whatsapp",
+   "fieldtype": "Check",
+   "label": "Also on WhatsApp and Email"
+  },
+  {
+   "fieldname": "published_section",
+   "fieldtype": "Section Break",
+   "label": "Published"
+  },
+  {
+   "fieldname": "published_on",
+   "fieldtype": "Datetime",
+   "label": "Published On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "published_by",
+   "fieldtype": "Link",
+   "label": "Published By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_published",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "recipients",
+   "fieldtype": "Int",
+   "label": "Tenants",
+   "read_only": 1
+  },
+  {
+   "fieldname": "messages_sent",
+   "fieldtype": "Int",
+   "label": "WhatsApp / Email Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "seen",
+   "fieldtype": "Int",
+   "label": "Seen By",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-30 15:21:21.899284",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Notice",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}

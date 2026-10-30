@@ -23,6 +23,7 @@ from rent_management import (
 	inspections,
 	leads,
 	mess,
+	notices,
 	notifications,
 	owner_summary,
 	pictures,
@@ -1998,3 +1999,40 @@ def get_referrals(property=None):
 def pay_out_referral(name, note=None):
 	check_access()
 	referrals.pay_out(name, note)
+
+
+# ---------------------------------------------------------------- notice board
+
+
+@frappe.whitelist()
+def get_notices(property=None):
+	check_access()
+	return notices.get_notices(property)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_notice(data, publish=0):
+	check_access()
+	name = notices.save(data)
+	if cint(publish):
+		notices.publish(name)
+	return name
+
+
+@frappe.whitelist(methods=["POST"])
+def publish_notice(name):
+	check_access()
+	notices.publish(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def take_down_notice(name):
+	"""Off the tenants' notice board (not withdraw_notice, which is a tenant's notice to leave)."""
+	check_access()
+	notices.withdraw(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_notice(name):
+	check_access()
+	notices.delete(name)

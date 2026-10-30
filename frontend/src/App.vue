@@ -182,6 +182,7 @@ import {
 	LayoutDashboard,
 	Lock,
 	LogOut,
+	Megaphone,
 	Menu,
 	NotebookPen,
 	Receipt,
@@ -241,6 +242,7 @@ const nav = computed(() => [
 				icon: NotebookPen,
 				badge: boot.leave_requests,
 			},
+			{ to: "/notices", label: "Notices", icon: Megaphone },
 			...(boot.properties.some((p) => p.food_included && p.is_active)
 				? [{ to: "/food", label: "Food", icon: UtensilsCrossed }]
 				: []),
@@ -336,6 +338,7 @@ const dialogs = {
 	advance: lazy("AdvanceDialog"),
 	paySalary: lazy("PaySalaryDialog"),
 	splitInvoice: lazy("SplitInvoiceDialog"),
+	announcement: lazy("AnnouncementDialog"),
 };
 
 async function logout() {

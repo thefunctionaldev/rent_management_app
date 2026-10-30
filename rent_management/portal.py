@@ -14,7 +14,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate, random_string
 
-from rent_management import fees, leads, mess, referrals, register, rent_collection, subscription
+from rent_management import fees, leads, mess, notices, referrals, register, rent_collection, subscription
 
 TENANT_ROLE = "Rent Tenant"
 INVOICE = "Tenant Rent Invoice"
@@ -168,6 +168,7 @@ def get_boot():
 		"online": rent_collection.get_payment_options(),
 		"food": bool(stay and stay.get("meal_plan") and mess.meals_of(stay.property)),
 		"referrals": referrals.enabled() and leads.listing_enabled(),
+		"notices_unread": len(notices.unread(tenant.name, stay)) if stay else 0,
 		"referral_reward": flt(frappe.db.get_single_value("Rent Management Settings", "referral_reward")),
 		"read_only": subscription.skip_if_lapsed(),
 		"today": nowdate(),
@@ -216,6 +217,7 @@ def get_home():
 			"Maintenance Request", {"tenant": tenant.name, "status": ("in", ("Open", "In Progress"))}
 		),
 		"checkin_url": checkin_link(stay),
+		"notice": (notices.unread(tenant.name, stay) or [None])[0] if stay else None,  # the newest unread
 	}
 
 
@@ -650,3 +652,15 @@ def get_referral():
 	if not (referrals.enabled() and leads.listing_enabled()):
 		frappe.throw(_("Referrals aren't on."))
 	return referrals.for_tenant(tenant.name)
+
+
+# ---------------------------------------------------------------- notice board
+
+
+@frappe.whitelist()
+def get_notices():
+	"""The notice board; opening it marks them seen."""
+	tenant, stay = my_stay()
+	rows = notices.for_tenant(tenant.name, stay)
+	notices.mark_read(tenant.name, [r.name for r in rows if r.unread])
+	return rows

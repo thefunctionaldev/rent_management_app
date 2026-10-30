@@ -16,6 +16,23 @@
 			</span>
 			<ChevronRight class="size-5 text-slate-400" />
 		</a>
+		<RouterLink
+			v-if="data.notice"
+			to="/notices"
+			class="card flex items-start gap-3 p-4 ring-2 transition hover:bg-slate-50"
+			:class="data.notice.category === 'Urgent' ? 'ring-rose-200' : 'ring-brand-100'"
+		>
+			<span
+				class="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600"
+				><Megaphone class="size-5"
+			/></span>
+			<div class="min-w-0 flex-1">
+				<p class="text-xs font-medium text-brand-700">New notice</p>
+				<p class="font-medium">{{ data.notice.title }}</p>
+				<p class="line-clamp-2 text-sm text-slate-500">{{ data.notice.message }}</p>
+			</div>
+			<ChevronRight class="mt-3 size-5 text-slate-400" />
+		</RouterLink>
 		<div class="card p-5">
 			<template v-if="data.due > 0">
 				<p class="text-sm text-slate-500">Rent due</p>
@@ -188,7 +205,15 @@
 </template>
 
 <script setup>
-import { ChevronRight, CircleCheck, Gift, Luggage, PenLine, Wrench } from "lucide-vue-next";
+import {
+	ChevronRight,
+	CircleCheck,
+	Gift,
+	Luggage,
+	Megaphone,
+	PenLine,
+	Wrench,
+} from "lucide-vue-next";
 import { computed } from "vue";
 
 import { get } from "@/api";

@@ -25,11 +25,27 @@
 						<p class="text-xl font-semibold">{{ me.first_name }}</p>
 					</div>
 				</div>
-				<div class="text-right text-sm text-white/80">
-					<p class="font-medium text-white">{{ me.building?.property_name }}</p>
-					<p v-if="me.landlord?.phone">
-						<a :href="`tel:${me.landlord.phone}`" class="underline">Call landlord</a>
-					</p>
+				<div class="flex items-center gap-3">
+					<div class="text-right text-sm text-white/80">
+						<p class="font-medium text-white">{{ me.building?.property_name }}</p>
+						<p v-if="me.landlord?.phone">
+							<a :href="`tel:${me.landlord.phone}`" class="underline"
+								>Call landlord</a
+							>
+						</p>
+					</div>
+					<RouterLink
+						to="/notices"
+						class="relative grid size-10 place-items-center rounded-full bg-white/15 hover:bg-white/25"
+						title="Notices"
+					>
+						<Bell class="size-5" />
+						<span
+							v-if="me.notices_unread"
+							class="absolute -top-0.5 -right-0.5 grid size-5 place-items-center rounded-full bg-rose-500 text-[11px] font-semibold"
+							>{{ me.notices_unread }}</span
+						>
+					</RouterLink>
 				</div>
 			</div>
 		</header>
@@ -72,6 +88,7 @@
 
 <script setup>
 import {
+	Bell,
 	Home,
 	MessageSquareWarning,
 	ReceiptText,

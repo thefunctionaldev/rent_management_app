@@ -280,6 +280,7 @@ class Demo:
 		self.make_staff()
 		self.make_fees()
 		self.make_referrals()
+		self.make_notices()
 		logins = self.make_logins()
 
 		frappe.db.set_single_value(SETTINGS, "send_receipts", send_receipts)
@@ -1164,6 +1165,39 @@ class Demo:
 			doc = frappe.get_doc("Rent Lead", lead)
 			doc.update({"source": "Referral", "referred_by": deepak})
 			doc.save()
+
+	def make_notices(self):
+		"""Two notices on the board (one seen by a few) and a draft."""
+		from rent_management import notices
+
+		rng = random.Random(71)  # its own sequence, so the rest of the data stays the same
+		sun = BUILDINGS[0][0]
+		day = getdate(add_days(self.today, 1)).strftime("%A, %d %b")
+		for property, values, hours_ago in (
+			(None, {"title": "Diwali dinner on Saturday", "category": "Event", "pinned": 1,
+				"message": "Join us for a special Diwali dinner on Saturday at 8 pm in the dining hall.\nSweets on us!"}, 30),
+			(sun, {"title": f"No water on {day}", "category": "Water",
+				"message": "The water supply will be off from 10 am to 2 pm for tank cleaning. Please store some water beforehand."}, 3),
+		):  # fmt: skip
+			doc = frappe.get_doc({"doctype": notices.NOTICE, "property": property, **values}).insert()
+			tenants = notices.tenants_for(property)
+			published = add_to_date(now_datetime(), hours=-hours_ago)
+			doc.db_set({"status": "Published", "published_on": published, "published_by": "Administrator",
+				"recipients": len(tenants)})  # fmt: skip
+			for tenant in rng.sample(
+				tenants, k=len(tenants) * 2 // 3 if hours_ago > 24 else len(tenants) // 3
+			):
+				frappe.get_doc(
+					{"doctype": notices.READ, "notice": doc.name, "tenant": tenant, "read_on": published}
+				).insert()
+			doc.db_set("seen", frappe.db.count(notices.READ, {"notice": doc.name}))
+		frappe.get_doc(
+			{"doctype": notices.NOTICE, "property": sun, "category": "Maintenance", "title": "Pest control this Sunday",
+				"message": "Pest control is on Sunday from 11 am. Please keep food covered."}
+		).insert()  # fmt: skip
+		# Deepak hasn't seen the water notice yet
+		deepak = frappe.db.get_value("Tenant", {"email_id": "deepak.reddy@example.com"})
+		frappe.db.delete(notices.READ, {"tenant": deepak})
 
 	# ------------------------------------------------------------ messages and logins
 

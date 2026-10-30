@@ -38,6 +38,7 @@ TEMPLATES = {
 	"Request Update": "rent_request_update",
 	"Owner Summary": "rent_owner_summary",
 	"Referral": "rent_referral_reward",
+	"Notice": "rent_notice",
 }
 GRAPH_URL = "https://graph.facebook.com"
 

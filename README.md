@@ -290,6 +290,25 @@ push service account or library is needed. The site must be served over HTTPS (l
 testing). The manifest and service worker are served by `rent_management/pwa.py` at
 `/rent/manifest.webmanifest` and `/rent/sw.js` (and the same under `/tenant/`).
 
+### Notice board
+
+**Notices** (under Property) are announcements to tenants: water or power cuts, repairs, pest
+control, house rules, a festival dinner.
+- **Writing one:** start from a template or write your own: who it's for (one building or all), a
+  category, the title and message, and optionally *pin to the top* and *show until* a date. *Save
+  draft* or *Publish*.
+- **Publishing** puts it on the notice board of every tenant currently staying there:
+  - in the tenant app, behind a bell with an unread count, and as a card on Home
+  - as a phone notification, for tenants who turned them on (on the Notices page, or with the app
+    installed)
+  - if ticked, also on WhatsApp (template `rent_notice`, see `notices.py`; WhatsApp charges per
+    message) and by email
+- **Seen by:** each notice shows how many tenants have seen it ("Seen by 15 of 23"). *Take down*
+  removes it from the board, and it can be published again later.
+
+Publishing sends in a background job, so the site's workers must be running (`bench start`, or
+supervisor in production).
+
 ### Reminders and receipts (WhatsApp and email)
 
 A daily job sends rent reminders before the due date, on the due date and while overdue (interval and

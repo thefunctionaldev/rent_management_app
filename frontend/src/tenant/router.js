@@ -13,6 +13,7 @@ const routes = [
 	{ path: "/food", name: "food", component: () => import("./pages/Food.vue") },
 	{ path: "/away", name: "away", component: () => import("./pages/Register.vue") },
 	{ path: "/refer", name: "refer", component: () => import("./pages/Refer.vue") },
+	{ path: "/notices", name: "notices", component: () => import("./pages/Notices.vue") },
 	{ path: "/profile", name: "profile", component: () => import("./pages/Profile.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];

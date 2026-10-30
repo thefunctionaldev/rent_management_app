@@ -34,6 +34,7 @@ const routes = [
 	{ path: "/register", name: "register", component: () => import("./pages/Register.vue") },
 	{ path: "/staff", name: "staff", component: () => import("./pages/Staff.vue") },
 	{ path: "/summary", name: "summary", component: () => import("./pages/Summary.vue") },
+	{ path: "/notices", name: "notices", component: () => import("./pages/Notices.vue") },
 	{ path: "/saas", name: "saas", component: () => import("./pages/Saas.vue") },
 	{ path: "/billing", name: "billing", component: () => import("./pages/Billing.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },

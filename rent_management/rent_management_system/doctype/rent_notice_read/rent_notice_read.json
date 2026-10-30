@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2026-10-30 15:21:21.901284",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "notice",
+  "tenant",
+  "read_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "notice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Notice",
+   "options": "Rent Notice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tenant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tenant",
+   "options": "Tenant",
+   "reqd": 1
+  },
+  {
+   "fieldname": "read_on",
+   "fieldtype": "Datetime",
+   "label": "Read On"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-30 15:21:21.901284",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Rent Notice Read",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

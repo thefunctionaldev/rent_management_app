@@ -291,6 +291,8 @@ def pending() -> list[dict]:
 		order_by="creation desc",
 		limit=3,
 	)
+	from rent_management import notices
+
 	return [
 		{
 			"id": row.name,
@@ -299,7 +301,7 @@ def pending() -> list[dict]:
 			"url": row.link or "/rent/",
 		}
 		for row in rows
-	]
+	] + notices.pending_for_user(frappe.session.user)  # tenants: new notices
 
 
 @frappe.whitelist(methods=["POST"])
