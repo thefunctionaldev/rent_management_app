@@ -148,6 +148,7 @@
 <script setup>
 import { Check, Plus, Wallet } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
@@ -170,6 +171,9 @@ const colors = {
 	"Security Deposit": "bg-slate-400",
 	Other: "bg-slate-300",
 };
+// "Record payment" on the phone's home screen
+if (useRoute().query.new) openDialog("recordPayment");
+
 const search = ref("");
 const mode = ref("");
 const { data, loading, reload } = useResource(

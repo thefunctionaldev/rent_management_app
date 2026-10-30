@@ -262,6 +262,29 @@ rent).
   gives them back, and they never take an invoice below zero (they wait for the next one).
 - **Leads > Referrals** lists every referral, what's been rewarded and what's waiting.
 
+### Phone app (install from the browser)
+
+The manager app (`/rent`) and the tenant app (`/tenant`) install like phone apps from the browser,
+with no app store. They open full screen from the home screen with their own icon.
+- **Installing:** on Android (Chrome), use the *Install the app* button (sidebar, or **Settings >
+  This phone**; tenants have it on their Profile) or the browser menu's *Install app*. On iPhone
+  (Safari), use Share > *Add to Home Screen*.
+- **Shortcuts:** long-press the manager app's icon for *Record payment*, *Night attendance*, *Visitor at
+  the gate* and *Add lead*. On a phone, the dashboard shows the same four as buttons.
+- **Weak signal:** pages show the last data they loaded, with an "offline" note, and saving says so
+  when there's no signal. Logging out removes the data kept on the phone.
+- **Phone notifications** for managers: turn them on per phone in **Settings > This phone**. Every app
+  notification (new leads and bookings, leave requests, payments to confirm, requests, notices, salaries
+  due, referral rewards) then also shows on the phone, even when the app is closed, and tapping it
+  opens the right page. On iPhone this needs iOS 16.4 or later and the app added to the home screen
+  first.
+
+These use the site's own Web Push keys, made the first time a phone turns notifications on (Settings
+> Phone notifications). The push carries no data, the phone fetches what's new from the site, so no
+push service account or library is needed. The site must be served over HTTPS (localhost works for
+testing). The manifest and service worker are served by `rent_management/pwa.py` at
+`/rent/manifest.webmanifest` and `/rent/sw.js` (and the same under `/tenant/`).
+
 ### Reminders and receipts (WhatsApp and email)
 
 A daily job sends rent reminders before the due date, on the due date and while overdue (interval and

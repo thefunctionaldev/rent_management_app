@@ -347,4 +347,5 @@ def remind_due():
 			_("Today is pay day for {0}. Prepare and pay their {1} salary on the Staff page.").format(
 				", ".join(s.staff_name for s in due), month
 			),
+			link="/rent/staff",
 		)

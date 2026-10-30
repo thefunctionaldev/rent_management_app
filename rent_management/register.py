@@ -62,6 +62,7 @@ def request_leave(allotment, from_date, to_date, destination=None, reason=None, 
 				frappe.utils.formatdate(doc.to_date),
 				f", going to {doc.destination}" if doc.destination else "",
 			),
+			link="/rent/register?tab=leave",
 		)
 	return doc.name
 

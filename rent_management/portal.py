@@ -382,6 +382,7 @@ def report_payment(name, amount, reference_no=None, payment_date=None, mode_of_p
 		_("Reference: {0}. Confirm it in Payments once it has reached you.").format(
 			payment.reference_no or "-"
 		),
+		link="/rent/payments",
 	)
 	return payment.name
 
@@ -482,6 +483,7 @@ def create_request(subject, category, description=None, priority="Medium"):
 	notify_managers(
 		_("New request from {0}: {1}").format(tenant.full_name, request.subject),
 		_("Room {0} · {1} · {2} priority").format(request.room or "-", category, priority),
+		link="/rent/requests",
 	)
 	return request.name
 
@@ -504,11 +506,14 @@ def give_notice(vacate_date=None):
 		_("Room {0}, moving out on {1}.").format(
 			stay.room, frappe.utils.formatdate(result["expected_vacate_date"])
 		),
+		link=f"/rent/tenants/{tenant.name}",
 	)
 	return result
 
 
-def notify_managers(subject, message):
+def notify_managers(subject, message, link=None):
+	"""An email and an app notification (and a phone notification, see pwa.py) to every manager.
+	`link` is the page in the manager app it opens, like /rent/register?tab=leave."""
 	from rent_management.notifications import email_configured
 
 	recipients = subscription.get_manager_users()
@@ -522,6 +527,7 @@ def notify_managers(subject, message):
 				"type": "Alert",
 				"subject": subject,
 				"email_content": message,
+				"link": link,
 			}
 		).insert(ignore_permissions=True)
 

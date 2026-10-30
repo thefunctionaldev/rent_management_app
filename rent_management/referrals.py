@@ -272,6 +272,7 @@ def tell_referrer(doc):
 		_("{0} referred {1}, who has moved in and paid. {2} comes off {0}'s next rent.").format(
 			doc.referrer_name, doc.friend_name, notifications.money(doc.reward_amount)
 		),
+		link="/rent/leads?tab=referrals",
 	)
 	tenant = frappe.db.get_value(
 		"Tenant", doc.referrer, ["name", "first_name", "full_name", "mobile_no", "email_id"], as_dict=True

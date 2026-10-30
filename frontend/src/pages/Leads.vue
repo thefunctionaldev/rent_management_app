@@ -255,4 +255,6 @@ function ago(value) {
 
 // links from the "New lead" emails open the lead
 if (route.query.lead) openDialog("lead", { name: route.query.lead });
+else if (route.query.new) openDialog("lead", {}); // "Add lead" on the phone's home screen
+if (route.query.tab === "referrals") status.value = "referrals";
 </script>

@@ -66,7 +66,11 @@
 			</div>
 		</div>
 
-		<Button variant="ghost" class="w-full" :icon="LogOut" href="/logout">Log out</Button>
+		<div v-if="!pwa.installed" class="card p-5">
+			<InstallCard title="Put My Rent on your home screen" />
+		</div>
+
+		<Button variant="ghost" class="w-full" :icon="LogOut" @click="logout">Log out</Button>
 	</div>
 </template>
 
@@ -77,7 +81,9 @@ import { computed, ref, watch } from "vue";
 import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
+import InstallCard from "@/components/InstallCard.vue";
 import PictureInput from "@/components/PictureInput.vue";
+import { forgetOfflineData, pwa } from "@/pwa";
 import { toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date } from "@/utils";
@@ -88,6 +94,11 @@ const { data, reload } = useResource(() => get(call("get_home")));
 const stay = computed(() => data.value?.stay);
 
 const vacateDate = ref("");
+
+async function logout() {
+	await forgetOfflineData(); // the last bills loaded stay on the phone otherwise
+	window.location.href = "/logout";
+}
 
 async function savePicture(picture) {
 	try {

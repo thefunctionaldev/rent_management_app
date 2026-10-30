@@ -75,6 +75,14 @@
 			</nav>
 
 			<div class="border-t border-slate-100 p-3">
+				<RouterLink
+					v-if="!pwa.installed && (pwa.installPrompt || isIOS)"
+					to="/settings#this-phone"
+					class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-50"
+					@click="menuOpen = false"
+				>
+					<Smartphone class="size-4" /> Install the app
+				</RouterLink>
 				<a
 					href="/app/tenant-space-allotment"
 					class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
@@ -115,6 +123,7 @@
 		</header>
 
 		<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+			<OfflineBanner />
 			<div
 				v-if="banner && $route.name !== 'billing'"
 				class="mb-6 flex flex-col gap-3 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
@@ -177,6 +186,7 @@ import {
 	Receipt,
 	Settings,
 	ShieldCheck,
+	Smartphone,
 	Sparkles,
 	TrendingUp,
 	Users,
@@ -189,8 +199,10 @@ import {
 import { computed, defineAsyncComponent, ref } from "vue";
 
 import Avatar from "./components/Avatar.vue";
+import OfflineBanner from "./components/OfflineBanner.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";
+import { forgetOfflineData, isIOS, pwa } from "./pwa";
 import { activeProperties, boot, setProperty, ui } from "./store";
 import { date } from "./utils";
 
@@ -324,7 +336,8 @@ const dialogs = {
 	splitInvoice: lazy("SplitInvoiceDialog"),
 };
 
-function logout() {
+async function logout() {
+	await forgetOfflineData(); // the last data loaded stays on the phone otherwise
 	window.location.href = "/logout";
 }
 </script>

@@ -379,7 +379,11 @@ def notify_managers(doc, subject):
 	from rent_management.portal import notify_managers as notify
 
 	tenant = frappe.db.get_value("Tenant", doc.tenant, "name")
-	notify(subject, subject + ". " + _("See their profile: {0}").format(get_url(f"/rent/tenants/{tenant}")))
+	notify(
+		subject,
+		subject + ". " + _("See their profile: {0}").format(get_url(f"/rent/tenants/{tenant}")),
+		link=f"/rent/tenants/{tenant}",
+	)
 
 
 # ---------------------------------------------------------------- police verification form

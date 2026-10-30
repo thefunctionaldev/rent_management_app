@@ -48,7 +48,16 @@ async function request(method, args = {}, httpMethod = "POST") {
 		options.body = JSON.stringify(args);
 	}
 
-	const response = await fetch(url, options);
+	let response;
+	try {
+		response = await fetch(url, options);
+	} catch {
+		throw new ApiError(
+			navigator.onLine
+				? "Couldn't reach the server. Try again."
+				: "You're offline. Try again when you have a signal."
+		);
+	}
 	let data = {};
 	try {
 		data = await response.json();

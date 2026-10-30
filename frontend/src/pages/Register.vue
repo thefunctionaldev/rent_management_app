@@ -436,6 +436,7 @@
 <script setup>
 import { DoorOpen, Luggage, MessageCircle, MoonStar, Phone, Plus } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
@@ -451,7 +452,8 @@ import { boot, scope, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, daysBetween, shortDate } from "@/utils";
 
-const tab = ref("night");
+const route = useRoute();
+const tab = ref(["leave", "visitors"].includes(route.query.tab) ? route.query.tab : "night");
 const day = ref(boot.today);
 const { data, loading, reload } = useResource(() =>
 	get("get_register", { day: day.value, ...scope() })
@@ -594,6 +596,11 @@ const blankVisitor = () => ({
 	overnight: false,
 });
 const visitorForm = ref(null);
+// "Visitor at the gate" on the phone's home screen
+if (route.query.new && tab.value === "visitors")
+	watch(data, (d) => d && !visitorForm.value && (visitorForm.value = blankVisitor()), {
+		immediate: true,
+	});
 async function checkIn(form) {
 	const ok = await act(
 		"visitor_in",

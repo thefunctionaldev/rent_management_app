@@ -4,10 +4,31 @@
 			<Button :icon="Sparkles" @click="openDialog('generateInvoices')"
 				>Generate invoices</Button
 			>
-			<Button variant="primary" :icon="Plus" @click="openDialog('recordPayment')"
+			<Button
+				variant="primary"
+				:icon="Plus"
+				class="max-sm:hidden"
+				@click="openDialog('recordPayment')"
 				>Record payment</Button
 			>
 		</PageHeader>
+
+		<!-- quick actions, on phones -->
+		<div class="mb-6 grid grid-cols-4 gap-2 sm:hidden">
+			<component
+				:is="a.to ? 'RouterLink' : 'button'"
+				v-for="a in quickActions"
+				:key="a.label"
+				:to="a.to"
+				class="card flex flex-col items-center gap-1.5 px-1 py-3 text-center text-[11px] leading-tight font-medium text-slate-700 active:bg-slate-50"
+				@click="a.action && a.action()"
+			>
+				<span class="grid size-9 place-items-center rounded-xl" :class="a.tone"
+					><component :is="a.icon" class="size-5"
+				/></span>
+				{{ a.label }}
+			</component>
+		</div>
 
 		<!-- attention strip -->
 		<div
@@ -291,10 +312,12 @@ import {
 	Hourglass,
 	KeyRound,
 	LogOut,
+	MoonStar,
 	PartyPopper,
 	Plus,
 	ShieldCheck,
 	Sparkles,
+	UserPlus,
 	Wallet,
 } from "lucide-vue-next";
 import { computed } from "vue";
@@ -311,6 +334,28 @@ import { openDialog } from "@/dialogs";
 import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, daysBetween, money, shortDate } from "@/utils";
+
+const quickActions = [
+	{
+		label: "Record payment",
+		icon: Wallet,
+		tone: "bg-emerald-50 text-emerald-600",
+		action: () => openDialog("recordPayment"),
+	},
+	{
+		label: "Night attendance",
+		icon: MoonStar,
+		tone: "bg-brand-50 text-brand-600",
+		to: "/register",
+	},
+	{
+		label: "Visitor at the gate",
+		icon: DoorOpen,
+		tone: "bg-sky-50 text-sky-600",
+		to: "/register?tab=visitors&new=1",
+	},
+	{ label: "Add lead", icon: UserPlus, tone: "bg-amber-50 text-amber-600", to: "/leads?new=1" },
+];
 
 const { data } = useResource(() => get("get_dashboard", scope()));
 const d = data;

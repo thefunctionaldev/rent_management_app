@@ -60,6 +60,9 @@ website_route_rules = [
 	{"from_route": "/stay/<path:building>", "to_route": "stay"},  # the public listing page
 ]
 
+# the apps' manifests and service workers (/rent/sw.js...), see rent_management/pwa.py
+page_renderer = ["rent_management.pwa.AppFilesRenderer"]
+
 # tenants (website users) land in the tenant app after logging in
 role_home_page = {"Rent Tenant": "tenant"}
 
@@ -228,6 +231,8 @@ doc_events["Tenant Rent Invoice"].update(
 )
 doc_events["Rent Lead"]["on_update"] = "rent_management.referrals.sync_lead"
 doc_events["User"] = {"validate": "rent_management.subscription.check_user_limit"}
+# app notifications also go to managers' phones
+doc_events["Notification Log"] = {"after_insert": "rent_management.pwa.on_notification"}
 
 # Scheduled Tasks
 # ---------------

@@ -35,6 +35,7 @@
 		</header>
 
 		<main class="mx-auto -mt-10 max-w-lg px-4">
+			<OfflineBanner />
 			<RouterView v-slot="{ Component }">
 				<component :is="Component" :key="$route.fullPath" />
 			</RouterView>
@@ -80,6 +81,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import Avatar from "@/components/Avatar.vue";
+import OfflineBanner from "@/components/OfflineBanner.vue";
 import Toasts from "@/components/Toasts.vue";
 
 import { me } from "./store";
