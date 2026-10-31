@@ -14,6 +14,7 @@ const routes = [
 	{ path: "/away", name: "away", component: () => import("./pages/Register.vue") },
 	{ path: "/refer", name: "refer", component: () => import("./pages/Refer.vue") },
 	{ path: "/notices", name: "notices", component: () => import("./pages/Notices.vue") },
+	{ path: "/statement", name: "statement", component: () => import("./pages/Statement.vue") },
 	{ path: "/receipts", name: "receipts", component: () => import("./pages/Receipts.vue") },
 	{ path: "/documents", name: "documents", component: () => import("./pages/Documents.vue") },
 	{ path: "/moving-out", name: "moving-out", component: () => import("./pages/MoveOut.vue") },

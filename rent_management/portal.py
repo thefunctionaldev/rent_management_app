@@ -18,6 +18,7 @@ from rent_management import (
 	documents,
 	fees,
 	leads,
+	ledger,
 	mess,
 	move_out,
 	notices,
@@ -726,6 +727,25 @@ def download_rent_receipt(fy, invoice=None):
 	if invoice:
 		own_invoice(invoice)  # their own
 	receipts.send_pdf(tenant.name, fy, invoice)
+
+
+# ---------------------------------------------------------------- statement and no dues
+
+
+@frappe.whitelist()
+def get_statement(from_date=None, to_date=None):
+	tenant = current_tenant().name
+	return ledger.statement(tenant, from_date, to_date) | {"no_dues": ledger.no_dues(tenant)}
+
+
+@frappe.whitelist()
+def download_statement(from_date=None, to_date=None):
+	ledger.statement_pdf(current_tenant().name, from_date, to_date)
+
+
+@frappe.whitelist()
+def download_no_dues():
+	ledger.certificate_pdf(current_tenant().name)
 
 
 # ---------------------------------------------------------------- documents

@@ -26,6 +26,7 @@ from rent_management import (
 	gst,
 	inspections,
 	leads,
+	ledger,
 	mess,
 	move_out,
 	notices,
@@ -2247,6 +2248,27 @@ def get_rent_receipts(tenant, fy=None):
 def download_rent_receipt(tenant, fy, invoice=None):
 	check_access()
 	receipts.send_pdf(tenant, fy, invoice)
+
+
+@frappe.whitelist()
+def get_tenant_statement(tenant, from_date=None, to_date=None):
+	check_access()
+	frappe.has_permission("Tenant", "read", tenant, throw=True)
+	return ledger.statement(tenant, from_date, to_date) | {"no_dues": ledger.no_dues(tenant)}
+
+
+@frappe.whitelist()
+def download_tenant_statement(tenant, from_date=None, to_date=None):
+	check_access()
+	frappe.has_permission("Tenant", "read", tenant, throw=True)
+	ledger.statement_pdf(tenant, from_date, to_date)
+
+
+@frappe.whitelist()
+def download_no_dues(tenant):
+	check_access()
+	frappe.has_permission("Tenant", "read", tenant, throw=True)
+	ledger.certificate_pdf(tenant)
 
 
 @frappe.whitelist(methods=["POST"])

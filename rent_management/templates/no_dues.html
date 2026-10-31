@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>No dues certificate: {{ c.tenant.full_name }}</title>
+<style>
+	body { font-family: "Helvetica Neue", Arial, sans-serif; color: #0f172a; font-size: 13px; margin: 0; }
+	.page { padding: 48px 56px; }
+	.head { width: 100%; border-collapse: collapse; border-bottom: 2px solid #4f46e5; }
+	.head td { vertical-align: top; padding-bottom: 14px; }
+	h1 { font-size: 24px; margin: 0; letter-spacing: 0.5px; }
+	.muted { color: #64748b; }
+	.small { font-size: 11px; }
+	.right { text-align: right; }
+	.body { margin: 34px 0 22px; line-height: 1.9; font-size: 14px; }
+	.facts { width: 100%; border-collapse: collapse; margin-top: 6px; }
+	.facts td { padding: 7px 4px; border-bottom: 1px solid #eef2f6; }
+	.facts td:first-child { width: 38%; color: #64748b; }
+	.sign { margin-top: 64px; width: 100%; border-collapse: collapse; }
+	.sign td { vertical-align: bottom; }
+	.sign img { max-height: 60px; max-width: 200px; }
+	.line { border-top: 1px solid #0f172a; width: 230px; padding-top: 4px; margin-left: auto; }
+	.note { margin-top: 34px; font-size: 10.5px; color: #64748b; }
+</style>
+</head>
+<body>
+<div class="page">
+	<table class="head"><tr>
+		<td>
+			<h1>No Dues Certificate</h1>
+			<div class="muted">{{ c.payee.property_address }}</div>
+		</td>
+		<td class="right small">
+			<div style="white-space: nowrap"><b>Certificate no.</b> {{ c.number }}</div>
+			<div><b>Date</b> {{ frappe.utils.formatdate(c.date, "dd MMM yyyy") }}</div>
+		</td>
+	</tr></table>
+
+	<div class="body">
+		This is to certify that <b>{{ c.tenant.full_name }}</b>
+		{% if c.stay.active %}
+		has been staying at <b>{{ c.payee.property_address }}</b>, room {{ c.stay.room }}, since
+		{{ frappe.utils.formatdate(c.stay.since, "dd MMM yyyy") }}, and has <b>no dues</b> payable to us as on
+		{{ frappe.utils.formatdate(c.date, "dd MMM yyyy") }}.
+		{% else %}
+		stayed at <b>{{ c.payee.property_address }}</b>, room {{ c.stay.room }}, from
+		{{ frappe.utils.formatdate(c.stay.since, "dd MMM yyyy") }} to {{ frappe.utils.formatdate(c.stay.until, "dd MMM yyyy") }},
+		and has paid all rent and charges. There are <b>no dues</b> payable to us.
+		{% endif %}
+	</div>
+
+	<table class="facts">
+		<tr><td>Tenant</td><td>{{ c.tenant.full_name }}{% if c.tenant.mobile_no %} · {{ c.tenant.mobile_no }}{% endif %}</td></tr>
+		<tr><td>Room</td><td>{{ c.stay.room }}</td></tr>
+		<tr><td>Stay</td><td>{{ frappe.utils.formatdate(c.stay.since, "dd MMM yyyy") }} to {{ frappe.utils.formatdate(c.stay.until, "dd MMM yyyy") if c.stay.until else "now" }}</td></tr>
+		<tr><td>Total paid</td><td>{{ c.inr(c.paid) }}</td></tr>
+		{% if c.deposit %}
+		<tr><td>Security deposit</td><td>Settled on {{ frappe.utils.formatdate(c.deposit.date, "dd MMM yyyy") }}{% if c.deposit.refund %}: {{ c.inr(c.deposit.refund) }} refunded{% if c.deposit.mode %} by {{ c.deposit.mode }}{% endif %}{% endif %}</td></tr>
+		{% endif %}
+	</table>
+
+	<table class="sign"><tr>
+		<td></td>
+		<td class="right">
+			{% if c.signature %}<img src="{{ c.signature }}" alt="" /><br />{% endif %}
+			<div class="line">{{ c.payee.name or "" }}<br /><span class="muted small">Landlord</span></div>
+		</td>
+	</tr></table>
+
+	<div class="note">
+		Issued from the landlord's rent records on {{ frappe.utils.formatdate(c.date, "dd MMM yyyy") }}.
+		{% if c.payee.pan %}Landlord's PAN: {{ c.payee.pan }}.{% endif %}
+	</div>
+</div>
+</body>
+</html>

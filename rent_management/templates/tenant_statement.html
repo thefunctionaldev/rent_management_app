@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Statement: {{ s.tenant.full_name }}</title>
+<style>
+	body { font-family: "Helvetica Neue", Arial, sans-serif; color: #0f172a; font-size: 12px; margin: 0; }
+	.page { padding: 32px 40px; }
+	/* tables, not flexbox: wkhtmltopdf's old WebKit makes these too when Chrome can't */
+	.head { width: 100%; border-collapse: collapse; border-bottom: 2px solid #4f46e5; }
+	.head td { vertical-align: top; padding-bottom: 12px; }
+	h1 { font-size: 22px; margin: 0; }
+	h2 { font-size: 13px; margin: 24px 0 6px; text-transform: uppercase; letter-spacing: 0.6px; color: #4f46e5; }
+	.muted { color: #64748b; }
+	.small { font-size: 10.5px; }
+	.right { text-align: right; }
+	.parties { width: 100%; margin-top: 16px; border-collapse: collapse; }
+	.parties td { vertical-align: top; width: 50%; padding-right: 12px; }
+	.label { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 3px; }
+	.totals { width: 100%; margin-top: 16px; border-collapse: separate; border-spacing: 8px 0; }
+	.totals td { background: #f8fafc; padding: 8px 10px; width: 25%; }
+	.totals b { display: block; font-size: 15px; margin-top: 2px; }
+	table.lines { width: 100%; border-collapse: collapse; }
+	table.lines th { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; text-align: left; border-bottom: 1px solid #cbd5e1; padding: 5px; }
+	table.lines td { border-bottom: 1px solid #eef2f6; padding: 6px 5px; vertical-align: top; }
+	table.lines tr { page-break-inside: avoid; }
+	.num { text-align: right; white-space: nowrap; }
+	.paid { color: #047857; }
+	.owe { color: #be123c; }
+	.end td { font-weight: bold; border-top: 2px solid #0f172a; border-bottom: none; }
+	.note { margin-top: 22px; font-size: 10px; color: #64748b; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="page">
+	<table class="head"><tr>
+		<td>
+			<h1>Tenant Statement</h1>
+			<div class="muted">{{ frappe.utils.formatdate(s.from_date, "dd MMM yyyy") }} to {{ frappe.utils.formatdate(s.to_date, "dd MMM yyyy") }}</div>
+		</td>
+		<td class="right small">
+			<div><b>Date</b> {{ frappe.utils.formatdate(frappe.utils.nowdate(), "dd MMM yyyy") }}</div>
+		</td>
+	</tr></table>
+
+	<table class="parties"><tr>
+		<td>
+			<div class="label">Tenant</div>
+			<div><b>{{ s.tenant.full_name }}</b></div>
+			{% if s.tenant.mobile_no %}<div class="muted">{{ s.tenant.mobile_no }}</div>{% endif %}
+			{% if s.stay %}<div class="muted">Room {{ s.stay.room }} · since {{ frappe.utils.formatdate(s.stay.since, "dd MMM yyyy") }}{% if s.stay.until %}, moved out {{ frappe.utils.formatdate(s.stay.until, "dd MMM yyyy") }}{% endif %}</div>{% endif %}
+		</td>
+		<td>
+			{% if s.payee %}
+			<div class="label">Landlord</div>
+			<div><b>{{ s.payee.name or "" }}</b></div>
+			<div class="muted">{{ s.payee.property_address }}</div>
+			{% endif %}
+		</td>
+	</tr></table>
+
+	<table class="totals"><tr>
+		<td><span class="muted small">Opening balance</span><b>{{ inr(s.opening) }}</b></td>
+		<td><span class="muted small">Billed</span><b>{{ inr(s.billed) }}</b></td>
+		<td><span class="muted small">Paid</span><b class="paid">{{ inr(s.paid) }}</b></td>
+		<td><span class="muted small">{% if s.balance > 0 %}Due{% elif s.balance < 0 %}Paid in advance{% else %}Balance{% endif %}</span><b class="{{ 'owe' if s.balance > 0 else '' }}">{{ inr(s.balance if s.balance >= 0 else -s.balance) }}</b></td>
+	</tr></table>
+
+	<h2>Bills and payments</h2>
+	<table class="lines">
+		<tr><th>Date</th><th>Details</th><th class="num">Billed</th><th class="num">Paid</th><th class="num">Balance</th></tr>
+		{% if s.from_date and s.opening %}
+		<tr><td>{{ frappe.utils.formatdate(s.from_date, "dd MMM yyyy") }}</td><td>Opening balance</td><td></td><td></td><td class="num">{{ inr(s.opening) }}</td></tr>
+		{% endif %}
+		{% for r in s.rows %}
+		<tr>
+			<td style="white-space: nowrap">{{ frappe.utils.formatdate(r.date, "dd MMM yyyy") }}</td>
+			<td>{{ r.label }}{% if r.detail %}<div class="muted small">{{ r.detail }}</div>{% endif %}</td>
+			<td class="num">{{ inr(r.debit) if r.debit else "" }}</td>
+			<td class="num paid">{{ inr(r.credit) if r.credit else "" }}</td>
+			<td class="num">{{ inr(r.balance) }}</td>
+		</tr>
+		{% endfor %}
+		{% if not s.rows %}<tr><td colspan="5" class="muted">Nothing in this period.</td></tr>{% endif %}
+		<tr class="end"><td colspan="2">Balance on {{ frappe.utils.formatdate(s.to_date, "dd MMM yyyy") }}</td><td class="num">{{ inr(s.billed) }}</td><td class="num">{{ inr(s.paid) }}</td><td class="num">{{ inr(s.balance) }}</td></tr>
+	</table>
+
+	{% if s.deposits %}
+	<h2>Security deposit</h2>
+	<table class="lines">
+		<tr><th>Room</th><th>Details</th><th class="num">Amount</th></tr>
+		{% for d in s.deposits %}
+		<tr><td>{{ d.room }}</td><td>Deposit{% if d.collected %} paid{% if d.collected_on %} on {{ frappe.utils.formatdate(d.collected_on, "dd MMM yyyy") }}{% endif %}{% else %} (not received){% endif %}</td><td class="num">{{ inr(d.amount) }}</td></tr>
+		{% if d.settlement %}
+		{% for x in d.settlement.deductions %}
+		<tr><td></td><td>{{ x.reason }}{% if x.description %}<div class="muted small">{{ x.description }}</div>{% endif %}</td><td class="num owe">- {{ inr(x.amount) }}</td></tr>
+		{% endfor %}
+		{% if d.settlement.rent_adjusted %}<tr><td></td><td>Unpaid bills paid from it</td><td class="num owe">- {{ inr(d.settlement.rent_adjusted) }}</td></tr>{% endif %}
+		<tr class="end"><td></td><td>{% if d.settlement.owes %}Still owed by the tenant{% else %}Refunded{% if d.settlement.mode %} by {{ d.settlement.mode }}{% endif %} on {{ frappe.utils.formatdate(d.settlement.date, "dd MMM yyyy") }}{% if d.settlement.reference %} · Ref. {{ d.settlement.reference }}{% endif %}{% endif %}</td><td class="num">{{ inr(d.settlement.owes or d.settlement.refund) }}</td></tr>
+		{% endif %}
+		{% endfor %}
+	</table>
+	{% endif %}
+
+	<div class="note">
+		Bills are shown on the day they were made, with what they include; payments on the day they were paid.
+		Payments from the security deposit are part of the bills and payments above.
+	</div>
+</div>
+</body>
+</html>

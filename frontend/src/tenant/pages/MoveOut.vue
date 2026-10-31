@@ -149,6 +149,11 @@
 					<p v-if="data.settlement.remarks" class="mt-2 text-sm text-slate-500">
 						{{ data.settlement.remarks }}
 					</p>
+					<RouterLink
+						to="/statement"
+						class="mt-3 inline-block text-sm font-medium text-brand-600"
+						>Statement and no-dues certificate →</RouterLink
+					>
 				</div>
 			</template>
 

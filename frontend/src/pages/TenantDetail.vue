@@ -522,6 +522,17 @@
 						</ul>
 					</div>
 					<RentReceipts v-else-if="tab === 'receipts'" :tenant="name" />
+					<div v-else-if="tab === 'statement'" class="p-5">
+						<TenantStatement
+							:fetch="
+								(args) => get('get_tenant_statement', { tenant: name, ...args })
+							"
+							:pdf-url="statementUrl"
+							:no-dues-url="`/api/method/rent_management.api.download_no_dues?tenant=${encodeURIComponent(
+								name
+							)}`"
+						/>
+					</div>
 					<TenantDocuments v-else-if="tab === 'documents'" :tenant="name" />
 					<div v-else>
 						<EmptyState
@@ -603,6 +614,7 @@ import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
 import RentReceipts from "@/components/RentReceipts.vue";
 import TenantDocuments from "@/components/TenantDocuments.vue";
+import TenantStatement from "@/components/TenantStatement.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
@@ -685,7 +697,13 @@ const tabs = computed(() => [
 	{ value: "stays", label: "Stays", count: data.value?.allotments.length },
 	{ value: "documents", label: "Documents" },
 	{ value: "receipts", label: "Rent receipts" },
+	{ value: "statement", label: "Statement" },
 ]);
+const statementUrl = (args) =>
+	`/api/method/rent_management.api.download_tenant_statement?${new URLSearchParams({
+		tenant: props.name,
+		...args,
+	})}`;
 const stats = computed(() => [
 	{ label: "Total invoiced", value: data.value.totals.invoiced, class: "" },
 	{ label: "Total paid", value: data.value.totals.paid, class: "text-emerald-600" },

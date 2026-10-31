@@ -276,6 +276,21 @@ building owned by someone else, add the owner's name, PAN and address on the bui
 Edit*). Its receipts then name the owner. When a tenant's rent is over ₹1,00,000 in a year and no
 PAN is set, both apps warn, because employers need the landlord's PAN for that.
 
+### Tenant statement and no-dues certificate
+
+Every tenant has a **statement**: each bill (with what it includes: rent, electricity and other
+charges, discounts, late fees) on the day it was made, each payment on the day it was paid, the
+running balance, and their deposit (paid, what was taken from it, what was refunded). Pick a
+period (everything, this or last financial year, the last 3 months) and download it as a PDF.
+Managers see it on the tenant's page (*Statement* tab); tenants in the tenant app (*Bills >
+Statement*).
+
+A **no-dues certificate** (PDF, signed with the receipt signature from Settings) can be downloaded
+from the same place once the tenant owes nothing: nothing unpaid, no bill being prepared, no
+payment waiting to be confirmed and, once they've moved out, the deposit settled with nothing left
+for them to pay. If something is pending, both apps say what. For a tenant still staying it says
+there are no dues as on that day.
+
 ### Moving out (tenant app)
 
 Tenants see everything about leaving on one page, **Profile > Moving out** (and a card on the home
