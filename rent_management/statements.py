@@ -629,7 +629,9 @@ def record(doc, row) -> str:
 				"reference_no": row.reference,
 				"remarks": remarks,
 			}
-		).insert()
+		)
+		payment.flags.allow_duplicate = bool(first)  # one transfer over several bills
+		payment.insert()
 		payment.submit()
 		first = first or payment.name
 		left = flt(left - amount, 2)

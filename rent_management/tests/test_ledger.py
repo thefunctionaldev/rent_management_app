@@ -24,7 +24,9 @@ class TestLedger(IntegrationTestCase):
 			allotment_date="2026-01-01", security_deposit=12000, deposit_collected=1)  # fmt: skip
 		self.jan = make_invoice(self.stay, submit=True)
 		self.feb = make_invoice(self.stay, billing_month="February", posting_date="2026-02-01", submit=True)
-		api.record_payment(self.jan.name, 6000, "UPI", "2026-01-05", "UTR111")
+		api.record_payment(
+			self.jan.name, 6000, "UPI", "2026-01-05", f"UTR111{frappe.generate_hash(length=5)}"
+		)
 		api.record_payment(self.feb.name, 2000, "Cash", "2026-02-06")
 
 	def tearDown(self):

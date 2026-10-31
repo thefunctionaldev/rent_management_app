@@ -20,7 +20,7 @@ SETTINGS = "Rent Management Settings"
 def pay(invoice, amount, mode="UPI", on=None):
 	doc = frappe.get_doc(
 		{"doctype": "Rent Payment", "tenant": invoice.tenant, "rent_invoice": invoice.name, "amount": amount,
-			"mode_of_payment": mode, "payment_date": on or invoice.posting_date, "reference_no": "UTR123" if mode == "UPI" else None}
+			"mode_of_payment": mode, "payment_date": on or invoice.posting_date, "reference_no": f"UTR123{frappe.generate_hash(length=5)}" if mode == "UPI" else None}
 	).insert()  # fmt: skip
 	doc.submit()
 

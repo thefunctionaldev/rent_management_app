@@ -305,6 +305,8 @@ _also("Rent Management Settings", "validate", "rent_management.receipts.check_pa
 _also("Rent Property", "validate", "rent_management.receipts.check_pan")
 # new stays to verify with the police, see rent_management/verification.py
 _also("Tenant Space Allotment", "on_submit", "rent_management.verification.on_move_in")
+# a payment recorded twice, see rent_management/duplicates.py
+_also("Rent Payment", "validate", "rent_management.duplicates.check")
 # moving out in the tenant app
 _also("Room Inspection", "on_update", "rent_management.move_out.on_checklist_update")
 _also("Security Deposit Settlement", "on_submit", "rent_management.move_out.on_settlement_submit")

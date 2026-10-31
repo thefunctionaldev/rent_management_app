@@ -217,6 +217,7 @@ def record_online_payment(invoice_name: str, payment_id: str, amount: float, met
 			}
 		)
 		payment.flags.ignore_permissions = True
+		payment.flags.allow_duplicate = True  # money received: idempotent per payment id above
 		payment.insert()
 		payment.submit()
 	finally:

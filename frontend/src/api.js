@@ -2,7 +2,12 @@
 
 const APP_METHOD = "rent_management.api.";
 
-export class ApiError extends Error {}
+export class ApiError extends Error {
+	constructor(message, type = "") {
+		super(message);
+		this.type = type; // the server's exception, like DuplicatePaymentError
+	}
+}
 
 // sent with every call: a staff login for one building always asks for that building
 // (endpoints that don't take an argument ignore it)
@@ -77,7 +82,7 @@ async function request(method, args = {}, httpMethod = "POST") {
 		)}`;
 	}
 	if (!response.ok || data.exc_type) {
-		throw new ApiError(errorMessage(data, response));
+		throw new ApiError(errorMessage(data, response), data.exc_type || "");
 	}
 	return data.message;
 }

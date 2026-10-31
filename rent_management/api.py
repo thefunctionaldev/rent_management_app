@@ -22,6 +22,7 @@ from rent_management import (
 	checkin,
 	data_import,
 	documents,
+	duplicates,
 	fees,
 	gst,
 	inspections,
@@ -48,6 +49,7 @@ from rent_management import (
 	subscription,
 	verification,
 )
+from rent_management import search as search_tenants
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.rent_property.rent_property import get_default_property
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
@@ -550,17 +552,11 @@ def create_room_type(data):
 def get_tenants(search=None, status=None, property=None):
 	check_access()
 	filters = {"status": status} if status else {}
-	or_filters = None
-	if search:
-		or_filters = [
-			["full_name", "like", f"%{search}%"],
-			["mobile_no", "like", f"%{search}%"],
-			["email_id", "like", f"%{search}%"],
-		]
+	if search:  # a name, phone, email, room number or payment UTR (search.py)
+		filters["name"] = ("in", list(search_tenants.matches(search, property)) or [""])
 	tenants = frappe.get_all(
 		"Tenant",
 		filters=filters,
-		or_filters=or_filters,
 		fields=[
 			"name",
 			"full_name",
@@ -592,6 +588,13 @@ def get_tenants(search=None, status=None, property=None):
 		# tenants staying in another building are hidden; those without a room are always shown
 		tenants = [t for t in tenants if not t.property or t.property == property]
 	return tenants
+
+
+@frappe.whitelist()
+def quick_search(text, property=None):
+	"""The search box at the top of the sidebar."""
+	check_access()
+	return search_tenants.quick(text, property)
 
 
 @frappe.whitelist()
@@ -1009,10 +1012,18 @@ def get_payments(search=None, mode_of_payment=None, start=0, page_length=100, pr
 
 @frappe.whitelist(methods=["POST"])
 def record_payment(
-	rent_invoice, amount, mode_of_payment="Cash", payment_date=None, reference_no=None, remarks=None
+	rent_invoice,
+	amount,
+	mode_of_payment="Cash",
+	payment_date=None,
+	reference_no=None,
+	remarks=None,
+	allow_duplicate=0,
 ):
 	check_access()
 	tenant = frappe.db.get_value("Tenant Rent Invoice", rent_invoice, "tenant")
+	if not cint(allow_duplicate):
+		duplicates.check_near(tenant, amount, payment_date or nowdate())
 	doc = frappe.get_doc(
 		{
 			"doctype": "Rent Payment",
@@ -1024,7 +1035,9 @@ def record_payment(
 			"reference_no": reference_no,
 			"remarks": remarks,
 		}
-	).insert()
+	)
+	doc.flags.allow_duplicate = cint(allow_duplicate)  # the manager said it's a second payment
+	doc.insert()
 	doc.submit()
 	return doc.name
 

@@ -35,7 +35,8 @@ export function useAction(fn, { success } = {}) {
 		loading.value = true;
 		try {
 			const result = await fn(...args);
-			if (success) toast(typeof success === "function" ? success(result) : success);
+			const message = typeof success === "function" ? success(result) : success;
+			if (message) toast(message);
 			bumpData();
 			return result;
 		} catch (e) {

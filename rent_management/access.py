@@ -50,7 +50,7 @@ PRESETS = {
 ENDPOINTS = {
 	"any": ("get_boot", "get_properties", "get_room_types", "get_staff_home"),
 	"rooms": (
-		"get_rooms", "get_room_items", "get_tenants", "get_tenant", "save_tenant", "allot_room",
+		"get_rooms", "get_room_items", "get_tenants", "quick_search", "get_tenant", "save_tenant", "allot_room",
 		"vacate_room", "give_notice", "withdraw_notice", "download_agreement", "mark_deposit_collected",
 		"invite_tenant", "send_checkin", "get_room_inspection", "save_room_inspection",
 		"get_checklist_deductions", "get_billable_allotments", "get_rent_receipts", "download_rent_receipt",
@@ -58,7 +58,7 @@ ENDPOINTS = {
 		"get_tenant_documents", "save_tenant_document", "delete_tenant_document",
 	),
 	"payments": (
-		"get_tenants", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
+		"get_tenants", "quick_search", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
 		"get_payments_to_confirm", "confirm_payment", "reject_payment", "send_rent_reminder",
 		"get_payment_link", "check_online_payment", "get_outstanding", "get_cash_book", "hand_over_cash",
 		"get_rent_receipts", "download_rent_receipt", "get_tenant_statement", "download_tenant_statement",

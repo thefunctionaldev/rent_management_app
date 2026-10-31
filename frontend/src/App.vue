@@ -25,6 +25,10 @@
 				</div>
 			</div>
 
+			<div v-if="canUse(['rooms', 'payments'])" class="px-3 pb-2">
+				<QuickSearch />
+			</div>
+
 			<div v-if="buildings.length > 1" class="px-3 pt-1">
 				<label class="relative block">
 					<Building2
@@ -120,7 +124,8 @@
 				<Menu class="size-5" />
 			</button>
 			<img :src="logo" alt="" class="size-7" />
-			<p class="text-sm font-semibold">Rent Management</p>
+			<p class="flex-1 text-sm font-semibold">Rent Management</p>
+			<QuickSearch v-if="canUse(['rooms', 'payments'])" compact />
 		</header>
 
 		<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
@@ -208,6 +213,7 @@ import { computed, defineAsyncComponent, ref } from "vue";
 import Avatar from "./components/Avatar.vue";
 import InstallSheet from "./components/InstallSheet.vue";
 import OfflineBanner from "./components/OfflineBanner.vue";
+import QuickSearch from "./components/QuickSearch.vue";
 import Toasts from "./components/Toasts.vue";
 import { closeDialog, dialog } from "./dialogs";
 import { forgetOfflineData, isIOS, pwa } from "./pwa";

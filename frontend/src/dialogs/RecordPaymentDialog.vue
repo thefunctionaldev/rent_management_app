@@ -158,12 +158,21 @@ watch(
 	{ immediate: true }
 );
 
-const { loading, run } = useAction(() => post("record_payment", form), {
-	success: () => `Payment of ${money(form.amount)} recorded`,
-});
+// a payment that looks recorded already is only saved once the manager confirms it
+const { loading, run } = useAction(
+	async () => {
+		try {
+			return await post("record_payment", form);
+		} catch (e) {
+			if (e.type !== "DuplicatePaymentError") throw e;
+			if (!window.confirm(`${e.message}\n\nRecord this one anyway?`)) return null;
+			return post("record_payment", { ...form, allow_duplicate: 1 });
+		}
+	},
+	{ success: (name) => (name ? `Payment of ${money(form.amount)} recorded` : "") }
+);
 
 async function save() {
-	await run();
-	emit("close");
+	if (await run()) emit("close");
 }
 </script>

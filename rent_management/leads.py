@@ -607,7 +607,9 @@ def record_token_as_rent(lead, tenant, allotment, allotment_date) -> list[str]:
 						frappe.utils.formatdate(lead.token_paid_on), lead.token_mode or "-"
 					),
 				}
-			).insert()
+			)
+			payment.flags.allow_duplicate = bool(payments)  # one token over several bills
+			payment.insert()
 			payment.submit()
 			payments.append(payment.name)
 			left = flt(left - amount, 2)
