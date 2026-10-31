@@ -25,6 +25,7 @@ class TestDemo(IntegrationTestCase):
 			patch.object(demo, "RENOVATION", {(names[b], room) for b, room in demo.RENOVATION}),
 			patch.object(subscription, "skip_enforcement", return_value=True),
 			patch.object(demo, "set_picture"),  # files on disk aren't rolled back; tested in test_pictures
+			patch("rent_management.pictures.set_document"),  # the same for documents
 		):
 			summary = demo.Demo("demo@1234").run()
 		self.assertTrue(frappe.db.exists("User", summary["tenant_login"]))

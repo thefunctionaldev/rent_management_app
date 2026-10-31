@@ -132,6 +132,9 @@
 								/>
 							</Field>
 						</div>
+						<Field label="Police station" hint="Where tenants' verification forms go">
+							<input v-model="form.police_station" class="input" />
+						</Field>
 						<Field label="Owner address">
 							<textarea v-model="form.owner_address" class="input" rows="2" />
 						</Field>
@@ -201,6 +204,7 @@ const form = reactive({
 	owner_name: p.owner_name || "",
 	owner_pan: p.owner_pan || "",
 	owner_address: p.owner_address || "",
+	police_station: p.police_station || "",
 });
 const picture = ref(p.image || "");
 

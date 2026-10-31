@@ -73,6 +73,9 @@
   "referral_reward",
   "column_break_referrals",
   "referral_friend_discount",
+  "verification_settings_section",
+  "police_verification_enabled",
+  "police_verification_days",
   "push_section",
   "vapid_public_key",
   "vapid_private_key"
@@ -511,13 +514,32 @@
    "fieldtype": "Attach Image",
    "hidden": 1,
    "label": "Signature for Rent Receipts"
+  },
+  {
+   "fieldname": "verification_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Police Verification"
+  },
+  {
+   "description": "New stays start as Pending",
+   "fieldname": "police_verification_enabled",
+   "fieldtype": "Check",
+   "label": "Track Police Verification"
+  },
+  {
+   "default": "7",
+   "depends_on": "police_verification_enabled",
+   "description": "Days after the move-in",
+   "fieldname": "police_verification_days",
+   "fieldtype": "Int",
+   "label": "Submit Within (days)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-30 18:07:16.789335",
+ "modified": "2026-10-30 18:20:57.373601",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

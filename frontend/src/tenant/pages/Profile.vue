@@ -66,6 +66,20 @@
 			</div>
 		</div>
 
+		<RouterLink
+			to="/documents"
+			class="card flex items-center gap-3 p-4 transition hover:bg-slate-50"
+		>
+			<span class="grid size-10 place-items-center rounded-xl bg-slate-100 text-slate-600"
+				><FolderOpen class="size-5"
+			/></span>
+			<div class="flex-1">
+				<p class="font-medium">My documents</p>
+				<p class="text-sm text-slate-500">ID, PAN, visa, offer letter</p>
+			</div>
+			<ChevronRight class="size-5 text-slate-400" />
+		</RouterLink>
+
 		<div v-if="!pwa.installed" class="card p-5">
 			<InstallCard title="Put My Rent on your home screen" />
 		</div>
@@ -75,7 +89,7 @@
 </template>
 
 <script setup>
-import { FileText, LogOut } from "lucide-vue-next";
+import { ChevronRight, FileText, FolderOpen, LogOut } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 import { get, post } from "@/api";

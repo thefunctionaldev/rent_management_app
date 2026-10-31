@@ -242,6 +242,42 @@
 									target="_blank"
 									>Rental agreement (PDF)</Button
 								>
+								<button
+									v-if="current.docstatus === 1"
+									class="col-span-2 flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs ring-1 ring-slate-200 hover:bg-slate-50"
+									@click="
+										current.police_verification
+											? openDialog('verification', {
+													stay: { ...current, room: current.room },
+											  })
+											: trackVerification(current)
+									"
+								>
+									<BadgeCheck
+										class="size-4 shrink-0"
+										:class="
+											current.police_verification === 'Verified'
+												? 'text-emerald-600'
+												: current.police_verification
+												? 'text-amber-600'
+												: 'text-slate-400'
+										"
+									/>
+									<span class="flex-1"
+										>Police verification:
+										<b>{{
+											{
+												Pending: "to submit",
+												Submitted: "with the police",
+												Verified: "verified",
+												"Not Required": "not needed",
+											}[current.police_verification] || "not tracked"
+										}}</b></span
+									>
+									<span class="text-brand-600">{{
+										current.police_verification ? "Update" : "Track"
+									}}</span>
+								</button>
 								<Button
 									v-if="current.security_deposit && !current.deposit_collected"
 									size="sm"
@@ -486,6 +522,7 @@
 						</ul>
 					</div>
 					<RentReceipts v-else-if="tab === 'receipts'" :tenant="name" />
+					<TenantDocuments v-else-if="tab === 'documents'" :tenant="name" />
 					<div v-else>
 						<EmptyState
 							v-if="!data.allotments.length"
@@ -539,16 +576,16 @@
 
 <script setup>
 import {
-	Smartphone,
 	ArrowDownLeft,
+	BadgeCheck,
 	BellRing,
-	ClipboardCheck,
-	IndianRupee,
 	Briefcase,
 	ChevronLeft,
+	ClipboardCheck,
 	DoorOpen,
 	FilePlus,
 	FileText,
+	IndianRupee,
 	KeyRound,
 	LogOut,
 	Mail,
@@ -556,6 +593,7 @@ import {
 	Phone,
 	Send,
 	ShieldCheck,
+	Smartphone,
 	Wallet,
 } from "lucide-vue-next";
 import { computed, ref } from "vue";
@@ -564,6 +602,7 @@ import { get, post } from "@/api";
 import Avatar from "@/components/Avatar.vue";
 import Button from "@/components/Button.vue";
 import RentReceipts from "@/components/RentReceipts.vue";
+import TenantDocuments from "@/components/TenantDocuments.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
@@ -629,11 +668,22 @@ async function toggleAadhaar() {
 	}
 }
 const current = computed(() => data.value.allotments.find((a) => a.status === "Active"));
+async function trackVerification(stay) {
+	try {
+		await post("track_verification", { allotment: stay.name });
+		toast("Tracking this tenant's police verification");
+		bumpData();
+	} catch (e) {
+		toast(e.message, "error");
+	}
+}
+
 const tab = ref("invoices");
 const tabs = computed(() => [
 	{ value: "invoices", label: "Invoices", count: data.value?.invoices.length },
 	{ value: "payments", label: "Payments", count: data.value?.payments.length },
 	{ value: "stays", label: "Stays", count: data.value?.allotments.length },
+	{ value: "documents", label: "Documents" },
 	{ value: "receipts", label: "Rent receipts" },
 ]);
 const stats = computed(() => [

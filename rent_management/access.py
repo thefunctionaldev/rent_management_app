@@ -54,6 +54,8 @@ ENDPOINTS = {
 		"vacate_room", "give_notice", "withdraw_notice", "download_agreement", "mark_deposit_collected",
 		"invite_tenant", "send_checkin", "get_room_inspection", "save_room_inspection",
 		"get_checklist_deductions", "get_billable_allotments", "get_rent_receipts", "download_rent_receipt",
+		"get_verifications", "update_verification", "track_verification", "download_verification_form",
+		"get_tenant_documents", "save_tenant_document", "delete_tenant_document",
 	),
 	"payments": (
 		"get_tenants", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
@@ -93,6 +95,7 @@ DOCTYPES = {
 	"Meter Reading": ("meters",),
 	"Property Expense": ("expenses",),
 	"Rent Notice": ("notices",),
+	"Tenant Document": ("rooms",),
 }
 
 

@@ -42,7 +42,8 @@
   "owner_name",
   "owner_pan",
   "column_break_owner",
-  "owner_address"
+  "owner_address",
+  "police_station"
  ],
  "fields": [
   {
@@ -257,6 +258,12 @@
    "fieldname": "owner_address",
    "fieldtype": "Small Text",
    "label": "Owner Address"
+  },
+  {
+   "description": "Where tenants' verification forms are submitted",
+   "fieldname": "police_station",
+   "fieldtype": "Data",
+   "label": "Police Station"
   }
  ],
  "grid_page_length": 50,
@@ -268,7 +275,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-10-30 18:07:16.790672",
+ "modified": "2026-10-30 18:20:57.374785",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Property",

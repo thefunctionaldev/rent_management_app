@@ -290,6 +290,7 @@ class Demo:
 		self.make_fees()
 		self.make_referrals()
 		self.make_notices()
+		self.make_verification()
 		logins = self.make_logins()
 		frappe.flags.no_activity_log = False
 		self.make_activity(logins["manager_login"], logins.get("staff_login"))
@@ -1304,6 +1305,82 @@ class Demo:
 		if tenant:
 			at(add_days(self.today, -1), manager, lambda: activity.log("Privacy",
 				f"viewed the Aadhaar number of {tenant.full_name}", tenant=tenant.name))  # fmt: skip
+
+	def make_verification(self):
+		"""Police verification of the current tenants, and a few of their documents."""
+		import base64
+		import io
+
+		from PIL import Image, ImageDraw
+
+		from rent_management import documents
+
+		rng = random.Random(97)  # its own sequence, so the rest of the data stays the same
+		stations = {BUILDINGS[0][0]: "Koramangala Police Station", BUILDINGS[1][0]: "HSR Layout Police Station",
+			BUILDINGS[2][0]: "Mico Layout Police Station"}  # fmt: skip
+		for building, station in stations.items():
+			frappe.db.set_value("Rent Property", building, "police_station", station)
+		frappe.db.set_single_value(
+			SETTINGS, {"police_verification_enabled": 1, "police_verification_days": 7}
+		)
+		stays = frappe.get_all(
+			ALLOTMENT,
+			filters={"docstatus": 1, "status": "Active"},
+			fields=["name", "property", "allotment_date"],
+			order_by="allotment_date desc",
+		)
+		for i, stay in enumerate(stays):
+			days = date_diff(self.today, stay.allotment_date)
+			values = {"police_station": stations.get(stay.property)}
+			if i == 0:
+				values["police_verification"] = "Pending"  # the newest tenant, overdue: to show it
+			elif i == 1:
+				values["police_verification"] = "Submitted"
+			elif days <= 5:
+				values["police_verification"] = "Pending"
+			elif days <= 12:
+				values["police_verification"] = "Pending" if rng.random() < 0.5 else "Submitted"
+			elif days <= 40:
+				values["police_verification"] = "Submitted"
+			else:
+				values["police_verification"] = "Verified"
+			if values["police_verification"] in ("Submitted", "Verified"):
+				submitted = add_days(stay.allotment_date, rng.randint(2, 6))
+				values.update(
+					{
+						"verification_submitted_on": submitted,
+						"verification_reference": f"PS/{rng.randint(1000, 9999)}",
+					}
+				)
+				if values["police_verification"] == "Verified":
+					values["verified_on"] = add_days(submitted, rng.randint(12, 30))
+			frappe.db.set_value(ALLOTMENT, stay.name, values, update_modified=False)
+
+		def card(title, lines):
+			image = Image.new("RGB", (900, 560), (241, 245, 249))
+			draw = ImageDraw.Draw(image)
+			draw.rectangle([0, 0, 900, 90], fill=(79, 70, 229))
+			draw.text((40, 32), title, fill="white")
+			for i, line in enumerate(lines):
+				draw.text((40, 150 + i * 50), line, fill=(15, 23, 42))
+			out = io.BytesIO()
+			image.save(out, "PNG")
+			return "data:image/png;base64," + base64.b64encode(out.getvalue()).decode()
+
+		deepak = frappe.db.get_value(
+			"Tenant", {"email_id": "deepak.reddy@example.com"}, ["name", "full_name"], as_dict=True
+		)
+		if deepak:
+			documents.save(deepak.name, {"document_type": "PAN Card", "document_number": "BXQPR4512K",
+				"upload": card("INCOME TAX DEPARTMENT", [deepak.full_name.upper(), "BXQPR4512K"])})  # fmt: skip
+			documents.save(deepak.name, {"document_type": "Offer Letter", "note": "Staff Nurse, Manipal Hospital",
+				"upload": card("OFFER OF EMPLOYMENT", [deepak.full_name, "Staff Nurse", "Manipal Hospital"])}, "Tenant App")  # fmt: skip
+		other = frappe.get_all(ALLOTMENT, filters={"docstatus": 1, "status": "Active", "tenant": ("!=", deepak.name if deepak else "")},
+			pluck="tenant", limit=1)  # fmt: skip
+		if other:
+			name = frappe.db.get_value("Tenant", other[0], "full_name")
+			documents.save(other[0], {"document_type": "Passport", "document_number": "Z4821935",
+				"expires_on": add_days(self.today, 24), "upload": card("REPUBLIC OF INDIA · PASSPORT", [name.upper(), "Z4821935"])})  # fmt: skip
 
 	def make_cash(self, manager, warden):
 		"""The warden collects Sunrise PG's cash and hands it to the manager; the manager the rest."""

@@ -207,6 +207,40 @@
 					</div>
 				</section>
 
+				<!-- police verification -->
+				<section class="card p-6">
+					<h2 class="font-semibold">Police verification</h2>
+					<p class="mt-1 text-sm text-slate-500">
+						Track each new tenant's verification form until the police clear it. See it
+						under
+						<RouterLink to="/verification" class="text-brand-600 hover:underline"
+							>Verification</RouterLink
+						>.
+					</p>
+					<div class="mt-2 divide-y divide-slate-100">
+						<Toggle
+							v-model="form.police_verification_enabled"
+							label="Track police verification"
+							hint="New tenants start as to submit, with a reminder on the day it's due"
+						/>
+						<div
+							v-if="form.police_verification_enabled"
+							class="flex items-center justify-between gap-4 py-3"
+						>
+							<div>
+								<p class="text-sm font-medium">Submit within</p>
+								<p class="text-xs text-slate-500">Days after moving in</p>
+							</div>
+							<input
+								v-model.number="form.police_verification_days"
+								type="number"
+								min="1"
+								class="input tabular w-20"
+							/>
+						</div>
+					</div>
+				</section>
+
 				<!-- referrals -->
 				<section class="card p-6">
 					<h2 class="font-semibold">Referrals</h2>

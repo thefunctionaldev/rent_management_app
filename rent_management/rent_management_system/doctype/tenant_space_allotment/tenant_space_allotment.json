@@ -44,7 +44,17 @@
   "amended_from",
   "meals_section",
   "meal_plan",
-  "meal_charge"
+  "meal_charge",
+  "verification_section",
+  "police_verification",
+  "verification_submitted_on",
+  "police_station",
+  "verification_reference",
+  "column_break_verification",
+  "verified_on",
+  "verification_acknowledgement",
+  "verification_copy",
+  "verification_note"
  ],
  "fields": [
   {
@@ -326,6 +336,77 @@
    "fieldname": "meal_charge",
    "fieldtype": "Currency",
    "label": "Meal Charge per Month"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "verification_section",
+   "fieldtype": "Section Break",
+   "label": "Police Verification",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Empty: not tracked",
+   "fieldname": "police_verification",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Police Verification",
+   "no_copy": 1,
+   "options": "\nPending\nSubmitted\nVerified\nNot Required"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verification_submitted_on",
+   "fieldtype": "Date",
+   "label": "Submitted On",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "police_station",
+   "fieldtype": "Data",
+   "label": "Police Station",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verification_reference",
+   "fieldtype": "Data",
+   "label": "Acknowledgement No.",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_verification",
+   "fieldtype": "Column Break",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verified_on",
+   "fieldtype": "Date",
+   "label": "Verified On",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verification_acknowledgement",
+   "fieldtype": "Attach",
+   "label": "Acknowledgement",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verification_copy",
+   "fieldtype": "Attach",
+   "label": "Verified Copy",
+   "no_copy": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verification_note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "no_copy": 1
   }
  ],
  "grid_page_length": 50,
@@ -343,7 +424,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-30 17:20:35.412096",
+ "modified": "2026-10-30 18:20:57.372481",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

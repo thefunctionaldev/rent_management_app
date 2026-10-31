@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import getdate, nowdate
+from frappe.utils import get_first_day, nowdate
 
 from rent_management import api, leads, portal, referrals
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
@@ -71,13 +71,15 @@ class TestReferrals(IntegrationTestCase):
 
 	def friend_moves_in(self):
 		lead = self.enquire()
-		result = api.move_in_lead(lead.name, self.room.name, allotment_date=nowdate())
-		today = getdate(nowdate())
+		# on the 1st, so the first invoice is a whole month's rent (a late move-in's is smaller
+		# than the discount, and then the discount rightly waits for the next invoice)
+		moved_in = get_first_day(nowdate())
+		result = api.move_in_lead(lead.name, self.room.name, allotment_date=moved_in)
 		invoice = make_invoice(
 			frappe.get_doc("Tenant Space Allotment", result["allotment"]),
-			billing_month=MONTHS[today.month - 1],
-			billing_year=today.year,
-			posting_date=nowdate(),
+			billing_month=MONTHS[moved_in.month - 1],
+			billing_year=moved_in.year,
+			posting_date=moved_in,
 			submit=True,
 		)
 		return lead, invoice

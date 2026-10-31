@@ -71,7 +71,7 @@ _staff_doctypes = (
 	"Tenant", "Tenant Space Allotment", "Tenant Space", "Room Inspection", "Tenant Check-in",
 	"Tenant Rent Invoice", "Rent Payment", "Night Attendance", "Tenant Leave", "Visitor Log", "Meal Opt-out",
 	"Mess Menu", "Maintenance Request", "Rent Lead", "Meter Reading", "Property Expense", "Rent Notice",
-	"Cash Handover",
+	"Cash Handover", "Tenant Document",
 )  # fmt: skip
 has_permission = {doctype: "rent_management.access.has_permission" for doctype in _staff_doctypes}
 permission_query_conditions = {
@@ -217,6 +217,7 @@ doc_events = {
 		"Rent Referral",
 		"Rent Notice",
 		"Cash Handover",
+		"Tenant Document",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [
@@ -294,6 +295,8 @@ for _doctype, _event in (
 # PANs on rent receipts look right, see rent_management/receipts.py
 _also("Rent Management Settings", "validate", "rent_management.receipts.check_pan")
 _also("Rent Property", "validate", "rent_management.receipts.check_pan")
+# new stays to verify with the police, see rent_management/verification.py
+_also("Tenant Space Allotment", "on_submit", "rent_management.verification.on_move_in")
 
 # Scheduled Tasks
 # ---------------
@@ -307,6 +310,8 @@ scheduler_events = {
 		"rent_management.salaries.remind_due",
 		"rent_management.fees.apply_late_fees",
 		"rent_management.owner_summary.send_monthly",
+		"rent_management.verification.remind",
+		"rent_management.documents.remind_expiring",
 		"rent_management.notifications.send_due_reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",

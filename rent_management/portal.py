@@ -15,6 +15,7 @@ from frappe import _
 from frappe.utils import add_days, cint, flt, nowdate, random_string
 
 from rent_management import (
+	documents,
 	fees,
 	leads,
 	mess,
@@ -700,3 +701,37 @@ def download_rent_receipt(fy, invoice=None):
 	if invoice:
 		own_invoice(invoice)  # their own
 	receipts.send_pdf(tenant.name, fy, invoice)
+
+
+# ---------------------------------------------------------------- documents
+
+
+@frappe.whitelist()
+def get_documents():
+	tenant = current_tenant()
+	return {"documents": documents.for_tenant(tenant.name), "types": documents.TYPES}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_document(data):
+	tenant = current_tenant()
+	subscription.check_writable()
+	data = frappe.parse_json(data)
+	if data.get("name") and frappe.db.get_value(documents.DOCUMENT, data["name"], "source") != "Tenant App":
+		frappe.throw(_("Ask your landlord to change this one."), frappe.PermissionError)
+	documents.save(tenant.name, data, source="Tenant App")
+	return get_documents()
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_document(name):
+	tenant = current_tenant()
+	if frappe.db.get_value(documents.DOCUMENT, name, "source") != "Tenant App":
+		frappe.throw(_("Ask your landlord to remove this one."), frappe.PermissionError)
+	documents.delete(tenant.name, name)
+	return get_documents()
+
+
+@frappe.whitelist()
+def document_file(key):
+	documents.send_file(current_tenant().name, key)

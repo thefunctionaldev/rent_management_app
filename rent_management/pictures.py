@@ -90,6 +90,63 @@ def decode(picture: str) -> tuple[bytes, str]:
 	return content, FORMATS[image_format]
 
 
+DOCUMENT_URL = re.compile(r"^data:(?P<type>[a-z]+/[a-z0-9.+-]+);base64,(?P<data>.+)$", re.S)
+
+
+def decode_document(data_url: str) -> tuple[bytes, str]:
+	"""A document upload: a JPEG, PNG or WebP photo, or a PDF (5 MB at most)."""
+	match = DOCUMENT_URL.match(data_url or "")
+	if match and match.group("type") == "application/pdf":
+		try:
+			content = base64.b64decode(match.group("data"), validate=True)
+		except binascii.Error, ValueError:
+			frappe.throw(_("The file could not be read. Please choose it again."))
+		if len(content) > MAX_BYTES:
+			frappe.throw(_("The file is too large (5 MB at most)."))
+		if not content.startswith(b"%PDF-"):
+			frappe.throw(_("Please choose a photo or a PDF."))
+		try:
+			from pypdf import PdfReader
+
+			PdfReader(io.BytesIO(content)).pages[0]  # opens it, like saving the file will
+		except Exception:
+			frappe.throw(_("That PDF could not be opened. Please choose it again, or a photo of it."))
+		return content, "pdf"
+	try:
+		return decode(data_url)
+	except frappe.ValidationError:
+		frappe.clear_last_message()
+		frappe.throw(_("Please choose a photo (JPEG, PNG, WebP) or a PDF."))
+
+
+def set_document(doc, field, data_url: str | None, name="document"):
+	"""Like set_image, for a photo or a PDF. Always private: these are people's papers."""
+	if data_url is None:
+		return
+	old = doc.get(field)
+	url = None
+	if data_url:
+		content, extension = decode_document(data_url)
+		slug = re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-") or "document"
+		file = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"{slug}-{random_string(6).lower()}.{extension}",
+				"content": content,
+				"is_private": 1,
+				"attached_to_doctype": doc.doctype,
+				"attached_to_name": str(doc.name),
+				"attached_to_field": field,
+			}
+		)
+		file.flags.ignore_permissions = True
+		file.insert()
+		url = file.file_url
+	doc.db_set(field, url)
+	if old and old != url:
+		delete_file(doc, old)
+
+
 def delete_file(doc, url):
 	for name in frappe.get_all(
 		"File",

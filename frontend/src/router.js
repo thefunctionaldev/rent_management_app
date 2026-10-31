@@ -92,6 +92,12 @@ const routes = [
 	{ path: "/summary", name: "summary", component: () => import("./pages/Summary.vue") },
 	{ path: "/activity", name: "activity", component: () => import("./pages/Activity.vue") },
 	{
+		path: "/verification",
+		name: "verification",
+		meta: { area: "rooms" },
+		component: () => import("./pages/Verification.vue"),
+	},
+	{
 		path: "/cash",
 		name: "cash",
 		meta: { area: ["payments", "expenses"] },

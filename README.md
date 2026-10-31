@@ -276,6 +276,36 @@ building owned by someone else, add the owner's name, PAN and address on the bui
 Edit*). Its receipts then name the owner. When a tenant's rent is over ₹1,00,000 in a year and no
 PAN is set, both apps warn, because employers need the landlord's PAN for that.
 
+### Police verification
+
+Many cities ask landlords to submit a verification form for each tenant to the local police. Turn
+on **Settings > Police verification** and choose how many days after moving in it's due (default 7).
+Set each building's police station under *Buildings > Edit*.
+
+**Verification** (under Property) tracks each tenant:
+- **Overdue** (past the days), **to submit**, **with the police** (flagged after 30 days), **done**.
+- **Form** prints the verification form, filled in from their check-in.
+- **Mark submitted:** the date, police station, acknowledgement number and a photo of the
+  acknowledgement.
+- **Mark verified:** the date and the stamped copy (photo or PDF). Or mark it *not needed*.
+
+Every new stay starts as *to submit* once tracking is on. Earlier tenants aren't tracked until you
+click *Track* on their page. Managers and wardens (logins with rooms and tenants) are told on the
+day each one is due, and every Monday what's overdue and still with the police. The tenant's page
+shows the status too.
+
+### Tenant documents
+
+The **Documents** tab on a tenant's page keeps their papers: PAN, passport, visa, driving licence,
+voter ID, offer letter, employee or college ID, and more. Each is a photo or PDF (5 MB at most) with
+an optional number, issue date and expiry date. The Aadhaar card from check-in and the police
+verification papers show here too. Aadhaar numbers are never stored on a document, only the last
+four digits.
+
+Tenants add theirs under **Profile > My documents** in the tenant app. They can remove only what
+they added. Files are private: tenants open theirs through the app, and managers from the tenant's
+page. Managers and wardens are told 30 days before a document expires, and on the day.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

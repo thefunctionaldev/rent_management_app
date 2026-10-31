@@ -170,6 +170,7 @@
 <script setup>
 import {
 	AlertTriangle,
+	BadgeCheck,
 	BarChart3,
 	Briefcase,
 	Building2,
@@ -259,6 +260,7 @@ const allNav = computed(() => [
 			},
 			{ to: "/rooms", label: "Rooms", icon: DoorOpen, area: ["rooms", "leads"] },
 			{ to: "/tenants", label: "Tenants", icon: Users, area: ["rooms", "payments"] },
+			{ to: "/verification", label: "Verification", icon: BadgeCheck, area: "rooms" },
 			{ to: "/requests", label: "Requests", icon: Wrench, area: "requests" },
 			{
 				to: "/register",
@@ -366,6 +368,7 @@ const dialogs = {
 	splitInvoice: lazy("SplitInvoiceDialog"),
 	announcement: lazy("AnnouncementDialog"),
 	staffLogin: lazy("StaffLoginDialog"),
+	verification: lazy("VerificationDialog"),
 };
 
 async function logout() {

@@ -21,6 +21,7 @@ from rent_management import (
 	cash,
 	checkin,
 	data_import,
+	documents,
 	fees,
 	gst,
 	inspections,
@@ -40,6 +41,7 @@ from rent_management import (
 	saas,
 	salaries,
 	subscription,
+	verification,
 )
 from rent_management.rent_management_system import billing
 from rent_management.rent_management_system.doctype.rent_property.rent_property import get_default_property
@@ -105,6 +107,7 @@ PROPERTY_FIELDS = (
 	"owner_name",
 	"owner_pan",
 	"owner_address",
+	"police_station",
 )
 ROOM_TYPE_FIELDS = (
 	"type",
@@ -618,6 +621,15 @@ def get_tenant(name):
 			"next_rent_increase_date",
 			"notice_given_on",
 			"expected_vacate_date",
+			"tenant_name",
+			"police_verification",
+			"verification_submitted_on",
+			"police_station",
+			"verification_reference",
+			"verified_on",
+			"verification_acknowledgement",
+			"verification_copy",
+			"verification_note",
 		],
 		order_by="allotment_date desc",
 	)
@@ -1488,6 +1500,8 @@ SETTINGS_FIELDS = (
 	"early_discount_value",
 	"early_discount_days",
 	"landlord_pan",
+	"police_verification_enabled",
+	"police_verification_days",
 	"owner_summary_enabled",
 	"owner_summary_day",
 	"owner_summary_phone",
@@ -2188,3 +2202,46 @@ def save_receipt_signature(picture=None):
 	settings = frappe.get_single("Rent Management Settings")
 	pictures.set_image(settings, "receipt_signature", picture, private=True)
 	return frappe.db.get_single_value("Rent Management Settings", "receipt_signature")
+
+
+# ---------------------------------------------------------------- police verification
+
+
+@frappe.whitelist()
+def get_verifications(property=None):
+	check_access()
+	return verification.get_verifications(property)
+
+
+@frappe.whitelist(methods=["POST"])
+def update_verification(allotment, data):
+	check_access()
+	verification.update(allotment, data)
+
+
+@frappe.whitelist(methods=["POST"])
+def track_verification(allotment):
+	check_access()
+	verification.track(allotment)
+
+
+# ---------------------------------------------------------------- tenant documents
+
+
+@frappe.whitelist()
+def get_tenant_documents(tenant):
+	check_access()
+	return {"documents": documents.for_tenant(tenant), "types": documents.TYPES}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_tenant_document(tenant, data):
+	check_access()
+	frappe.get_doc("Tenant", tenant).check_permission("read")
+	return documents.save(tenant, data)
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_tenant_document(tenant, name):
+	check_access()
+	documents.delete(tenant, name)
