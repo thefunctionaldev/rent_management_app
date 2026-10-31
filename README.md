@@ -667,7 +667,13 @@ You can install this app using the [bench](https://github.com/frappe/bench) CLI:
 cd $PATH_TO_YOUR_BENCH
 bench get-app $URL_OF_THIS_REPO --branch version-16
 bench install-app rent_management
+bench setup-chrome
 ```
+
+PDFs (agreements, invoices, rent receipts, the police verification form) are made with Chrome, which
+runs on Linux, Intel Macs and Apple-chip Macs alike. `bench setup-chrome` downloads it into the bench
+once; otherwise it's downloaded the first time a PDF is made, or set `chromium_path` in
+`common_site_config.json` to use one you have. If Chrome can't start, wkhtmltopdf is used instead.
 
 ### Contributing
 

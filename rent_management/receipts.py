@@ -245,12 +245,12 @@ def html(tenant, fy, invoice=None) -> str:
 
 
 def send_pdf(tenant, fy, invoice=None):
-	from frappe.utils.pdf import get_pdf
+	from rent_management import pdf
 
 	r = receipt(tenant, fy, invoice)
 	page = frappe.render_template("rent_management/templates/rent_receipt.html", {"r": r})
 	frappe.local.response.filename = (
 		f"Rent-receipt-{r.fy}" + (f"-{r.months[0].month}" if invoice else "") + ".pdf"
 	)
-	frappe.local.response.filecontent = get_pdf(page, {"page-size": "A4"})
+	frappe.local.response.filecontent = pdf.of_html(page, {"page-size": "A4"})
 	frappe.local.response.type = "pdf"

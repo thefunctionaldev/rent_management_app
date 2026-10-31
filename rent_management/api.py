@@ -30,6 +30,7 @@ from rent_management import (
 	notices,
 	notifications,
 	owner_summary,
+	pdf,
 	pictures,
 	portal,
 	profit,
@@ -782,7 +783,7 @@ def download_agreement(allotment):
 	doc.check_permission("print")
 	send_pdf(
 		f"Agreement-{doc.name}",
-		frappe.get_print(doc.doctype, doc.name, print_format=AGREEMENT_FORMAT, as_pdf=True),
+		pdf.of_print(doc.doctype, doc.name, AGREEMENT_FORMAT),
 	)
 
 
@@ -1689,8 +1690,8 @@ def download_subscription_invoice(name):
 	if not payment.invoice_number:
 		frappe.throw(_("This payment has no invoice."))
 	frappe.local.response.filename = payment.invoice_number.replace("/", "-") + ".pdf"
-	frappe.local.response.filecontent = frappe.get_print(
-		subscription.PAYMENT, name, print_format=subscription.INVOICE_PRINT_FORMAT, as_pdf=True
+	frappe.local.response.filecontent = pdf.of_print(
+		subscription.PAYMENT, name, subscription.INVOICE_PRINT_FORMAT
 	)
 	frappe.local.response.type = "pdf"
 
@@ -1808,7 +1809,7 @@ def download_verification_form(allotment):
 	doc.check_permission("print")
 	send_pdf(
 		f"Police-Verification-{doc.tenant_name or doc.tenant}",
-		frappe.get_print(doc.doctype, doc.name, print_format=checkin.VERIFICATION_FORMAT, as_pdf=True),
+		pdf.of_print(doc.doctype, doc.name, checkin.VERIFICATION_FORMAT),
 	)
 
 

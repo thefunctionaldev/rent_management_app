@@ -20,6 +20,7 @@ from rent_management import (
 	leads,
 	mess,
 	notices,
+	pdf,
 	receipts,
 	referrals,
 	register,
@@ -452,7 +453,7 @@ def download_agreement():
 def send_print(doctype, name, print_format, filename):
 	frappe.flags.ignore_print_permissions = True  # ownership is checked by the caller
 	try:
-		content = frappe.get_print(doctype, name, print_format=print_format, as_pdf=True)
+		content = pdf.of_print(doctype, name, print_format)
 	finally:
 		frappe.flags.ignore_print_permissions = False
 	frappe.local.response.filename = f"{filename}.pdf"
