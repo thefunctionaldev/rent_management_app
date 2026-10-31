@@ -107,6 +107,11 @@ description, amenities, who it's for, food, a map link, and each room type with 
 
 Building details for the page are under *Buildings > Edit > Listing page*.
 
+**QR poster for the gate:** *Buildings > QR poster* downloads a printable A4 poster for a building
+on the listing page: its name and photo, the rent it starts from, who it's for, a few amenities,
+the landlord's phone number (Settings), and a QR code to its listing page. People walking past scan
+it to see the rooms and book.
+
 ### Tenant self check-in (`/checkin`)
 
 On a tenant's profile, **Send check-in link** opens WhatsApp with a link for them (it is emailed too

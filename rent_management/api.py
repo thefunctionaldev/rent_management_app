@@ -35,6 +35,7 @@ from rent_management import (
 	pdf,
 	pictures,
 	portal,
+	poster,
 	profit,
 	razorpay,
 	receipts,
@@ -201,6 +202,7 @@ def get_boot():
 		"today": nowdate(),
 		"properties": get_properties(),
 		"new_leads": frappe.db.count(leads.LEAD, {"status": "New"}) if can("leads") else 0,
+		"listing_enabled": cint(frappe.db.get_single_value("Rent Management Settings", "listing_enabled")),
 		"leave_requests": frappe.db.count(register.LEAVE, {"status": "Requested"}) if can("register") else 0,
 		"access": staff_boot(),
 		"is_control_site": saas.is_control_site() and "System Manager" in frappe.get_roles(),
@@ -2248,6 +2250,13 @@ def get_rent_receipts(tenant, fy=None):
 def download_rent_receipt(tenant, fy, invoice=None):
 	check_access()
 	receipts.send_pdf(tenant, fy, invoice)
+
+
+@frappe.whitelist()
+def download_listing_poster(property):
+	"""A printable poster for the building's gate, with its listing page as a QR code."""
+	check_access()
+	poster.send_pdf(property)
 
 
 @frappe.whitelist()

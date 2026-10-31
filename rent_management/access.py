@@ -71,7 +71,7 @@ ENDPOINTS = {
 	),
 	"requests": ("get_requests", "save_request"),
 	"food": ("get_food", "save_menu", "set_meal_plan", "skip_meal_for"),
-	"leads": ("get_leads", "get_lead", "save_lead", "record_lead_token", "ask_lead_for_token", "move_in_lead", "get_rooms"),
+	"leads": ("get_leads", "get_lead", "save_lead", "record_lead_token", "ask_lead_for_token", "move_in_lead", "get_rooms", "download_listing_poster"),
 	"meters": ("get_meter_rooms", "save_meter_readings", "get_meter_readings", "delete_meter_reading"),
 	"expenses": ("get_expenses", "save_expense", "get_cash_book", "hand_over_cash", "confirm_cash_handover", "cancel_cash_handover"),
 	"notices": ("get_notices", "save_notice", "publish_notice", "take_down_notice", "delete_notice"),

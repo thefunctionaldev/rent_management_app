@@ -69,6 +69,16 @@
 						>View rooms</Button
 					>
 					<Button
+						v-if="p.is_active && p.show_on_listing && boot.listing_enabled"
+						size="sm"
+						:icon="QrCode"
+						:href="`/api/method/rent_management.api.download_listing_poster?property=${encodeURIComponent(
+							p.name
+						)}`"
+						title="A poster for the gate with a QR code to this building's listing page"
+						>QR poster</Button
+					>
+					<Button
 						v-if="!p.is_active"
 						size="sm"
 						variant="ghost"
@@ -82,7 +92,7 @@
 </template>
 
 <script setup>
-import { Building2, DoorOpen, Pencil, Plus } from "lucide-vue-next";
+import { Building2, DoorOpen, Pencil, Plus, QrCode } from "lucide-vue-next";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 

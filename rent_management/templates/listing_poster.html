@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>{{ p.card.name }}: rooms available</title>
+<style>
+	@page { size: A4; margin: 0; }
+	body { font-family: "Helvetica Neue", Arial, sans-serif; color: #0f172a; margin: 0; }
+	/* tables, not flexbox: wkhtmltopdf's old WebKit makes these too when Chrome can't */
+	.page { width: 100%; }
+	.band { background: #4f46e5; color: #fff; padding: 16mm 16mm 12mm; }
+	.band .kicker { font-size: 15pt; letter-spacing: 3px; text-transform: uppercase; opacity: 0.85; }
+	.band h1 { font-size: 40pt; margin: 3mm 0 2mm; line-height: 1.05; }
+	.band .where { font-size: 14pt; opacity: 0.9; }
+	.photo { height: 52mm; background: #e2e8f0 center / cover no-repeat; }
+	.main { padding: 9mm 16mm 0; }
+	.cols { width: 100%; border-collapse: collapse; }
+	.cols td { vertical-align: top; }
+	.qr { width: 92mm; text-align: center; }
+	.qr .box { border: 3px solid #4f46e5; border-radius: 6mm; padding: 4mm; display: inline-block; }
+	.qr svg { width: 68mm; height: 68mm; display: block; }
+	.scan { font-size: 17pt; font-weight: bold; margin-top: 4mm; color: #4f46e5; }
+	.url { font-size: 10pt; color: #64748b; margin-top: 1mm; word-break: break-all; }
+	.facts { padding-left: 8mm; }
+	.rent { font-size: 13pt; color: #64748b; }
+	.rent b { display: block; font-size: 30pt; color: #0f172a; margin-top: 1mm; }
+	.pill { display: inline-block; background: #eef2ff; color: #3730a3; border-radius: 4mm; padding: 1.5mm 4mm; font-size: 12pt; margin: 4mm 2mm 0 0; }
+	ul { margin: 7mm 0 0; padding: 0; list-style: none; font-size: 13pt; line-height: 1.75; }
+	li:before { content: "✓  "; color: #4f46e5; font-weight: bold; }
+	.call { margin-top: 12mm; background: #0f172a; color: #fff; padding: 8mm 16mm; font-size: 15pt; }
+	.call b { font-size: 24pt; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="page">
+	<div class="band">
+		<div class="kicker">{% if p.card.free_beds %}Rooms available{% else %}Rooms for rent{% endif %}</div>
+		<h1>{{ p.card.name }}</h1>
+		<div class="where">{{ [p.card.address, p.card.city] | select | join(", ") }}</div>
+	</div>
+	{% if p.image %}<div class="photo" style="background-image: url('{{ p.image }}')"></div>{% endif %}
+	<div class="main">
+		<table class="cols"><tr>
+			<td class="qr">
+				<div class="box">{{ p.qr }}</div>
+				<div class="scan">Scan to see rooms and book</div>
+				<div class="url">{{ p.short_url }}</div>
+			</td>
+			<td class="facts">
+				{% if p.card.rent_from %}<div class="rent">Rent from<b>{{ p.inr(p.card.rent_from) }}<span style="font-size: 14pt; color: #64748b"> /month</span></b></div>{% endif %}
+				<div>
+					{% if p.card.listing_for %}<span class="pill">For {{ p.card.listing_for }}</span>{% endif %}
+					{% if p.card.food_included %}<span class="pill">Food included</span>{% endif %}
+					{% if p.card.free_beds %}<span class="pill">{{ p.card.free_beds }} bed{{ "s" if p.card.free_beds != 1 else "" }} free</span>{% endif %}
+				</div>
+				{% if p.amenities %}
+				<ul>{% for a in p.amenities %}<li>{{ a }}</li>{% endfor %}</ul>
+				{% endif %}
+			</td>
+		</tr></table>
+	</div>
+	{% if p.phone %}<div class="call">Call or WhatsApp &nbsp;<b>{{ p.phone }}</b></div>{% endif %}
+</div>
+</body>
+</html>
