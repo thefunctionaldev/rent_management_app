@@ -359,6 +359,8 @@ const dialogs = {
 	invoice: lazy("InvoiceDialog"),
 	generateInvoices: lazy("GenerateInvoicesDialog"),
 	recordPayment: lazy("RecordPaymentDialog"),
+	remindAll: lazy("RemindAllDialog"),
+	markPaid: lazy("MarkPaidDialog"),
 	settleDeposit: lazy("SettleDepositDialog"),
 	collectDeposit: lazy("CollectDepositDialog"),
 	property: lazy("PropertyDialog"),

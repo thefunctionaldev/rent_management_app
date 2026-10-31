@@ -27,8 +27,11 @@ def generate_monthly_invoices():
 	)
 
 
-def generate_invoices(billing_month: str, billing_year: int, submit: bool = False) -> list[str]:
-	"""Create a rent invoice for every allotment that was occupied during the given month.
+def generate_invoices(
+	billing_month: str, billing_year: int, submit: bool = False, property: str | None = None
+) -> list[str]:
+	"""Create a rent invoice for every allotment that was occupied during the given month
+	(in one building, if given).
 
 	Allotments that already have an invoice for that month are skipped.
 	Returns the names of the invoices created.
@@ -43,6 +46,7 @@ def generate_invoices(billing_month: str, billing_year: int, submit: bool = Fals
 			"docstatus": 1,
 			"status": ("in", ("Active", "Vacated")),
 			"allotment_date": ("<=", month_end),
+			**({"property": property} if property else {}),
 		},
 		or_filters=[["vacate_date", "is", "not set"], ["vacate_date", ">=", month_start]],
 		pluck="name",

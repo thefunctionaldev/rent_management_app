@@ -22,6 +22,14 @@
 					/>
 				</Field>
 			</div>
+			<Field v-if="activeProperties().length > 1" label="Building">
+				<select v-model="form.property" class="input">
+					<option value="">All buildings</option>
+					<option v-for="b in activeProperties()" :key="b.name" :value="b.name">
+						{{ b.name }}
+					</option>
+				</select>
+			</Field>
 			<label class="flex items-center gap-2 text-sm text-slate-700">
 				<input v-model="form.submit" type="checkbox" class="size-4 accent-brand-600" />
 				Submit invoices right away
@@ -68,13 +76,18 @@ import { post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import Modal from "@/components/Modal.vue";
-import { boot } from "@/store";
+import { activeProperties, boot, ui } from "@/store";
 import { useAction } from "@/useResource";
 import { currentMonth } from "@/utils";
 
 defineEmits(["close"]);
 const { month, year } = currentMonth();
-const form = reactive({ billing_month: month, billing_year: year, submit: false });
+const form = reactive({
+	billing_month: month,
+	billing_year: year,
+	submit: false,
+	property: ui.property || "",
+});
 const result = ref(null);
 
 const { loading, run } = useAction(() =>

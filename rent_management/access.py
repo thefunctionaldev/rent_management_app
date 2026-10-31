@@ -60,6 +60,7 @@ ENDPOINTS = {
 	"payments": (
 		"get_tenants", "quick_search", "get_tenant", "get_invoices", "get_invoice", "get_payments", "record_payment",
 		"get_payments_to_confirm", "confirm_payment", "reject_payment", "send_rent_reminder",
+		"get_reminder_list", "send_bulk_reminders", "mark_invoices_paid",
 		"get_payment_link", "check_online_payment", "get_outstanding", "get_cash_book", "hand_over_cash",
 		"get_rent_receipts", "download_rent_receipt", "get_tenant_statement", "download_tenant_statement",
 		"download_no_dues",

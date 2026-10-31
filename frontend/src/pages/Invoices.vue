@@ -48,6 +48,20 @@
 				<table class="w-full">
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
+							<th class="table-head w-10">
+								<input
+									type="checkbox"
+									class="size-4 accent-brand-600"
+									:checked="payable.length && picked.length === payable.length"
+									:disabled="!payable.length"
+									aria-label="Choose all unpaid"
+									@change="
+										picked = $event.target.checked
+											? payable.map((i) => i.name)
+											: []
+									"
+								/>
+							</th>
 							<th class="table-head">Invoice</th>
 							<th class="table-head">Tenant</th>
 							<th class="table-head">Period</th>
@@ -64,6 +78,16 @@
 							class="cursor-pointer transition hover:bg-slate-50/80"
 							@click="selected = inv.name"
 						>
+							<td class="table-cell" @click.stop>
+								<input
+									v-if="isPayable(inv)"
+									v-model="picked"
+									type="checkbox"
+									:value="inv.name"
+									class="size-4 accent-brand-600"
+									:aria-label="`Choose ${inv.name}`"
+								/>
+							</td>
 							<td class="table-cell font-medium text-slate-900">{{ inv.name }}</td>
 							<td class="table-cell">
 								<p class="font-medium">{{ inv.tenant_name }}</p>
@@ -100,16 +124,31 @@
 			</div>
 		</div>
 
+		<!-- what to do with the chosen bills -->
+		<div
+			v-if="picked.length"
+			class="fixed inset-x-0 bottom-4 z-20 mx-auto flex w-fit max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm text-white shadow-xl lg:ml-[calc(50%+8rem)] lg:-translate-x-1/2"
+		>
+			<span class="mr-2">{{ picked.length }} chosen · {{ money(pickedTotal) }}</span>
+			<Button size="sm" :icon="Wallet" @click="markPaid">Mark paid</Button>
+			<Button size="sm" :icon="Send" :loading="reminding" @click="remind"
+				>Send reminders</Button
+			>
+			<button class="px-2 text-slate-300 hover:text-white" @click="picked = []">
+				Clear
+			</button>
+		</div>
+
 		<InvoiceDrawer :name="selected" @close="selected = null" />
 	</div>
 </template>
 
 <script setup>
-import { FileText, Plus, Sparkles } from "lucide-vue-next";
+import { FileText, Plus, Send, Sparkles, Wallet } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import { get } from "@/api";
+import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import EmptyState from "@/components/EmptyState.vue";
 import InvoiceDrawer from "@/components/InvoiceDrawer.vue";
@@ -119,7 +158,7 @@ import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import Tabs from "@/components/Tabs.vue";
 import { openDialog } from "@/dialogs";
-import { boot, scope } from "@/store";
+import { boot, scope, toast } from "@/store";
 import { useResource } from "@/useResource";
 import { date, debounce, money } from "@/utils";
 
@@ -156,5 +195,45 @@ const tabs = computed(() => {
 });
 
 watch([status, month, year], reload);
+
+// choosing several unpaid bills to mark paid or remind about
+const isPayable = (inv) => inv.docstatus === 1 && inv.outstanding_amount > 0;
+const payable = computed(() => invoices.value.filter(isPayable));
+const picked = ref([]);
+watch(invoices, (list) => {
+	const still = new Set(list.filter(isPayable).map((i) => i.name));
+	picked.value = picked.value.filter((n) => still.has(n));
+});
+const pickedRows = computed(() => payable.value.filter((i) => picked.value.includes(i.name)));
+const pickedTotal = computed(() => pickedRows.value.reduce((s, i) => s + i.outstanding_amount, 0));
+function markPaid() {
+	openDialog("markPaid", {
+		invoices: pickedRows.value.map((i) => ({
+			name: i.name,
+			outstanding_amount: i.outstanding_amount,
+		})),
+	});
+}
+const reminding = ref(false);
+async function remind() {
+	reminding.value = true;
+	try {
+		const r = await post("send_bulk_reminders", { invoices: picked.value });
+		const extra = [
+			r.skipped.length && `${r.skipped.length} skipped`,
+			r.failed.length && `${r.failed.length} not sent`,
+		]
+			.filter(Boolean)
+			.join(", ");
+		toast(
+			`${r.sent} reminder${r.sent === 1 ? "" : "s"} sent${extra ? ` (${extra})` : ""}`,
+			r.sent ? "success" : "error"
+		);
+	} catch (e) {
+		toast(e.message, "error");
+	} finally {
+		reminding.value = false;
+	}
+}
 watch(search, debounce(reload, 250));
 </script>

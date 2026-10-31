@@ -6,6 +6,9 @@
 				Overdue only
 			</label>
 			<input v-model="asOn" type="date" class="input w-auto" title="As on date" />
+			<Button variant="primary" :icon="Send" @click="openDialog('remindAll')"
+				>Remind all</Button
+			>
 		</PageHeader>
 
 		<div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -132,7 +135,7 @@
 </template>
 
 <script setup>
-import { MessageCircle, PartyPopper } from "lucide-vue-next";
+import { MessageCircle, PartyPopper, Send } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 import { get } from "@/api";

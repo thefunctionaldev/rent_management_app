@@ -18,6 +18,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 from rent_management import (
 	access,
 	activity,
+	bulk,
 	cash,
 	checkin,
 	data_import,
@@ -976,9 +977,11 @@ def delete_invoice(name):
 
 
 @frappe.whitelist(methods=["POST"])
-def generate_invoices(billing_month, billing_year, submit=0):
+def generate_invoices(billing_month, billing_year, submit=0, property=None):
 	check_access()
-	created = billing.generate_invoices(billing_month, cint(billing_year), submit=cint(submit))
+	created = billing.generate_invoices(
+		billing_month, cint(billing_year), submit=cint(submit), property=property or None
+	)
 	return {"created": created}
 
 
@@ -1648,6 +1651,25 @@ def get_message_log(start=0, page_length=50):
 		start=cint(start),
 		page_length=cint(page_length),
 	)
+
+
+@frappe.whitelist()
+def get_reminder_list(property=None):
+	"""Remind all: everyone who owes rent, who can be reached and who was reminded today."""
+	check_access()
+	return bulk.reminder_list(property)
+
+
+@frappe.whitelist(methods=["POST"])
+def send_bulk_reminders(invoices):
+	check_access()
+	return bulk.send_reminders(invoices)
+
+
+@frappe.whitelist(methods=["POST"])
+def mark_invoices_paid(invoices, mode_of_payment="Cash", payment_date=None, reference_no=None):
+	check_access()
+	return bulk.mark_paid(invoices, mode_of_payment, payment_date, reference_no)
 
 
 @frappe.whitelist(methods=["POST"])
