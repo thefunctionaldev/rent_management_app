@@ -74,6 +74,96 @@
 						</RouterLink>
 					</div>
 
+					<div v-if="data.unpaid" class="card">
+						<div
+							class="flex items-center justify-between border-b border-slate-100 px-5 py-4"
+						>
+							<div>
+								<h3 class="font-semibold">Not paid yet</h3>
+								<p class="text-xs text-slate-500">
+									{{ data.unpaid.count }} tenant{{
+										data.unpaid.count === 1 ? "" : "s"
+									}}
+									· {{ money(data.unpaid.owed) }}
+								</p>
+							</div>
+							<RouterLink
+								to="/outstanding"
+								class="text-sm font-medium text-brand-600"
+								>All</RouterLink
+							>
+						</div>
+						<p
+							v-if="!data.unpaid.rows.length"
+							class="px-5 py-4 text-sm text-slate-500"
+						>
+							Everyone has paid. 🎉
+						</p>
+						<ul class="divide-y divide-slate-100">
+							<li
+								v-for="u in data.unpaid.rows"
+								:key="u.invoice"
+								class="flex flex-wrap items-center gap-3 px-5 py-3 text-sm"
+							>
+								<div class="min-w-0 flex-1">
+									<p class="truncate font-medium">
+										{{ u.tenant_name }}
+										<span class="font-normal text-slate-500"
+											>· room {{ u.room }}</span
+										>
+									</p>
+									<p
+										class="text-xs"
+										:class="u.overdue ? 'text-rose-600' : 'text-slate-500'"
+									>
+										{{ money(u.owed) }} ·
+										{{
+											u.overdue
+												? `${u.days_overdue} day${
+														u.days_overdue === 1 ? "" : "s"
+												  } late`
+												: `due ${shortDate(u.due_on)}`
+										}}
+									</p>
+								</div>
+								<div class="flex gap-1">
+									<a
+										v-if="u.mobile_no"
+										:href="`tel:${u.mobile_no}`"
+										class="rounded-lg p-2 text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50"
+										title="Call"
+										><Phone class="size-4"
+									/></a>
+									<button
+										v-if="u.reach.length"
+										class="rounded-lg p-2 ring-1 ring-slate-200 hover:bg-slate-50"
+										:class="
+											u.reminded_today
+												? 'text-emerald-600'
+												: 'text-slate-500'
+										"
+										:disabled="u.reminded_today || reminding === u.invoice"
+										:title="
+											u.reminded_today ? 'Reminded today' : 'Send a reminder'
+										"
+										@click="remind(u)"
+									>
+										<Check v-if="u.reminded_today" class="size-4" /><Send
+											v-else
+											class="size-4"
+										/>
+									</button>
+									<button
+										class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-50"
+										@click="collect(u)"
+									>
+										Collected cash
+									</button>
+								</div>
+							</li>
+						</ul>
+					</div>
+
 					<div v-if="'new_leads' in data" class="card">
 						<RouterLink to="/leads" class="row">
 							<UserSearch class="size-5 text-amber-600" />
@@ -141,11 +231,14 @@
 <script setup>
 import {
 	AlarmClock,
+	Check,
 	ChevronRight,
 	DoorOpen,
 	Luggage,
 	Megaphone,
 	MoonStar,
+	Phone,
+	Send,
 	UserPlus,
 	UserSearch,
 	UtensilsCrossed,
@@ -153,18 +246,49 @@ import {
 	Wrench,
 	Zap,
 } from "lucide-vue-next";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
-import { get } from "@/api";
+import { get, post } from "@/api";
 import PageHeader from "@/components/PageHeader.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatusBadge from "@/components/StatusBadge.vue";
 import ThisPhone from "@/components/ThisPhone.vue";
 import { openDialog } from "@/dialogs";
-import { boot, canUse, scope } from "@/store";
+import { boot, canUse, scope, toast } from "@/store";
 import { useResource } from "@/useResource";
+import { money, shortDate } from "@/utils";
 
-const { data } = useResource(() => get("get_staff_home", scope()));
+const { data, reload } = useResource(() => get("get_staff_home", scope()));
+
+const reminding = ref("");
+async function remind(u) {
+	reminding.value = u.invoice;
+	try {
+		const r = await post("send_bulk_reminders", { invoices: [u.invoice] });
+		toast(
+			r.sent
+				? `Reminder sent to ${u.tenant_name}`
+				: r.skipped[0]?.why || r.failed[0]?.why || "Not sent",
+			r.sent ? "success" : "error"
+		);
+		reload();
+	} catch (e) {
+		toast(e.message, "error");
+	} finally {
+		reminding.value = "";
+	}
+}
+// into the warden's cash book (cash.py records who collected it)
+function collect(u) {
+	openDialog("recordPayment", {
+		invoice: {
+			name: u.invoice,
+			outstanding_amount: u.bill_outstanding,
+			tenant_name: u.tenant_name,
+		},
+		mode: "Cash",
+	});
+}
 
 const hour = new Date().getHours();
 const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";

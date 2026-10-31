@@ -91,6 +91,31 @@ class TestStaffAccess(IntegrationTestCase):
 		self.assertFalse(frappe.has_permission(register.ATTENDANCE, "read", doc=night_b))
 		self.assertFalse(frappe.has_permission(salaries.SLIP, "read"))
 
+	def test_warden_unpaid_list_and_cash(self):
+		from frappe.utils import get_first_day
+
+		from rent_management.rent_management_system.doctype.tenant_rent_invoice.test_tenant_rent_invoice import (
+			make_invoice,
+		)
+
+		day = get_first_day(nowdate())
+		months = ("January", "February", "March", "April", "May", "June", "July", "August", "September",
+			"October", "November", "December")  # fmt: skip
+		bill_a = make_invoice(self.stay_a, billing_month=months[day.month - 1], billing_year=day.year,
+			posting_date=str(day), submit=True)  # fmt: skip
+		make_invoice(self.stay_b, billing_month=months[day.month - 1], billing_year=day.year,
+			posting_date=str(day), submit=True)  # fmt: skip
+
+		self.as_user(self.warden.user)
+		unpaid = api.get_staff_home(self.a)["unpaid"]
+		self.assertEqual([r["invoice"] for r in unpaid["rows"]], [bill_a.name])  # their building only
+		self.assertEqual(unpaid["rows"][0]["bill_outstanding"], bill_a.outstanding_amount)
+
+		# "Collected cash": in their cash book
+		name = api.record_payment(bill_a.name, bill_a.outstanding_amount, "Cash", nowdate())
+		self.assertEqual(frappe.db.get_value("Rent Payment", name, "collected_by"), self.warden.user)
+		self.assertEqual(api.get_staff_home(self.a)["unpaid"]["rows"], [])
+
 	def test_staff_are_notified_for_their_building(self):
 		register.request_leave(self.stay_a.name, nowdate(), add_days(nowdate(), 2))
 		self.assertTrue(

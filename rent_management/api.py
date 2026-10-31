@@ -268,6 +268,13 @@ def get_staff_home(property=None):
 			"Tenant Rent Invoice",
 			{**base, "docstatus": 1, "outstanding_amount": (">", 0), "next_due_date": ("<", nowdate())},
 		)
+		# who hasn't paid: to call, remind, or take cash from (the oldest bill first)
+		unpaid = bulk.reminder_list(property)["rows"]
+		home["unpaid"] = {
+			"rows": unpaid[:30],
+			"count": len(unpaid),
+			"owed": flt(sum(r["owed"] for r in unpaid), 2),
+		}
 	if "leads" in areas:
 		home["new_leads"] = frappe.db.count(leads.LEAD, {**base, "status": "New"})
 	if "food" in areas and property:

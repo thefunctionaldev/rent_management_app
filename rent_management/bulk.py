@@ -95,6 +95,7 @@ def reminder_list(property=None) -> dict:
 				"days_overdue": max(days, 0),
 				"overdue": days > 0,
 				"owed": flt(r["owed"], 2),
+				"bill_outstanding": flt(bill.outstanding_amount),
 				"bills": r["bills"],
 				"reach": reach,
 				"mobile_no": t.mobile_no,

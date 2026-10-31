@@ -117,7 +117,10 @@ import { boot } from "@/store";
 import { useAction, useResource } from "@/useResource";
 import { date, money } from "@/utils";
 
-const props = defineProps({ invoice: { type: Object, default: null } });
+const props = defineProps({
+	invoice: { type: Object, default: null },
+	mode: { type: String, default: "UPI" }, // "Cash" when a warden collects it
+});
 const emit = defineEmits(["close"]);
 
 const modes = ["Cash", "UPI", "Bank Transfer", "Cheque", "Card", "Other"];
@@ -125,7 +128,7 @@ const form = reactive({
 	rent_invoice: props.invoice?.name || "",
 	amount: "",
 	payment_date: boot.today,
-	mode_of_payment: "UPI",
+	mode_of_payment: props.mode,
 	reference_no: "",
 });
 
