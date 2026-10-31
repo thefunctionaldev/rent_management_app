@@ -3,7 +3,7 @@
 		<header class="bg-gradient-to-br from-brand-700 via-brand-600 to-violet-600 text-white">
 			<div class="mx-auto max-w-6xl px-5 pt-8 pb-28">
 				<div class="flex items-center gap-2 text-lg font-semibold">
-					<img :src="logo" alt="" class="size-8 rounded-lg bg-white/90 p-1" />
+					<img :src="logo" alt="" class="size-8 drop-shadow-sm" />
 					{{ info?.brand || "Rent Management" }}
 				</div>
 				<div class="mt-14 max-w-2xl">

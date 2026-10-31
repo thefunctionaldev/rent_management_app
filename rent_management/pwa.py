@@ -79,7 +79,7 @@ def manifest(app: str) -> dict:
 		"scope": f"/{app}/",
 		"display": "standalone",
 		"orientation": "portrait",
-		"background_color": "#f8fafc",
+		"background_color": "#1e1b4b",  # the splash screen, behind the icon
 		"theme_color": THEME,
 		"icons": [
 			{"src": f"{ICONS}/icon-192.png", "sizes": "192x192", "type": "image/png"},

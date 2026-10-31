@@ -78,6 +78,13 @@ permission_query_conditions = {
 	doctype: "rent_management.access.query_conditions" for doctype in _staff_doctypes
 }
 
+# the app's mark on the desk, the login page and the browser tab
+app_logo_url = "/assets/rent_management/frontend/favicon.svg"
+website_context = {
+	"favicon": "/assets/rent_management/icons/favicon-32.png",
+	"splash_image": "/assets/rent_management/frontend/favicon.svg",
+}
+
 add_to_apps_screen = [
 	{
 		"name": "rent_management",
