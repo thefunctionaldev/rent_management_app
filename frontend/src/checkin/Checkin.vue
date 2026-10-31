@@ -21,16 +21,32 @@
 						{{ data.stay.building }} · Room {{ data.stay.room }}
 					</p>
 					<h1 class="mt-1 text-2xl font-semibold tracking-tight">
-						{{ done ? "You're checked in" : `Welcome, ${data.tenant.first_name}!` }}
+						{{
+							renewal
+								? done
+									? "Your agreement is renewed"
+									: `Hello ${data.tenant.first_name}, your agreement is renewed`
+								: done
+								? "You're checked in"
+								: `Welcome, ${data.tenant.first_name}!`
+						}}
 					</h1>
 					<p class="mt-1 text-sm text-white/80">
 						{{
-							done
+							renewal
+								? done
+									? "You've signed the renewed agreement."
+									: `Read the renewed agreement${
+											data.stay.agreement_end_date
+												? `, until ${date(data.stay.agreement_end_date)},`
+												: ""
+									  } and sign it below.`
+								: done
 								? "Your details are saved and your agreement is signed."
 								: "Three short steps to finish your check-in. About 5 minutes."
 						}}
 					</p>
-					<ol v-if="!done" class="mt-6 grid grid-cols-3 gap-2 text-xs">
+					<ol v-if="!done && !renewal" class="mt-6 grid grid-cols-3 gap-2 text-xs">
 						<li
 							v-for="(label, i) in steps"
 							:key="label"
@@ -313,6 +329,7 @@ import { get, post } from "@/api";
 import Button from "@/components/Button.vue";
 import Field from "@/components/Field.vue";
 import PictureInput from "@/components/PictureInput.vue";
+import { date } from "@/utils";
 
 const METHOD = "rent_management.checkin.";
 const key = new URLSearchParams(window.location.search).get("key");
@@ -323,6 +340,7 @@ const error = ref("");
 const data = ref(null);
 const step = ref(0);
 const done = computed(() => data.value?.status === "Signed");
+const renewal = computed(() => data.value?.purpose === "Renewal"); // their details are on file: just sign
 
 const form = reactive({
 	first_name: "",

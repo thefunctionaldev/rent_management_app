@@ -51,7 +51,8 @@ ENDPOINTS = {
 	"any": ("get_boot", "get_properties", "get_room_types", "get_staff_home"),
 	"rooms": (
 		"get_rooms", "get_room_items", "get_tenants", "quick_search", "get_tenant", "save_tenant", "allot_room",
-		"vacate_room", "give_notice", "withdraw_notice", "download_agreement", "mark_deposit_collected",
+		"vacate_room", "give_notice", "withdraw_notice", "get_renewal", "renew_agreement",
+		"send_renewal_for_signing", "download_agreement", "mark_deposit_collected",
 		"invite_tenant", "send_checkin", "get_room_inspection", "save_room_inspection",
 		"get_checklist_deductions", "get_billable_allotments", "get_rent_receipts", "download_rent_receipt",
 		"get_verifications", "update_verification", "track_verification", "download_verification_form",

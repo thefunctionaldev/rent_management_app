@@ -43,6 +43,7 @@ from rent_management import (
 	receipts,
 	referrals,
 	register,
+	renewals,
 	rent_collection,
 	saas,
 	salaries,
@@ -771,6 +772,26 @@ def vacate_room(allotment, vacate_date=None):
 def give_notice(allotment, notice_date=None, vacate_date=None):
 	check_access()
 	return frappe.get_doc("Tenant Space Allotment", allotment).give_notice(notice_date, vacate_date)
+
+
+@frappe.whitelist()
+def get_renewal(allotment, months=None):
+	"""Renew agreement: the dates and rent a renewal would have."""
+	check_access()
+	return renewals.preview(allotment, months)
+
+
+@frappe.whitelist(methods=["POST"])
+def renew_agreement(allotment, months=None, new_rent=None, send_for_signing=1):
+	check_access()
+	return renewals.renew(allotment, months, new_rent, send_for_signing)
+
+
+@frappe.whitelist(methods=["POST"])
+def send_renewal_for_signing(allotment):
+	check_access()
+	frappe.get_doc("Tenant Space Allotment", allotment).check_permission("write")
+	return renewals.send_for_signing_now(allotment)
 
 
 @frappe.whitelist(methods=["POST"])

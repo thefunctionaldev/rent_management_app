@@ -296,6 +296,16 @@
 					<p class="text-sm font-medium text-sky-700">
 						{{ shortDate(a.agreement_end_date) }}
 					</p>
+					<button
+						class="rounded-lg px-2 py-1 text-xs font-medium text-brand-600 ring-1 ring-slate-200 hover:bg-slate-50"
+						@click="
+							openDialog('renewAgreement', {
+								allotment: { name: a.name, tenant_name: a.tenant_name },
+							})
+						"
+					>
+						Renew
+					</button>
 				</li>
 			</ul>
 		</div>

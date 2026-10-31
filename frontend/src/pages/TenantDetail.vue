@@ -236,11 +236,30 @@
 								>
 								<Button
 									size="sm"
-									class="col-span-2"
+									:icon="RefreshCw"
+									:disabled="!!current.expected_vacate_date"
+									:title="
+										current.agreement_end_date
+											? `Agreement until ${date(current.agreement_end_date)}`
+											: ''
+									"
+									@click="
+										openDialog('renewAgreement', {
+											allotment: {
+												name: current.name,
+												tenant_name: tenant.full_name,
+												first_name: tenant.first_name,
+											},
+										})
+									"
+									>Renew</Button
+								>
+								<Button
+									size="sm"
 									:icon="FileText"
 									:href="agreementUrl(current)"
 									target="_blank"
-									>Rental agreement (PDF)</Button
+									>Agreement (PDF)</Button
 								>
 								<button
 									v-if="current.docstatus === 1"
@@ -602,6 +621,7 @@ import {
 	Mail,
 	Pencil,
 	Phone,
+	RefreshCw,
 	Send,
 	ShieldCheck,
 	Smartphone,

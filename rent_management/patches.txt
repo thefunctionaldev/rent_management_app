@@ -17,3 +17,4 @@ rent_management.patches.v1_7.set_listing_slugs
 rent_management.patches.v1_8.set_next_due_dates
 rent_management.patches.v1_9.set_cash_holders
 rent_management.patches.v1_10.set_deposit_refund_days
+rent_management.patches.v1_10.set_agreement_start_dates

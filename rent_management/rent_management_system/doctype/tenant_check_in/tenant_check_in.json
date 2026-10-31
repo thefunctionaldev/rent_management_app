@@ -12,6 +12,7 @@
   "property",
   "column_break_status",
   "status",
+  "purpose",
   "sent_on",
   "expires_on",
   "details_submitted_on",
@@ -194,11 +195,19 @@
    "hidden": 1,
    "label": "Code Attempts",
    "read_only": 1
+  },
+  {
+   "default": "Move-in",
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Purpose",
+   "options": "Move-in\nRenewal"
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-30 17:20:35.414045",
+ "modified": "2026-10-31 10:38:52.674352",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Check-in",

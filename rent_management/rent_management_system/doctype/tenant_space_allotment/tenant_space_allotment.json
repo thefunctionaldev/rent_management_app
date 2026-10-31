@@ -30,6 +30,9 @@
   "agreement_section",
   "agreement_months",
   "agreement_end_date",
+  "agreement_start_date",
+  "renewals",
+  "renewed_on",
   "lock_in_months",
   "notice_period_days",
   "column_break_agreement",
@@ -438,6 +441,29 @@
    "fieldtype": "Datetime",
    "label": "Refund Details Given On",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The move-in date, or the start of the latest renewal",
+   "fieldname": "agreement_start_date",
+   "fieldtype": "Date",
+   "label": "Current Agreement From",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "renewals",
+   "fieldtype": "Int",
+   "label": "Renewals",
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "renewed_on",
+   "fieldtype": "Datetime",
+   "label": "Last Renewed On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -455,7 +481,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-31 07:50:57.485187",
+ "modified": "2026-10-31 10:38:52.673021",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

@@ -9,10 +9,16 @@
 				><PenLine class="size-5"
 			/></span>
 			<span class="flex-1">
-				<span class="block font-medium">Finish your check-in</span>
-				<span class="block text-sm text-slate-600"
-					>Add your details and ID, and sign your agreement</span
-				>
+				<span class="block font-medium">{{
+					data.checkin_purpose === "Renewal"
+						? "Sign your renewed agreement"
+						: "Finish your check-in"
+				}}</span>
+				<span class="block text-sm text-slate-600">{{
+					data.checkin_purpose === "Renewal"
+						? "Read the new terms and sign with a code"
+						: "Add your details and ID, and sign your agreement"
+				}}</span>
 			</span>
 			<ChevronRight class="size-5 text-slate-400" />
 		</a>
@@ -138,6 +144,13 @@
 					<dd class="tabular font-semibold">{{ money(data.stay.security_deposit) }}</dd>
 				</div>
 			</dl>
+			<p
+				v-if="agreementEnding"
+				class="mt-3 rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800"
+			>
+				Your agreement ends on {{ date(data.stay.agreement_end_date) }}. Talk to your
+				landlord about renewing it.
+			</p>
 		</div>
 
 		<RouterLink
@@ -238,6 +251,14 @@ const { data } = useResource(() => get(call("get_home")));
 const next = computed(() => data.value?.unpaid[0]);
 const nextDue = computed(() => next.value?.next_due_date || next.value?.due_date);
 const overdue = computed(() => nextDue.value && nextDue.value < me.today);
+// within 30 days of the end (not after notice, nor while a renewal waits to be signed)
+const agreementEnding = computed(() => {
+	const s = data.value?.stay;
+	if (!s?.agreement_end_date || s.expected_vacate_date || data.value.checkin_purpose)
+		return false;
+	const days = (new Date(s.agreement_end_date) - new Date(me.today)) / 86400000;
+	return days <= 30;
+});
 
 const movingOut = computed(() => {
 	const m = data.value.moving_out;

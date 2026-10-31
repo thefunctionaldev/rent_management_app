@@ -326,6 +326,7 @@ scheduler_events = {
 		"rent_management.verification.remind",
 		"rent_management.documents.remind_expiring",
 		"rent_management.move_out.remind",
+		"rent_management.renewals.remind",
 		"rent_management.notifications.send_due_reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",

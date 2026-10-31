@@ -202,6 +202,7 @@ def get_checkin(key=None):
 	settings = frappe.get_single("Rent Management Settings")
 	return {
 		"status": doc.status,
+		"purpose": doc.get("purpose") or "Move-in",
 		"tenant": {field: tenant.get(field) for field in DETAIL_FIELDS}
 		| {"mobile_no": tenant.mobile_no, "aadhaar_last4": tenant.aadhar_last4},
 		"has_aadhaar_card": bool(tenant.aadhar_card),
@@ -211,6 +212,7 @@ def get_checkin(key=None):
 			"room": frappe.db.get_value("Tenant Space", stay.room, "room_number"),
 			"bed_no": stay.bed_no,
 			"allotment_date": stay.allotment_date,
+			"agreement_end_date": stay.agreement_end_date,
 			"rent_amount": stay.rent_amount,
 			"security_deposit": stay.security_deposit,
 		},

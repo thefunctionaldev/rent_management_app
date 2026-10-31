@@ -86,6 +86,7 @@ class TenantSpaceAllotment(Document):
 				self.set(field, fallback if value in (None, "") else value)
 
 		start = getdate(self.allotment_date)
+		self.agreement_start_date = start  # until it's renewed (renewals.py)
 		months = cint(self.agreement_months)
 		self.agreement_end_date = add_days(add_months(start, months), -1) if months else None
 		every = cint(self.rent_increase_every_months) or 12
@@ -236,6 +237,8 @@ def move_in_items(allotment):
 
 def get_agreement_context(doc) -> dict:
 	"""Everything the Rent Agreement print format needs (registered as a Jinja method)."""
+	from rent_management.renewals import signed_after_renewal
+
 	settings = frappe.get_cached_doc("Rent Management Settings")
 	tenant = frappe.get_doc("Tenant", doc.tenant)
 	room = frappe.get_doc("Tenant Space", doc.room)
@@ -258,14 +261,8 @@ def get_agreement_context(doc) -> dict:
 		"lock_in_ends": add_months(getdate(doc.allotment_date), cint(doc.lock_in_months))
 		if cint(doc.lock_in_months)
 		else None,
-		"signature": frappe.db.get_value(
-			"Tenant Check-in",
-			{"allotment": doc.name, "status": "Signed"},
-			["name", "signed_on", "signed_name", "otp_channel", "otp_sent_to"],
-			as_dict=True,
-		)
-		if doc.name
-		else None,
+		"signature": signed_after_renewal(doc) if doc.name else None,
+		"term_start": doc.get("agreement_start_date") or doc.allotment_date,
 		"room_items": move_in_items(doc.name),
 		"money": lambda amount: frappe.utils.fmt_money(
 			amount, currency=frappe.db.get_default("currency") or "INR"

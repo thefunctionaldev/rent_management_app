@@ -231,6 +231,7 @@ def get_home():
 			"Maintenance Request", {"tenant": tenant.name, "status": ("in", ("Open", "In Progress"))}
 		),
 		"checkin_url": checkin_link(stay),
+		"checkin_purpose": checkin_purpose(stay),
 		"notice": (notices.unread(tenant.name, stay) or [None])[0] if stay else None,  # the newest unread
 		"moving_out": moving_out_card(tenant.name, stay),
 	}
@@ -246,6 +247,13 @@ def moving_out_card(tenant, stay):
 	return {
 		k: data.get(k) for k in ("stage", "moving_on", "days_left", "refund_due_on", "refund_overdue")
 	} | {"refund": (data.get("settlement") or data.get("estimate") or {}).get("refund")}
+
+
+def checkin_purpose(stay):
+	from rent_management.checkin import open_checkin
+
+	doc = open_checkin(stay.name) if stay else None
+	return (doc.get("purpose") or "Move-in") if doc else None
 
 
 def checkin_link(stay):
