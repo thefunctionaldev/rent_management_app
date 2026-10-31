@@ -80,6 +80,21 @@
 					>
 				</label>
 
+				<div
+					v-if="
+						preview?.refund_amount > 0 &&
+						(allotment.refund_upi_id || allotment.refund_bank_details)
+					"
+					class="rounded-xl bg-slate-50 px-4 py-3 text-sm"
+				>
+					<p class="text-xs font-medium text-slate-500">The tenant asked for it here</p>
+					<p v-if="allotment.refund_upi_id" class="font-medium">
+						UPI: {{ allotment.refund_upi_id }}
+					</p>
+					<p v-if="allotment.refund_bank_details" class="whitespace-pre-line">
+						{{ allotment.refund_bank_details }}
+					</p>
+				</div>
 				<div v-if="preview?.refund_amount > 0" class="grid gap-4 sm:grid-cols-2">
 					<Field label="Refund mode" required>
 						<select v-model="form.mode_of_refund" class="input" required>
@@ -168,7 +183,11 @@ const reasons = ["Damages", "Cleaning", "Repairs", "Unpaid Utilities", "Lost Key
 const refundModes = ["Bank Transfer", "UPI", "Cash", "Cheque", "Other"];
 const deductions = reactive([]);
 const adjustRent = ref(true);
-const form = reactive({ mode_of_refund: "Bank Transfer", reference_no: "", remarks: "" });
+const form = reactive({
+	mode_of_refund: props.allotment.refund_upi_id ? "UPI" : "Bank Transfer",
+	reference_no: "",
+	remarks: "",
+});
 const preview = ref(null);
 const previewing = ref(false);
 

@@ -44,6 +44,7 @@
   "default_agreement_months",
   "default_lock_in_months",
   "default_notice_days",
+  "deposit_refund_days",
   "default_rent_increase_percent",
   "agreement_terms_section",
   "agreement_terms",
@@ -533,13 +534,21 @@
    "fieldname": "police_verification_days",
    "fieldtype": "Int",
    "label": "Submit Within (days)"
+  },
+  {
+   "default": "7",
+   "description": "Tenants see the date their deposit will be refunded by, counted from the day they move out. Managers are reminded on that day.",
+   "fieldname": "deposit_refund_days",
+   "fieldtype": "Int",
+   "label": "Refund Deposits Within (Days)",
+   "non_negative": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-30 18:20:57.373601",
+ "modified": "2026-10-31 07:50:57.488316",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Rent Management Settings",

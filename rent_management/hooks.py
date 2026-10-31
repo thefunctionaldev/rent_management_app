@@ -297,6 +297,9 @@ _also("Rent Management Settings", "validate", "rent_management.receipts.check_pa
 _also("Rent Property", "validate", "rent_management.receipts.check_pan")
 # new stays to verify with the police, see rent_management/verification.py
 _also("Tenant Space Allotment", "on_submit", "rent_management.verification.on_move_in")
+# moving out in the tenant app
+_also("Room Inspection", "on_update", "rent_management.move_out.on_checklist_update")
+_also("Security Deposit Settlement", "on_submit", "rent_management.move_out.on_settlement_submit")
 
 # Scheduled Tasks
 # ---------------
@@ -312,6 +315,7 @@ scheduler_events = {
 		"rent_management.owner_summary.send_monthly",
 		"rent_management.verification.remind",
 		"rent_management.documents.remind_expiring",
+		"rent_management.move_out.remind",
 		"rent_management.notifications.send_due_reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",

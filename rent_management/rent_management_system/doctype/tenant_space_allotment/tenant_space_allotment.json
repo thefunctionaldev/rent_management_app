@@ -54,7 +54,11 @@
   "verified_on",
   "verification_acknowledgement",
   "verification_copy",
-  "verification_note"
+  "verification_note",
+  "refund_section",
+  "refund_upi_id",
+  "refund_bank_details",
+  "refund_details_on"
  ],
  "fields": [
   {
@@ -407,6 +411,33 @@
    "fieldtype": "Small Text",
    "label": "Note",
    "no_copy": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "refund_section",
+   "fieldtype": "Section Break",
+   "label": "Deposit Refund"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Given by the tenant in the tenant app",
+   "fieldname": "refund_upi_id",
+   "fieldtype": "Data",
+   "label": "Refund UPI ID"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Account name, number and IFSC",
+   "fieldname": "refund_bank_details",
+   "fieldtype": "Small Text",
+   "label": "Refund Bank Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "refund_details_on",
+   "fieldtype": "Datetime",
+   "label": "Refund Details Given On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -424,7 +455,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-30 18:20:57.372481",
+ "modified": "2026-10-31 07:50:57.485187",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

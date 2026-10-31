@@ -27,6 +27,7 @@ from rent_management import (
 	inspections,
 	leads,
 	mess,
+	move_out,
 	notices,
 	notifications,
 	owner_summary,
@@ -1068,7 +1069,7 @@ def get_deposits(property=None):
 
 
 def get_pending_settlements(property=None):
-	return pictures.add_tenant_pictures(
+	rows = pictures.add_tenant_pictures(
 		frappe.get_all(
 			"Tenant Space Allotment",
 			filters=by_property(
@@ -1089,10 +1090,15 @@ def get_pending_settlements(property=None):
 				"vacate_date",
 				"security_deposit",
 				"deposit_collected",
+				"refund_upi_id",
+				"refund_bank_details",
 			],
 			order_by="vacate_date desc",
 		)
 	)
+	for row in rows:  # when the tenant was told to expect it (see move_out.py)
+		row.refund_due_on = move_out.refund_due_on(row)
+	return rows
 
 
 def make_settlement(allotment, deductions=None, adjust_outstanding_rent=1, **kwargs):

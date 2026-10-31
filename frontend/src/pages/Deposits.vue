@@ -41,6 +41,24 @@
 							</p>
 						</div>
 					</div>
+					<p
+						v-if="a.deposit_collected && a.refund_due_on"
+						class="mt-3 text-xs"
+						:class="
+							a.refund_due_on < boot.today
+								? 'font-medium text-rose-600'
+								: 'text-slate-500'
+						"
+					>
+						{{ a.refund_due_on < boot.today ? "Refund was due" : "Refund by" }}
+						{{ date(a.refund_due_on) }}
+					</p>
+					<p
+						v-if="a.refund_upi_id || a.refund_bank_details"
+						class="mt-1 text-xs text-slate-500"
+					>
+						Refund to: {{ a.refund_upi_id || a.refund_bank_details }}
+					</p>
 					<div class="mt-4 flex items-end justify-between">
 						<div>
 							<p class="text-xs text-slate-500">Deposit</p>
@@ -200,7 +218,7 @@ import EmptyState from "@/components/EmptyState.vue";
 import PageHeader from "@/components/PageHeader.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
-import { scope } from "@/store";
+import { boot, scope } from "@/store";
 import { useResource } from "@/useResource";
 import { date, money, shortDate } from "@/utils";
 

@@ -276,6 +276,28 @@ building owned by someone else, add the owner's name, PAN and address on the bui
 Edit*). Its receipts then name the owner. When a tenant's rent is over ₹1,00,000 in a year and no
 PAN is set, both apps warn, because employers need the landlord's PAN for that.
 
+### Moving out (tenant app)
+
+Tenants see everything about leaving on one page, **Profile > Moving out** (and a card on the home
+page once they've given notice):
+
+- **Giving notice:** pick a date. They're warned if it's shorter than their notice period or before
+  the lock-in ends, and the manager is told.
+- **Steps:** notice given, room checked, moved out, deposit settled, with the dates.
+- **Their deposit:** an estimate of what comes back (the deposit less unpaid bills and the move-out
+  checklist charges) and the date it's due by: *Settings > Rental agreements > Refund Deposits
+  Within (Days)* of moving out (7 by default). Once settled, the breakdown: each deduction, unpaid
+  bills paid from it, and how and when the refund was paid.
+- **Where to send the refund:** their UPI ID or bank account. Managers see it on *Deposits* and in
+  the settle dialog.
+- **Room checklist:** before the move-out check, what was in the room at move-in; afterwards, each
+  item's condition then and now, and what was charged.
+
+Tenants get a phone notification when the move-out checklist is completed and when the deposit is
+settled (also on WhatsApp, template `rent_deposit_settled`, or by email). Managers are reminded on
+the day a refund falls due, and every Monday about late ones. The page stays in the tenant app for
+120 days after moving out, or until the deposit is settled.
+
 ### Police verification
 
 Many cities ask landlords to submit a verification form for each tenant to the local police. Turn
@@ -437,6 +459,7 @@ limit in Settings), and a receipt for every payment. Every message is in the **R
   rent_overdue         Hello {{1}}, your rent of {{2}} for {{3}} at {{4}} was due on {{5}} and is still unpaid. {{6}}
   rent_receipt         Hello {{1}}, we have received {{2}} for your rent for {{3}} at {{4}}. Balance due: {{5}}. Thank you!
   rent_request_update  Hello {{1}}, your request "{{2}}" is now {{3}}. {{4}}
+  rent_deposit_settled Hello {{1}}, your deposit of {{2}} is settled: {{3}} {{4}}. See the breakdown in the app.
   ```
 
   Optional: `whatsapp_templates` to use other template names (`{"rent_reminder": "my_reminder"}`),

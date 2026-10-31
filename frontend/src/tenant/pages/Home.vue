@@ -33,6 +33,21 @@
 			</div>
 			<ChevronRight class="mt-3 size-5 text-slate-400" />
 		</RouterLink>
+		<RouterLink
+			v-if="data.moving_out"
+			to="/moving-out"
+			class="card flex items-center gap-3 p-4 ring-2 transition hover:bg-slate-50"
+			:class="data.moving_out.refund_overdue ? 'ring-rose-200' : 'ring-amber-100'"
+		>
+			<span class="grid size-10 place-items-center rounded-xl bg-amber-50 text-amber-600"
+				><DoorOpen class="size-5"
+			/></span>
+			<div class="flex-1">
+				<p class="font-medium">{{ movingOut.title }}</p>
+				<p class="text-sm text-slate-500">{{ movingOut.note }}</p>
+			</div>
+			<ChevronRight class="size-5 text-slate-400" />
+		</RouterLink>
 		<div class="card p-5">
 			<template v-if="data.due > 0">
 				<p class="text-sm text-slate-500">Rent due</p>
@@ -123,12 +138,6 @@
 					<dd class="tabular font-semibold">{{ money(data.stay.security_deposit) }}</dd>
 				</div>
 			</dl>
-			<p
-				v-if="data.stay.expected_vacate_date"
-				class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800"
-			>
-				You're moving out on {{ date(data.stay.expected_vacate_date) }}.
-			</p>
 		</div>
 
 		<RouterLink
@@ -208,6 +217,7 @@
 import {
 	ChevronRight,
 	CircleCheck,
+	DoorOpen,
 	Gift,
 	Luggage,
 	Megaphone,
@@ -228,4 +238,27 @@ const { data } = useResource(() => get(call("get_home")));
 const next = computed(() => data.value?.unpaid[0]);
 const nextDue = computed(() => next.value?.next_due_date || next.value?.due_date);
 const overdue = computed(() => nextDue.value && nextDue.value < me.today);
+
+const movingOut = computed(() => {
+	const m = data.value.moving_out;
+	const refund = m.refund ? `${money(m.refund)} back` : "Your deposit";
+	if (m.stage === "notice")
+		return {
+			title: `Moving out on ${date(m.moving_on)}`,
+			note: m.days_left
+				? `${m.days_left} day${m.days_left === 1 ? "" : "s"} to go · checklist and deposit`
+				: "Today · checklist and deposit",
+		};
+	if (m.stage === "moved_out")
+		return {
+			title: m.refund_due_on ? "Your deposit refund" : "You've moved out",
+			note: m.refund_due_on
+				? `${refund} · ${m.refund_overdue ? "was due" : "by"} ${date(m.refund_due_on)}`
+				: "See your move-out checklist",
+		};
+	return {
+		title: "Your deposit is settled",
+		note: m.refund ? `${money(m.refund)} refunded` : "See the breakdown",
+	};
+});
 </script>

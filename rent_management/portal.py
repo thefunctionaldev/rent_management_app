@@ -19,6 +19,7 @@ from rent_management import (
 	fees,
 	leads,
 	mess,
+	move_out,
 	notices,
 	pdf,
 	receipts,
@@ -230,7 +231,20 @@ def get_home():
 		),
 		"checkin_url": checkin_link(stay),
 		"notice": (notices.unread(tenant.name, stay) or [None])[0] if stay else None,  # the newest unread
+		"moving_out": moving_out_card(tenant.name, stay),
 	}
+
+
+def moving_out_card(tenant, stay):
+	"""For the home page: the move-out page while it matters (notice given, or a deposit to come)."""
+	if stay and not stay.expected_vacate_date:
+		return None
+	data = move_out.for_tenant(tenant)
+	if not data or data["stage"] == "staying":
+		return None
+	return {
+		k: data.get(k) for k in ("stage", "moving_on", "days_left", "refund_due_on", "refund_overdue")
+	} | {"refund": (data.get("settlement") or data.get("estimate") or {}).get("refund")}
 
 
 def checkin_link(stay):
@@ -506,7 +520,17 @@ def create_request(subject, category, description=None, priority="Medium"):
 	return request.name
 
 
-# ---------------------------------------------------------------- notice
+# ---------------------------------------------------------------- notice and moving out
+
+
+@frappe.whitelist()
+def get_move_out():
+	return move_out.for_tenant(current_tenant().name)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_refund_details(upi_id=None, bank_details=None):
+	move_out.save_refund_details(current_tenant().name, upi_id, bank_details)
 
 
 @frappe.whitelist(methods=["POST"])
