@@ -236,6 +236,18 @@
 								>
 								<Button
 									size="sm"
+									:icon="ArrowRightLeft"
+									@click="
+										openDialog('transfer', {
+											allotment: current.name,
+											tenantName: tenant.full_name,
+											firstName: tenant.first_name,
+										})
+									"
+									>Move room</Button
+								>
+								<Button
+									size="sm"
 									:icon="RefreshCw"
 									:disabled="!!current.expected_vacate_date"
 									:title="
@@ -607,6 +619,7 @@
 <script setup>
 import {
 	ArrowDownLeft,
+	ArrowRightLeft,
 	BadgeCheck,
 	BellRing,
 	Briefcase,

@@ -46,7 +46,8 @@ def stay_for(tenant):
 		return stay
 	for row in frappe.get_all(
 		ALLOTMENT,
-		filters={"tenant": tenant, "docstatus": 1, "status": "Vacated"},
+		# a room they moved out of to another one isn't moving out
+		filters={"tenant": tenant, "docstatus": 1, "status": "Vacated", "transferred_to": ("is", "not set")},
 		fields=["name", "vacate_date", "deposit_settlement", "deposit_collected", "security_deposit"],
 		order_by="vacate_date desc",
 		limit=1,
@@ -287,6 +288,7 @@ def remind():
 			"deposit_collected": 1,
 			"security_deposit": (">", 0),
 			"deposit_settlement": ("is", "not set"),
+			"transferred_to": ("is", "not set"),
 			"vacate_date": ("<=", add_days(today, -days)),
 		},
 		fields=["name", "tenant", "tenant_name", "room", "property", "vacate_date", "security_deposit"],

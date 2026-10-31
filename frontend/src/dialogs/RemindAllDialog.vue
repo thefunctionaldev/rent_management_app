@@ -165,13 +165,10 @@ get("get_reminder_list", scope())
 	.catch((e) => toast(e.message, "error"));
 
 const owed = computed(() => (data.value?.rows || []).reduce((s, r) => s + r.owed, 0));
-const subtitle = computed(() =>
-	data.value?.rows.length
-		? `${data.value.rows.length} tenant${data.value.rows.length === 1 ? "" : "s"} owe ${money(
-				owed.value
-		  )}`
-		: ""
-);
+const subtitle = computed(() => {
+	const n = data.value?.rows.length || 0;
+	return n ? `${n} tenant${n === 1 ? " owes" : "s owe"} ${money(owed.value)}` : "";
+});
 const channelText = computed(() =>
 	[data.value?.channels.whatsapp && "WhatsApp", data.value?.channels.email && "email"]
 		.filter(Boolean)

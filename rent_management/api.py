@@ -49,6 +49,7 @@ from rent_management import (
 	salaries,
 	statements,
 	subscription,
+	transfers,
 	verification,
 )
 from rent_management import search as search_tenants
@@ -782,6 +783,21 @@ def give_notice(allotment, notice_date=None, vacate_date=None):
 
 
 @frappe.whitelist()
+def get_transfer_options(allotment):
+	"""Move to another bed: the rooms with a free bed."""
+	check_access()
+	return transfers.options(allotment)
+
+
+@frappe.whitelist(methods=["POST"])
+def transfer_stay(
+	allotment, room, bed_no=None, transfer_date=None, new_rent=None, new_deposit=None, send_for_signing=0
+):
+	check_access()
+	return transfers.transfer(allotment, room, bed_no, transfer_date, new_rent, new_deposit, send_for_signing)
+
+
+@frappe.whitelist()
 def get_renewal(allotment, months=None):
 	"""Renew agreement: the dates and rent a renewal would have."""
 	check_access()
@@ -1126,6 +1142,7 @@ def get_pending_settlements(property=None):
 					"status": "Vacated",
 					"security_deposit": (">", 0),
 					"deposit_settlement": ("is", "not set"),
+					"transferred_to": ("is", "not set"),  # the deposit went with them to the new room
 				},
 				property,
 			),

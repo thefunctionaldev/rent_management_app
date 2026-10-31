@@ -104,7 +104,8 @@ def deposits(tenant) -> list[dict]:
 	out = []
 	for s in frappe.get_all(
 		ALLOTMENT,
-		filters={"tenant": tenant, "docstatus": 1, "security_deposit": (">", 0)},
+		# after a room change the deposit is the new stay's
+		filters={"tenant": tenant, "docstatus": 1, "security_deposit": (">", 0), "transferred_to": ("is", "not set")},
 		fields=["name", "room", "allotment_date", "vacate_date", "security_deposit", "deposit_collected",
 			"deposit_collected_on", "deposit_settlement"],
 		order_by="allotment_date asc",

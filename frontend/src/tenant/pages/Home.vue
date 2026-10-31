@@ -12,10 +12,12 @@
 				<span class="block font-medium">{{
 					data.checkin_purpose === "Renewal"
 						? "Sign your renewed agreement"
+						: data.checkin_purpose === "Room Change"
+						? "Sign your agreement for your new room"
 						: "Finish your check-in"
 				}}</span>
 				<span class="block text-sm text-slate-600">{{
-					data.checkin_purpose === "Renewal"
+					["Renewal", "Room Change"].includes(data.checkin_purpose)
 						? "Read the new terms and sign with a code"
 						: "Add your details and ID, and sign your agreement"
 				}}</span>

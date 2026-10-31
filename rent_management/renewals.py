@@ -94,8 +94,9 @@ def renew(allotment, months=None, new_rent=None, send_for_signing=1) -> dict:
 	return result
 
 
-def send_for_signing_now(allotment) -> dict:
-	"""A link for the tenant to sign the renewed agreement: straight to signing."""
+def send_for_signing_now(allotment, purpose="Renewal") -> dict:
+	"""A link for the tenant to sign the renewed (or, after a room change, updated) agreement:
+	straight to signing."""
 	from rent_management.checkin import checkin_url
 
 	stay = frappe.get_doc(ALLOTMENT, allotment)
@@ -106,21 +107,24 @@ def send_for_signing_now(allotment) -> dict:
 			"doctype": CHECKIN,
 			"tenant": stay.tenant,
 			"allotment": stay.name,
-			"purpose": "Renewal",
+			"purpose": purpose,
 			"status": "Details Submitted",  # their details are on file: just read and sign
 			"sent_on": now_datetime(),
 			"details_submitted_on": now_datetime(),
 		}
 	).insert(ignore_permissions=True)
 	link = checkin_url(doc)
-	tell_tenant(
-		stay,
-		_("Sign your renewed agreement"),
-		_("Your agreement is renewed until {0}. Read and sign it here: {1}").format(
+	if purpose == "Room Change":
+		subject = _("Sign your agreement for your new room")
+		message = _("Your agreement is updated for room {0}. Read and sign it here: {1}").format(
+			stay.room, link
+		)
+	else:
+		subject = _("Sign your renewed agreement")
+		message = _("Your agreement is renewed until {0}. Read and sign it here: {1}").format(
 			frappe.utils.formatdate(stay.agreement_end_date), link
-		),
-		link,
-	)
+		)
+	tell_tenant(stay, subject, message, link)
 	tenant = frappe.db.get_value("Tenant", stay.tenant, ["mobile_no"], as_dict=True)
 	return {"name": doc.name, "url": link, "mobile_no": tenant.mobile_no}
 

@@ -24,7 +24,9 @@
 						{{
 							renewal
 								? done
-									? "Your agreement is renewed"
+									? "Your agreement is signed"
+									: data.purpose === "Room Change"
+									? `Hello ${data.tenant.first_name}, your agreement is updated for room ${data.stay.room}`
 									: `Hello ${data.tenant.first_name}, your agreement is renewed`
 								: done
 								? "You're checked in"
@@ -35,8 +37,10 @@
 						{{
 							renewal
 								? done
-									? "You've signed the renewed agreement."
-									: `Read the renewed agreement${
+									? "You've signed the updated agreement."
+									: `Read the ${
+											data.purpose === "Room Change" ? "updated" : "renewed"
+									  } agreement${
 											data.stay.agreement_end_date
 												? `, until ${date(data.stay.agreement_end_date)},`
 												: ""
@@ -340,7 +344,8 @@ const error = ref("");
 const data = ref(null);
 const step = ref(0);
 const done = computed(() => data.value?.status === "Signed");
-const renewal = computed(() => data.value?.purpose === "Renewal"); // their details are on file: just sign
+// a renewal or a room change: their details are on file, so just read and sign
+const renewal = computed(() => ["Renewal", "Room Change"].includes(data.value?.purpose));
 
 const form = reactive({
 	first_name: "",

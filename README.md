@@ -134,6 +134,40 @@ your check-in" while one is open, and managers are notified when details come in
 addresses, work, emergency contact, the tenancy and the landlord's details, to submit at the police station
 or on the state police portal. Printing it is logged on the tenant, as it shows the full Aadhaar number.
 
+### Renewals and room changes
+
+- **Agreement renewals:** managers (and wardens with rooms and tenants) get a notification 30 and 7
+  days before an agreement ends, and on Mondays a list of those ending in the next 30 days; the
+  tenant sees it in their app. **Renew** (on the tenant's page or the dashboard) starts the next
+  term the day after the old one ends, for the usual number of months, optionally at a new rent
+  from that day (the agreed increase is suggested). The renewed agreement can be sent to the tenant
+  to sign with a code, as at check-in, straight to the signing step. The agreement PDF shows the
+  current term and the renewal number.
+- **Room changes:** **Move room** on the tenant's page moves them to another bed or room on a date
+  (today or earlier). The old stay ends the night before and a new one starts, so each room is
+  billed for its nights: a draft bill for the old room is reworked out, and if it's already
+  submitted the new room's bill takes off what it charged for the days after the move. The deposit
+  goes with them (a bigger one for the new room is added to its first bill; a smaller one leaves
+  the difference to refund at move-out), and so do the agreement's term, the rest of the lock-in,
+  the rent increase, the meal plan, any notice, and the police verification when it's the same
+  building. The updated agreement can be sent to sign.
+
+### Daily work
+
+- **Remind all** (*Outstanding*) sends one reminder to each tenant who owes rent, for their oldest
+  unpaid bill, on WhatsApp and email. The overdue ones are ticked to start; it shows who can't be
+  reached (no number or email) and who was already reminded today, and nobody is reminded twice in
+  a day.
+- **Several bills at once** (*Invoices*): tick unpaid bills to **Mark paid** (one mode and date for
+  all) or **Send reminders**. *Generate for month* can make one building's invoices only.
+- **Unpaid list for wardens:** staff with rent and payments see who hasn't paid in their building on
+  their home screen, with call, remind and **Collected cash** (recorded into their cash book).
+- **Duplicate payments:** a payment with the same UTR or reference as another is refused unless a
+  manager confirms it's a second payment; recording the same amount for the same tenant within 2
+  days asks too.
+- **Search:** the search box at the top of the sidebar (press `/`) and the tenant list find a tenant
+  by name, phone number (however it's written), email, room number or a payment's UTR.
+
 ### Room checklists (move-in and move-out)
 
 Each room has a list of **items in the room** (*Rooms > Edit*): bed, mattress, cupboard, chair, fan,

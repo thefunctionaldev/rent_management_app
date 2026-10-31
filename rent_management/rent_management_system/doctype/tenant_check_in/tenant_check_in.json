@@ -202,12 +202,12 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Purpose",
-   "options": "Move-in\nRenewal"
+   "options": "Move-in\nRenewal\nRoom Change"
   }
  ],
  "grid_page_length": 50,
  "links": [],
- "modified": "2026-10-31 10:38:52.674352",
+ "modified": "2026-10-31 10:45:18.372188",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Check-in",

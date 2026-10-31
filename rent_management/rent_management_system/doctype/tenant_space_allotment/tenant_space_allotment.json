@@ -33,6 +33,8 @@
   "agreement_start_date",
   "renewals",
   "renewed_on",
+  "transferred_from",
+  "transferred_to",
   "lock_in_months",
   "notice_period_days",
   "column_break_agreement",
@@ -464,6 +466,24 @@
    "fieldtype": "Datetime",
    "label": "Last Renewed On",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The stay this one continues after a room change",
+   "fieldname": "transferred_from",
+   "fieldtype": "Link",
+   "label": "Moved Here From",
+   "options": "Tenant Space Allotment",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The deposit, agreement and verification went with them",
+   "fieldname": "transferred_to",
+   "fieldtype": "Link",
+   "label": "Moved To",
+   "options": "Tenant Space Allotment",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -481,7 +501,7 @@
    "link_fieldname": "tenant_space_allotment"
   }
  ],
- "modified": "2026-10-31 10:38:52.673021",
+ "modified": "2026-10-31 10:45:18.370690",
  "modified_by": "Administrator",
  "module": "Rent Management System",
  "name": "Tenant Space Allotment",

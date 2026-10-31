@@ -159,6 +159,8 @@ def invoice_deleted(doc):
 
 
 def stay_submitted(doc):
+	if doc.get("transferred_from"):
+		return  # a room change: logged once by transfers.py
 	log(
 		"Stays",
 		_("moved {0} into room {1} at {2} a month").format(doc.tenant_name, doc.room, money(doc.rent_amount)),

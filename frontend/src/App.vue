@@ -362,6 +362,7 @@ const dialogs = {
 	remindAll: lazy("RemindAllDialog"),
 	markPaid: lazy("MarkPaidDialog"),
 	renewAgreement: lazy("RenewAgreementDialog"),
+	transfer: lazy("TransferDialog"),
 	settleDeposit: lazy("SettleDepositDialog"),
 	collectDeposit: lazy("CollectDepositDialog"),
 	property: lazy("PropertyDialog"),
