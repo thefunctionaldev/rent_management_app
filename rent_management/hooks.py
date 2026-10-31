@@ -218,6 +218,7 @@ doc_events = {
 		"Rent Notice",
 		"Cash Handover",
 		"Tenant Document",
+		"Bank Statement",
 	)
 }
 doc_events["Tenant Space"]["validate"] = [

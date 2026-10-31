@@ -41,6 +41,12 @@ const routes = [
 		name: "payments",
 		component: () => import("./pages/Payments.vue"),
 	},
+	{
+		path: "/bank-statements/:name?",
+		name: "bank-statements",
+		component: () => import("./pages/BankStatements.vue"),
+		props: true,
+	},
 	{ path: "/deposits", name: "deposits", component: () => import("./pages/Deposits.vue") },
 	{
 		path: "/outstanding",

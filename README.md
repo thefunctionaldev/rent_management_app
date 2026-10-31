@@ -328,6 +328,30 @@ Tenants add theirs under **Profile > My documents** in the tenant app. They can 
 they added. Files are private: tenants open theirs through the app, and managers from the tenant's
 page. Managers and wardens are told 30 days before a document expires, and on the day.
 
+### Bank statement matching
+
+Rent paid by UPI or bank transfer is confirmed from the bank statement instead of one by one.
+**Bank statements > Upload statement**: the statement as your bank exports it, Excel (.xlsx or
+.xls) or CSV. The columns are found by their names (Date, Narration, Ref No., Withdrawal and
+Deposit, or Amount with Cr/Dr), so most banks' and UPI apps' statements work as they are. Only
+money that came in is read.
+
+Each credit is matched to rent:
+
+- **Already recorded:** its UTR is on a payment already confirmed, or the same line was confirmed
+  from an earlier statement (statements can overlap).
+- **A payment the tenant reported** in the tenant app: by its UTR, or the amount and their name.
+- **A tenant's unpaid bills:** the tenant is found by a UPI ID or name they paid from before, their
+  refund UPI ID, their mobile number, or their name in the narration; then the bill by the amount.
+  An amount only one unpaid bill has is suggested too.
+
+Sure matches are ticked; check the others (marked *Check*), pick the tenant for the ones not
+matched, mark anything that isn't rent as *Not rent*, and **Confirm**. Each becomes a Rent Payment
+(UPI or bank transfer, with the UTR and the date from the statement), spread over the tenant's
+bills oldest first if it covers more than one. A payment the tenant reported is confirmed instead of
+recorded twice. The UPI ID or name each tenant paid from is remembered (Tenant > *Names on Bank
+Statements*), so next month's statement matches by itself. Only managers see bank statements.
+
 ### Collecting rent online
 
 Rent goes straight into the landlord's own account, set up in *Settings > Online rent collection*:

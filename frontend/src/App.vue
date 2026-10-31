@@ -182,6 +182,7 @@ import {
 	FileText,
 	FileUp,
 	HandCoins,
+	Landmark,
 	History,
 	LayoutDashboard,
 	Lock,
@@ -283,6 +284,7 @@ const allNav = computed(() => [
 		items: [
 			{ to: "/invoices", label: "Invoices", icon: FileText, area: "payments" },
 			{ to: "/payments", label: "Payments", icon: Wallet, area: "payments" },
+			{ to: "/bank-statements", label: "Bank statements", icon: Landmark },
 			{ to: "/cash", label: "Cash book", icon: HandCoins, area: ["payments", "expenses"] },
 			{ to: "/deposits", label: "Deposits", icon: ShieldCheck },
 			{ to: "/electricity", label: "Electricity", icon: Zap, area: "meters" },

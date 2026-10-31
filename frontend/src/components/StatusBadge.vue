@@ -23,6 +23,9 @@ const palette = {
 };
 
 const colors = {
+	Confirmed: "green",
+	Recorded: "sky",
+	Ignored: "slate",
 	Available: "green",
 	Paid: "green",
 	Active: "green",

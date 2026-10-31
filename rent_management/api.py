@@ -42,6 +42,7 @@ from rent_management import (
 	rent_collection,
 	saas,
 	salaries,
+	statements,
 	subscription,
 	verification,
 )
@@ -1398,6 +1399,52 @@ def reject_payment(name, reason=None):
 		),
 	)
 	frappe.delete_doc("Rent Payment", name)
+
+
+# ---------------------------------------------------------------- bank statements (statements.py)
+
+
+@frappe.whitelist()
+def get_bank_statements():
+	check_access()
+	return statements.get_statements()
+
+
+@frappe.whitelist(methods=["POST"])
+def upload_bank_statement(filename, content, bank=None):
+	check_access()
+	frappe.has_permission(statements.STATEMENT, "create", throw=True)
+	return statements.upload(filename, content, bank)
+
+
+@frappe.whitelist()
+def get_bank_statement(name):
+	check_access()
+	return statements.get_statement(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_bank_statement_line(name, line, tenant=None, rent_invoice=None, status=None):
+	check_access()
+	statements.set_line(name, line, tenant, rent_invoice, status)
+
+
+@frappe.whitelist(methods=["POST"])
+def confirm_bank_statement(name, lines):
+	check_access()
+	return statements.confirm(name, lines)
+
+
+@frappe.whitelist(methods=["POST"])
+def rematch_bank_statement(name):
+	check_access()
+	statements.rematch(name)
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_bank_statement(name):
+	check_access()
+	statements.delete(name)
 
 
 # ---------------------------------------------------------------- expenses

@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "autoname": "BST-.YYYY.-.#####",
+ "creation": "2026-10-31 08:29:56.280246",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bank",
+  "file_name",
+  "from_date",
+  "to_date",
+  "column_break_1",
+  "credits",
+  "total_credits",
+  "debits",
+  "confirmed",
+  "lines_section",
+  "lines"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bank / Account"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credits",
+   "fieldtype": "Int",
+   "label": "Credits",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credits",
+   "fieldtype": "Currency",
+   "label": "Total Credits",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debits",
+   "fieldtype": "Int",
+   "label": "Debits (Skipped)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confirmed",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Confirmed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lines_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lines",
+   "fieldtype": "Table",
+   "label": "Lines",
+   "options": "Bank Statement Line"
+  }
+ ],
+ "grid_page_length": 50,
+ "links": [],
+ "modified": "2026-10-31 08:29:56.280246",
+ "modified_by": "Administrator",
+ "module": "Rent Management System",
+ "name": "Bank Statement",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Rent Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "bank"
+}
