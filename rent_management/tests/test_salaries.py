@@ -1,6 +1,7 @@
+from unittest.mock import patch
+
 # Copyright (c) 2026, Shashank Dixit and Contributors
 # See license.txt
-
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_months, getdate, nowdate
@@ -101,6 +102,7 @@ class TestSalaries(IntegrationTestCase):
 		month = salaries.MONTHS[before.month - 1]
 		self.assertNotIn(guard, salaries.staff_for(month, before.year, self.building))
 
+	@patch("rent_management.subscription.get_manager_users", new=lambda **kwargs: ["Administrator"])
 	def test_pay_day_reminder(self):
 		frappe.db.set_value(salaries.STAFF, self.cook, "pay_day", min(getdate(nowdate()).day, 28))
 		frappe.db.delete("Notification Log", {"subject": ("like", "Salaries due%")})

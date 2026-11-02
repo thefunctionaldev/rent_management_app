@@ -76,6 +76,7 @@ class TestCheckin(IntegrationTestCase):
 		self.assertTrue(api.get_tenant(self.tenant.name)["checkin"]["expired"])
 		self.assertNotEqual(api.send_checkin(self.stay.name)["name"], again["name"])  # a fresh one
 
+	@patch("rent_management.subscription.get_manager_users", new=lambda **kwargs: ["Administrator"])
 	def test_details_and_documents(self):
 		data = self.as_guest(checkin.get_checkin, self.key)
 		self.assertEqual((data["status"], data["agreement"]), ("Sent", None))  # no agreement before details

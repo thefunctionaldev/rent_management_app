@@ -30,7 +30,7 @@ class TestOperationsSuite(IntegrationTestCase):
 		self.a, self.b = make_property(), make_property()
 		self.requester = make_user("suite.manager@example.com", ["Rent Manager"])
 		self.reviewer = make_user("suite.reviewer@example.com", ["Rent Manager"])
-		self.owner = make_user("suite.owner@example.com")
+		self.owner = make_user(f"suite.owner.{frappe.generate_hash(length=10)}@example.com")
 		api.save_approval_rules({"enabled": 0, "rules": []})
 
 	def tearDown(self):

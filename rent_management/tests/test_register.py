@@ -1,7 +1,7 @@
 # Copyright (c) 2026, Shashank Dixit and Contributors
 # See license.txt
-
 import random
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import IntegrationTestCase
@@ -56,6 +56,7 @@ class TestRegister(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
+	@patch("rent_management.subscription.get_manager_users", new=lambda **kwargs: ["Administrator"])
 	def test_leave_request_approval_skips_meals(self):
 		start, end = add_days(nowdate(), 1), add_days(nowdate(), 3)
 		data = self.as_tenant(portal.request_leave, start, end, destination="Mysuru")
