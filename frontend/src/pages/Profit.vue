@@ -69,8 +69,8 @@
 								<tr>
 									<th class="table-head">Month</th>
 									<th class="table-head text-right">Invoiced</th>
-									<th class="table-head text-right">Collected</th>
-									<th class="table-head text-right">Expenses</th>
+									<th class="table-head text-right">{{ $t("Collected") }}</th>
+									<th class="table-head text-right">{{ $t("Expenses") }}</th>
 									<th class="table-head text-right">Profit</th>
 								</tr>
 							</thead>

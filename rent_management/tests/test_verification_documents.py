@@ -172,6 +172,11 @@ class TestTenantDocuments(IntegrationTestCase):
 		self.assertIn("aadhaar", [d["key"] for d in api.get_tenant_documents(self.tenant.name)["documents"]])
 		api.delete_tenant_document(self.tenant.name, pan)
 		self.assertFalse(frappe.db.exists(documents.DOCUMENT, pan))
+		# The legacy tenant attachment must remain readable after its document row is removed.
+		self.assertTrue(frappe.db.exists("File", {"file_url": docs["PAN Card"]["file"]}))
+		self.assertEqual(
+			frappe.db.get_value("Tenant", self.tenant.name, "aadhar_card"), docs["PAN Card"]["file"]
+		)
 
 	def test_tenant_app(self):
 		api.invite_tenant(self.tenant.name)

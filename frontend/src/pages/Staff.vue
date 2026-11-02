@@ -93,7 +93,7 @@
 					<table class="w-full min-w-[56rem] text-sm">
 						<thead class="bg-slate-50/60">
 							<tr>
-								<th class="table-head">Staff</th>
+								<th class="table-head">{{ $t("Staff") }}</th>
 								<th class="table-head w-24 text-right">Days off</th>
 								<th class="table-head text-right">Salary</th>
 								<th class="table-head w-28 text-right">Bonus</th>
@@ -199,7 +199,7 @@
 									<div class="flex items-center justify-end gap-2">
 										<template v-if="s.status === 'Paid'">
 											<span class="text-xs text-slate-500"
-												>Paid {{ shortDate(s.paid_on) }}</span
+												>{{ $t("Paid") }} {{ shortDate(s.paid_on) }}</span
 											>
 											<a
 												v-if="s.staff_details?.mobile_no"
@@ -338,12 +338,12 @@
 				<table class="w-full min-w-[40rem] text-sm">
 					<thead class="bg-slate-50/60">
 						<tr>
-							<th class="table-head">Staff</th>
+							<th class="table-head">{{ $t("Staff") }}</th>
 							<th class="table-head">Given</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 							<th class="table-head text-right">Per month</th>
 							<th class="table-head text-right">To recover</th>
-							<th class="table-head">Status</th>
+							<th class="table-head">{{ $t("Status") }}</th>
 							<th class="table-head"></th>
 						</tr>
 					</thead>
@@ -423,7 +423,7 @@ const year = computed(() => cursor.value.getFullYear());
 const isCurrentMonth = computed(
 	() =>
 		cursor.value.getFullYear() === today.getFullYear() &&
-		cursor.value.getMonth() === today.getMonth(),
+		cursor.value.getMonth() === today.getMonth()
 );
 function shift(n) {
 	cursor.value = new Date(cursor.value.getFullYear(), cursor.value.getMonth() + n, 1);
@@ -431,14 +431,14 @@ function shift(n) {
 
 // reactive() so the template reads pay.data rather than pay.data.value
 const pay = reactive(
-	useResource(() => get("get_salaries", { month: month.value, year: year.value, ...scope() })),
+	useResource(() => get("get_salaries", { month: month.value, year: year.value, ...scope() }))
 );
 watch(cursor, pay.reload);
 const staff = reactive(useResource(() => get("get_staff", scope())));
 
 const active = computed(() => (staff.data?.staff || []).filter((s) => s.is_active));
 const openAdvances = computed(
-	() => (staff.data?.advances || []).filter((a) => a.status === "Open").length,
+	() => (staff.data?.advances || []).filter((a) => a.status === "Open").length
 );
 const tabs = computed(() => [
 	{ value: "salaries", label: "Salaries" },
@@ -492,7 +492,7 @@ async function undo(slip) {
 		toast(
 			result?.approval_pending
 				? `Approval requested (${result.request}). Payment is unchanged.`
-				: "Payment undone",
+				: "Payment undone"
 		);
 		bumpData();
 	} catch (e) {
@@ -507,7 +507,7 @@ async function removeAdvance(a) {
 		toast(
 			result?.approval_pending
 				? `Approval requested (${result.request}). Advance is unchanged.`
-				: "Advance deleted",
+				: "Advance deleted"
 		);
 		bumpData();
 	} catch (e) {
@@ -553,7 +553,7 @@ function payslipLink(s) {
 		s.other_deduction
 			? `Deduction: ${money(s.other_deduction)}${
 					s.deduction_note ? ` (${s.deduction_note})` : ""
-				}`
+			  }`
 			: null,
 		s.advance_recovery ? `Advance recovered: ${money(s.advance_recovery)}` : null,
 		`Paid: ${money(s.net_pay)} on ${date(s.paid_on)}${

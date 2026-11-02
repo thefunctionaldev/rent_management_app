@@ -64,7 +64,7 @@
 			</p>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button variant="primary" type="submit" form="move-in-form" :loading="loading"
 				>Move in</Button
 			>

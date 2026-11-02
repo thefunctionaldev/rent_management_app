@@ -51,6 +51,7 @@
 		</header>
 
 		<main class="mx-auto -mt-10 max-w-lg px-4">
+			<div class="mb-4 flex justify-end"><LanguageSwitcher /></div>
 			<OfflineBanner />
 			<RouterView v-slot="{ Component }">
 				<component :is="Component" :key="$route.fullPath" />
@@ -72,7 +73,7 @@
 					:class="isActive(item) && '!text-brand-600'"
 				>
 					<component :is="item.icon" class="size-5" :stroke-width="1.8" />
-					{{ item.label }}
+					{{ $t(item.label) }}
 				</RouterLink>
 			</div>
 		</nav>
@@ -87,6 +88,7 @@
 </template>
 
 <script setup>
+import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
 import {
 	Bell,
 	Home,

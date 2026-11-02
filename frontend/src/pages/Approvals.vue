@@ -3,7 +3,7 @@
 		<PageHeader
 			title="Approvals"
 			subtitle="Review proposed financial changes before they take effect."
-			><Button @click="reload">Refresh</Button
+			><Button @click="reload">{{ $t("Refresh") }}</Button
 			><Button v-if="data?.can_configure" @click="openRules"
 				>Approval rules</Button
 			></PageHeader
@@ -63,7 +63,9 @@
 				<div v-if="r.can_decide" class="flex flex-wrap gap-2">
 					<Button variant="primary" :disabled="busy" @click="review(r, 'approve')"
 						>Review and approve</Button
-					><Button :disabled="busy" @click="review(r, 'reject')">Reject</Button>
+					><Button :disabled="busy" @click="review(r, 'reject')">{{
+						$t("Reject")
+					}}</Button>
 				</div>
 				<Button
 					v-if="r.status === 'Pending' && r.requested_by === boot.user"
@@ -161,7 +163,7 @@
 				>Add rule</Button
 			>
 			<template #footer
-				><Button @click="rulesOpen = false">Cancel</Button
+				><Button @click="rulesOpen = false">{{ $t("Cancel") }}</Button
 				><Button variant="primary" :loading="saving" @click="saveRules"
 					>Save rules</Button
 				></template
@@ -187,7 +189,7 @@ const status = ref("Pending"),
 	decision = ref("approve"),
 	note = ref("");
 const filtered = computed(() =>
-	(data.value?.requests || []).filter((r) => !status.value || r.status === status.value),
+	(data.value?.requests || []).filter((r) => !status.value || r.status === status.value)
 );
 function details(r) {
 	try {
@@ -235,7 +237,7 @@ async function openRules() {
 }
 const { loading: saving, run: save } = useAction(
 	() => post("save_approval_rules", { data: { ...rules, enabled: rules.enabled ? 1 : 0 } }),
-	{ success: "Approval rules saved" },
+	{ success: "Approval rules saved" }
 );
 async function saveRules() {
 	await save();

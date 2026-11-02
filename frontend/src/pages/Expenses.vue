@@ -52,10 +52,10 @@
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
 							<th class="table-head">Date</th>
-							<th class="table-head">Category</th>
+							<th class="table-head">{{ $t("Category") }}</th>
 							<th class="table-head">Paid to</th>
 							<th v-if="!ui.property" class="table-head">Building</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100">

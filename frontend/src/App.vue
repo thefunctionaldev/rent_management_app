@@ -63,7 +63,7 @@
 					<p
 						class="px-3 pb-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase"
 					>
-						{{ group.label }}
+						{{ $t(group.label) }}
 					</p>
 					<RouterLink
 						v-for="item in group.items"
@@ -78,7 +78,7 @@
 							class="size-[18px] shrink-0"
 							:stroke-width="1.8"
 						/>
-						{{ item.label }}
+						{{ $t(item.label) }}
 						<span
 							v-if="item.badge"
 							class="ml-auto rounded-full bg-brand-600 px-1.5 text-[11px] leading-5 font-semibold text-white"
@@ -89,6 +89,7 @@
 			</nav>
 
 			<div class="border-t border-slate-100 p-3">
+				<LanguageSwitcher />
 				<RouterLink
 					v-if="!pwa.installed && (pwa.installPrompt || isIOS)"
 					:to="boot.access ? '/#this-phone' : '/settings#this-phone'"
@@ -138,7 +139,7 @@
 				<Menu class="size-5" />
 			</button>
 			<img :src="logo" alt="" class="size-7" />
-			<p class="flex-1 text-sm font-semibold">{{ currentPage }}</p>
+			<p class="flex-1 text-sm font-semibold">{{ $t(currentPage) }}</p>
 			<QuickSearch v-if="canUse(['rooms', 'payments'])" compact />
 		</header>
 
@@ -146,7 +147,7 @@
 			<div class="flex min-w-0 items-center gap-3">
 				<span class="text-sm text-slate-500">Workspace</span>
 				<span aria-hidden="true" class="text-slate-300">/</span>
-				<span class="truncate text-sm font-semibold">{{ currentPage }}</span>
+				<span class="truncate text-sm font-semibold">{{ $t(currentPage) }}</span>
 			</div>
 			<span class="flex items-center gap-2 text-sm text-slate-600"
 				><Building2 class="size-4" />{{ ui.property || "All buildings" }}</span
@@ -241,6 +242,7 @@ import {
 import { computed, defineAsyncComponent, ref } from "vue";
 import { useRoute } from "vue-router";
 
+import LanguageSwitcher from "./components/LanguageSwitcher.vue";
 import Avatar from "./components/Avatar.vue";
 import InstallSheet from "./components/InstallSheet.vue";
 import OfflineBanner from "./components/OfflineBanner.vue";
@@ -271,16 +273,28 @@ const nav = computed(() =>
 			...group,
 			items: group.items.filter((item) => item.everyone || canUse(item.area)),
 		}))
-		.filter((group) => group.items.length),
+		.filter((group) => group.items.length)
 );
 const allNav = computed(() => [
+	{
+		label: "Operations",
+		items: [
+			{ to: "/maintenance", label: "Maintenance", icon: Wrench, area: "requests" },
+			{ to: "/recurring-bills", label: "Recurring bills", icon: Receipt, area: "expenses" },
+			{ to: "/housekeeping", label: "Housekeeping", icon: Sparkles, area: "housekeeping" },
+			{ to: "/waitlist", label: "Waitlist", icon: Users, area: "leads" },
+			{ to: "/owner-access", label: "Owner access", icon: Building2 },
+			{ to: "/health", label: "Operational health", icon: History },
+			{ to: "/erpnext", label: "ERPNext integration", icon: Landmark },
+		],
+	},
 	...(boot.is_control_site
 		? [
 				{
 					label: "Your business",
 					items: [{ to: "/saas", label: "Customers", icon: Briefcase }],
 				},
-			]
+		  ]
 		: []),
 	{
 		label: "Overview",
@@ -372,7 +386,7 @@ const banner = computed(() => {
 			tone: "amber",
 			icon: AlertTriangle,
 			text: `Your plan ended on ${date(s.current_period_end)}. Renew by ${date(
-				s.grace_ends_on,
+				s.grace_ends_on
 			)} to keep using the app.`,
 			cta: "Renew",
 		};

@@ -1,6 +1,7 @@
+from unittest.mock import patch
+
 # Copyright (c) 2026, Shashank Dixit and Contributors
 # See license.txt
-
 import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import get_first_day, nowdate
@@ -117,6 +118,7 @@ class TestReferrals(IntegrationTestCase):
 		lead.save()
 		self.assertEqual(self.referral().status, "Not Eligible")
 
+	@patch("rent_management.subscription.get_manager_users", new=lambda **kwargs: ["Administrator"])
 	def test_discount_reward_and_credit(self):
 		_lead, invoice = self.friend_moves_in()
 		referral = self.referral()

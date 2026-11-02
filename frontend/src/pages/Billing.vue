@@ -253,7 +253,7 @@
 								<th class="table-head">Plan</th>
 								<th class="table-head">Period</th>
 								<th class="table-head">Reference</th>
-								<th class="table-head text-right">Amount</th>
+								<th class="table-head text-right">{{ $t("Amount") }}</th>
 								<th class="table-head" />
 							</tr>
 						</thead>

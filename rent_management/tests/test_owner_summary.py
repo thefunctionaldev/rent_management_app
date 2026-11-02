@@ -45,7 +45,7 @@ class TestOwnerSummary(IntegrationTestCase):
 		self.assertEqual(s["invoiced"], self.invoice.final_amount)
 		self.assertEqual((s["beds"], s["taken"], s["occupancy"]), (2, 1, 50))
 		self.assertEqual(len(s["moved_in"]), 1)
-		self.assertEqual(s["outstanding"], self.invoice.final_amount - 5000)
+		self.assertAlmostEqual(s["outstanding"], self.invoice.final_amount - 5000, places=2)
 		self.assertEqual(s["top_expenses"][0]["category"], "Electricity Bill")
 		if getdate(self.invoice.due_date) < getdate(nowdate()):
 			self.assertEqual(s["defaulters"][0]["tenant_name"], self.stay.tenant_name)

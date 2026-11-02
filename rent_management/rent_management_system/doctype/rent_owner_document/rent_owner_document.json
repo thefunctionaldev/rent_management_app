@@ -1,0 +1,51 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Owner Document",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "property",
+  "title",
+  "file",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "title",
+   "label": "Title",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "file",
+   "label": "File",
+   "fieldtype": "Attach"
+  },
+  {
+   "fieldname": "description",
+   "label": "Description",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

@@ -15,6 +15,10 @@ a tenant app, and everything needed to sell it as a hosted subscription service 
 
 ### Features
 
+- **[Property operations suite](docs/operations-suite.md)** — maintenance work orders, recurring bills,
+  owner portal, housekeeping schedules, vacancy waitlist, operational health, Hindi/English preferences,
+  and reviewable ERPNext accounting drafts.
+
 - **Photos** - every building and tenant can have a photo, shown on building and room cards, in lists and
   in the tenant app. Tenants can set their own from the tenant app. Tenant photos are private files.
 - **Buildings (Rent Property)** - one site can run several buildings. Every list, report and the dashboard

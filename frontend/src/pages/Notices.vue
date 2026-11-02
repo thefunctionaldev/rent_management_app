@@ -42,7 +42,7 @@
 							<span
 								v-if="n.status !== 'Published'"
 								class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
-								>Draft</span
+								>{{ $t("Draft") }}</span
 							>
 							<span
 								v-else-if="n.expired"
@@ -89,9 +89,9 @@
 						<Button size="sm" variant="ghost" :icon="Trash2" @click="remove(n)"
 							>Delete</Button
 						>
-						<Button size="sm" @click="openDialog('announcement', { notice: n })"
-							>Edit</Button
-						>
+						<Button size="sm" @click="openDialog('announcement', { notice: n })">{{
+							$t("Edit")
+						}}</Button>
 						<Button size="sm" variant="primary" :icon="Megaphone" @click="publish(n)"
 							>Publish</Button
 						>

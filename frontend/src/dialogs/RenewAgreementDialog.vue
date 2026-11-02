@@ -99,7 +99,7 @@
 
 		<template #footer>
 			<template v-if="data && !result">
-				<Button @click="$emit('close')">Cancel</Button>
+				<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 				<Button
 					variant="primary"
 					type="submit"

@@ -4,7 +4,7 @@
 			to="/tenants"
 			class="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
 		>
-			<ChevronLeft class="size-4" /> Tenants
+			<ChevronLeft class="size-4" /> {{ $t("Tenants") }}
 		</RouterLink>
 
 		<div v-if="!data" class="space-y-4">
@@ -57,9 +57,9 @@
 						</div>
 					</div>
 					<div class="flex gap-2 sm:pt-3">
-						<Button :icon="Pencil" @click="openDialog('tenant', { tenant })"
-							>Edit</Button
-						>
+						<Button :icon="Pencil" @click="openDialog('tenant', { tenant })">{{
+							$t("Edit")
+						}}</Button>
 						<Button
 							v-if="!current"
 							variant="primary"
@@ -84,7 +84,7 @@
 								/></span>
 								<div>
 									<p class="font-semibold">
-										Room {{ current.room
+										{{ $t("Room") }} {{ current.room
 										}}<span
 											v-if="current.bed_no"
 											class="font-normal text-slate-500"
@@ -154,7 +154,7 @@
 									v-if="servesFood || current.meal_plan"
 									class="flex justify-between"
 								>
-									<dt class="text-slate-500">Food</dt>
+									<dt class="text-slate-500">{{ $t("Food") }}</dt>
 									<dd>
 										{{
 											current.meal_plan === "Paid Monthly"
@@ -189,7 +189,7 @@
 									class="shrink-0 text-xs font-medium underline"
 									@click="withdrawNotice"
 								>
-									Withdraw
+									{{ $t("Withdraw") }}
 								</button>
 							</div>
 							<div class="mt-5 grid grid-cols-2 gap-2">
@@ -584,7 +584,9 @@
 									"
 								/>
 								<div class="flex items-center gap-2">
-									<p class="text-sm font-medium">Room {{ a.room }}</p>
+									<p class="text-sm font-medium">
+										{{ $t("Room") }} {{ a.room }}
+									</p>
 									<StatusBadge :status="a.status" />
 								</div>
 								<p class="mt-0.5 text-xs text-slate-500">

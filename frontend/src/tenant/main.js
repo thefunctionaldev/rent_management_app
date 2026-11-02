@@ -1,3 +1,4 @@
+import { i18n, loadLanguage } from "@/i18n";
 import { createApp } from "vue";
 
 import "../style.css";
@@ -8,10 +9,10 @@ import router from "./router";
 import { loadMe } from "./store";
 
 setupPwa("tenant");
-loadMe()
+Promise.all([loadMe(), loadLanguage()])
 	.catch(() => {
 		window.location.href = `/login?redirect-to=${encodeURIComponent(
 			window.location.pathname
 		)}`;
 	})
-	.finally(() => createApp(App).use(router).mount("#app"));
+	.finally(() => createApp(App).use(i18n).use(router).mount("#app"));

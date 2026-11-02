@@ -18,7 +18,7 @@
 			</Field>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button variant="primary" type="submit" form="collect-form" :loading="loading"
 				>Mark collected</Button
 			>

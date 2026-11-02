@@ -262,7 +262,7 @@
 					</section>
 
 					<section>
-						<h2 class="text-lg font-semibold">Rooms</h2>
+						<h2 class="text-lg font-semibold">{{ $t("Rooms") }}</h2>
 						<div class="mt-3 grid gap-4 sm:grid-cols-2">
 							<div
 								v-for="rt in building.room_types"

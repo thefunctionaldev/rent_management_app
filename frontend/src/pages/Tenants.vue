@@ -36,10 +36,10 @@
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
 							<th class="table-head">Tenant</th>
-							<th class="table-head">Phone</th>
-							<th class="table-head">Room</th>
-							<th class="table-head">Status</th>
-							<th class="table-head text-right">Outstanding</th>
+							<th class="table-head">{{ $t("Phone") }}</th>
+							<th class="table-head">{{ $t("Room") }}</th>
+							<th class="table-head">{{ $t("Status") }}</th>
+							<th class="table-head text-right">{{ $t("Outstanding") }}</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100">

@@ -1,0 +1,70 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Job Run",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "job_key",
+  "status",
+  "started_on",
+  "finished_on",
+  "summary",
+  "error_id",
+  "requested_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_key",
+   "label": "Job Key",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Queued\nRunning\nSuccess\nFailed\nPartial Failure",
+   "default": "Queued",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "started_on",
+   "label": "Started On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "finished_on",
+   "label": "Finished On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "summary",
+   "label": "Summary",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "error_id",
+   "label": "Error Id",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "requested_by",
+   "label": "Requested By",
+   "fieldtype": "Link",
+   "options": "User"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

@@ -41,7 +41,7 @@
 		</div>
 		<template #footer>
 			<template v-if="!result">
-				<Button @click="$emit('close')">Cancel</Button>
+				<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 				<Button variant="primary" type="submit" form="mark-paid-form" :loading="saving"
 					>Mark paid</Button
 				>

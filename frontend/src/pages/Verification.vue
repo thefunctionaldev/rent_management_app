@@ -76,7 +76,7 @@
 									>{{ s.tenant_name }}</RouterLink
 								>
 								<p class="text-xs text-slate-500">
-									Room {{ s.room }} · {{ s.property }} · moved in
+									{{ $t("Room") }} {{ s.room }} · {{ s.property }} · moved in
 									{{ shortDate(s.allotment_date) }}
 									<template v-if="group.key === 'overdue'">
 										·

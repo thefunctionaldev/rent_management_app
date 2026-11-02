@@ -1,0 +1,108 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Waitlist",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "full_name",
+  "phone",
+  "email",
+  "property",
+  "room_type",
+  "budget",
+  "move_in_date",
+  "status",
+  "offer_room",
+  "offer_expires",
+  "lead",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "full_name",
+   "label": "Full Name",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "phone",
+   "label": "Phone",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "label": "Email",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "room_type",
+   "label": "Room Type",
+   "fieldtype": "Link",
+   "options": "Tenant Space Type"
+  },
+  {
+   "fieldname": "budget",
+   "label": "Budget",
+   "fieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "move_in_date",
+   "label": "Move In Date",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Waiting\nOffered\nConverted\nClosed",
+   "default": "Waiting",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "offer_room",
+   "label": "Offer Room",
+   "fieldtype": "Link",
+   "options": "Tenant Space"
+  },
+  {
+   "fieldname": "offer_expires",
+   "label": "Offer Expires",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "lead",
+   "label": "Lead",
+   "fieldtype": "Link",
+   "options": "Rent Lead"
+  },
+  {
+   "fieldname": "notes",
+   "label": "Notes",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

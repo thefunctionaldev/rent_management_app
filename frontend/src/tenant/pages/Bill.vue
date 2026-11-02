@@ -49,7 +49,7 @@
 					<dd class="text-emerald-600">− {{ money(inv.early_discount) }}</dd>
 				</div>
 				<div v-if="inv.paid_amount" class="flex justify-between py-2.5">
-					<dt class="text-slate-600">Paid</dt>
+					<dt class="text-slate-600">{{ $t("Paid") }}</dt>
 					<dd class="text-emerald-600">− {{ money(inv.paid_amount) }}</dd>
 				</div>
 				<div class="flex justify-between py-3 text-base font-semibold">
@@ -183,7 +183,7 @@
 		</div>
 
 		<div v-if="data.payments.length" class="card">
-			<h2 class="px-5 pt-4 font-semibold">Payments</h2>
+			<h2 class="px-5 pt-4 font-semibold">{{ $t("Payments") }}</h2>
 			<ul class="mt-2 divide-y divide-slate-100">
 				<li
 					v-for="p in data.payments"

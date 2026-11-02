@@ -81,7 +81,9 @@
 			<InstallCard title="Put My Rent on your home screen" />
 		</div>
 
-		<Button variant="ghost" class="w-full" :icon="LogOut" @click="logout">Log out</Button>
+		<Button variant="ghost" class="w-full" :icon="LogOut" @click="logout">{{
+			$t("Log out")
+		}}</Button>
 	</div>
 </template>
 

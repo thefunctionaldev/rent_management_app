@@ -28,7 +28,7 @@ import { boot } from "@/store";
 
 const { data: setup } = useResource(
 	() => (boot.access ? Promise.resolve(null) : get("get_setup_progress")),
-	{ immediate: !boot.access },
+	{ immediate: !boot.access }
 );
 const Dashboard = defineAsyncComponent(() => import("./Dashboard.vue"));
 const StaffHome = defineAsyncComponent(() => import("./StaffHome.vue"));

@@ -62,7 +62,7 @@
 				@click="remove"
 				>Delete</Button
 			>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button
 				variant="primary"
 				type="submit"

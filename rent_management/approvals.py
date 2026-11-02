@@ -16,6 +16,8 @@ from rent_management import access, subscription
 REQUEST = "Rent Approval Request"
 SETTINGS = "Rent Approval Settings"
 METHODS = {
+	"pay_work_order": "Expense",
+	"pay_operating_bill": "Expense",
 	"save_expense": "Expense",
 	"delete_expense": "Expense",
 	"pay_salary": "Expense",

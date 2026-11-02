@@ -37,7 +37,7 @@
 						<div class="min-w-0 flex-1">
 							<p class="truncate font-medium">{{ a.tenant_name }}</p>
 							<p class="text-xs text-slate-500">
-								Room {{ a.room }} · moved out {{ date(a.vacate_date) }}
+								{{ $t("Room") }} {{ a.room }} · moved out {{ date(a.vacate_date) }}
 							</p>
 						</div>
 					</div>
@@ -100,9 +100,9 @@
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
 							<th class="table-head">Tenant</th>
-							<th class="table-head">Room</th>
+							<th class="table-head">{{ $t("Room") }}</th>
 							<th class="table-head">Since</th>
-							<th class="table-head">Status</th>
+							<th class="table-head">{{ $t("Status") }}</th>
 							<th class="table-head text-right">Deposit</th>
 							<th class="table-head"></th>
 						</tr>
@@ -122,7 +122,7 @@
 								<span
 									v-if="a.deposit_collected"
 									class="inline-flex items-center gap-1 text-sm text-emerald-600"
-									><Check class="size-4" />Collected
+									><Check class="size-4" />{{ $t("Collected") }}
 									{{ shortDate(a.deposit_collected_on) }}</span
 								>
 								<span v-else class="text-sm text-amber-600">Not collected</span>

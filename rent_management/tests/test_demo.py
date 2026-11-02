@@ -13,7 +13,8 @@ from rent_management import api, demo, subscription
 class TestDemo(IntegrationTestCase):
 	def test_demo_data_adds_up(self):
 		frappe.set_user("Administrator")
-		# this site has data already: refused, the demo is for new sites
+		# Establish the non-empty-site precondition independently of test order.
+		frappe.get_doc({"doctype": "Tenant", "first_name": "Existing tenant"}).insert()
 		self.assertRaises(frappe.ValidationError, demo.make_demo_data)
 
 		# run it next to the existing data, under building names of its own

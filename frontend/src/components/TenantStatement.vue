@@ -21,7 +21,7 @@
 					<p class="tabular font-semibold">{{ money(data.billed) }}</p>
 				</div>
 				<div class="rounded-xl bg-slate-50 p-3">
-					<p class="text-xs text-slate-500">Paid</p>
+					<p class="text-xs text-slate-500">{{ $t("Paid") }}</p>
 					<p class="tabular font-semibold text-emerald-700">{{ money(data.paid) }}</p>
 				</div>
 				<div

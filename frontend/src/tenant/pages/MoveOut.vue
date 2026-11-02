@@ -8,7 +8,7 @@
 			<RouterLink to="/profile" class="text-sm text-slate-500">← Profile</RouterLink>
 			<h1 class="mt-1 text-lg font-semibold">Moving out</h1>
 			<p class="text-sm text-slate-500">
-				Room {{ data.room
+				{{ $t("Room") }} {{ data.room
 				}}<template v-if="data.bed_no"> · Bed {{ data.bed_no }}</template> ·
 				{{ data.property }}
 			</p>
@@ -242,7 +242,7 @@
 						<dd class="font-medium">{{ data.refund_upi_id }}</dd>
 					</div>
 					<div v-if="data.refund_bank_details">
-						<dt class="text-slate-500">Bank account</dt>
+						<dt class="text-slate-500">{{ $t("Bank account") }}</dt>
 						<dd class="mt-1 whitespace-pre-line">{{ data.refund_bank_details }}</dd>
 					</div>
 				</dl>
@@ -269,9 +269,9 @@
 						placeholder="Name on the account, account number, IFSC"
 					/>
 				</div>
-				<Button variant="primary" type="submit" class="w-full" :loading="saving"
-					>Save</Button
-				>
+				<Button variant="primary" type="submit" class="w-full" :loading="saving">{{
+					$t("Save")
+				}}</Button>
 			</form>
 		</div>
 

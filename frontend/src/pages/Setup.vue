@@ -41,7 +41,8 @@
 						<span
 							class="grid size-8 shrink-0 place-items-center rounded-full bg-black/5"
 							>{{ step.done ? "✓" : index + 1 }}</span
-						>{{ step.title }}<span v-if="step.done" class="sr-only">Completed</span>
+						>{{ step.title
+						}}<span v-if="step.done" class="sr-only">{{ $t("Completed") }}</span>
 					</button>
 				</nav>
 				<section class="card p-6 sm:p-8">
@@ -91,8 +92,9 @@
 							<p class="text-sm text-slate-500 sm:col-span-2">
 								Cash and bank transfer work without online setup. Configure
 								Razorpay and reminders in
-								<RouterLink to="/settings" class="text-brand-600 underline"
-									>Settings</RouterLink
+								<RouterLink to="/settings" class="text-brand-600 underline">{{
+									$t("Settings")
+								}}</RouterLink
 								>.
 							</p>
 							<Button variant="primary" type="submit" :loading="saving"

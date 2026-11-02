@@ -56,7 +56,7 @@
 
 			<div v-if="!newType">
 				<div class="mb-1.5 flex items-center justify-between">
-					<span class="label mb-0">Room type</span>
+					<span class="label mb-0">{{ $t("Room type") }}</span>
 					<button
 						type="button"
 						class="text-xs font-medium text-brand-600 hover:underline"
@@ -184,7 +184,7 @@
 			</details>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button variant="primary" type="submit" form="room-form" :loading="loading">{{
 				room ? "Save" : "Add room"
 			}}</Button>

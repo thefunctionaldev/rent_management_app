@@ -40,10 +40,10 @@
 			</Field>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
-			<Button variant="primary" type="submit" form="meal-plan-form" :loading="loading"
-				>Save</Button
-			>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
+			<Button variant="primary" type="submit" form="meal-plan-form" :loading="loading">{{
+				$t("Save")
+			}}</Button>
 		</template>
 	</Modal>
 </template>

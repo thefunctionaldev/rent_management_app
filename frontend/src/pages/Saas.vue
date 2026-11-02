@@ -133,7 +133,7 @@
 						<thead class="border-b border-slate-100 bg-slate-50/60">
 							<tr>
 								<th class="table-head">Customer</th>
-								<th class="table-head">Status</th>
+								<th class="table-head">{{ $t("Status") }}</th>
 								<th class="table-head">Plan</th>
 								<th class="table-head">Until</th>
 								<th class="table-head text-right">Beds</th>

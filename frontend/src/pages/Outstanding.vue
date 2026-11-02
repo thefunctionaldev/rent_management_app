@@ -66,9 +66,9 @@
 						<tr>
 							<th class="table-head">Tenant</th>
 							<th class="table-head">Period</th>
-							<th class="table-head">Due</th>
+							<th class="table-head">{{ $t("Due") }}</th>
 							<th class="table-head text-right">Days late</th>
-							<th class="table-head text-right">Outstanding</th>
+							<th class="table-head text-right">{{ $t("Outstanding") }}</th>
 							<th class="table-head"></th>
 						</tr>
 					</thead>
@@ -85,7 +85,7 @@
 									>{{ r.tenant_name }}</RouterLink
 								>
 								<p class="text-xs text-slate-500">
-									Room {{ r.room }} · {{ r.mobile_no || "no phone" }}
+									{{ $t("Room") }} {{ r.room }} · {{ r.mobile_no || "no phone" }}
 								</p>
 							</td>
 							<td class="table-cell text-slate-600">{{ r.billing_period }}</td>

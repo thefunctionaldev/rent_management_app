@@ -15,12 +15,13 @@
 				<p>
 					The room becomes available right away. The last invoice is charged only up to
 					the move-out date, and the security deposit can then be settled from
-					<b>Deposits</b>.
+					<b>{{ $t("Deposits") }}</b
+					>.
 				</p>
 			</div>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button
 				variant="danger"
 				type="submit"

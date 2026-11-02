@@ -98,7 +98,7 @@
 							class="text-xs font-medium text-slate-500 hover:text-rose-600"
 							@click="cancel(h)"
 						>
-							Cancel
+							{{ $t("Cancel") }}
 						</button>
 					</li>
 				</ul>
@@ -110,7 +110,7 @@
 					<thead class="bg-slate-50/60">
 						<tr>
 							<th class="table-head">Who</th>
-							<th class="table-head text-right">Collected</th>
+							<th class="table-head text-right">{{ $t("Collected") }}</th>
 							<th class="table-head text-right">Spent</th>
 							<th class="table-head text-right">Received</th>
 							<th class="table-head text-right">Handed over</th>
@@ -122,8 +122,8 @@
 							<td class="table-cell">
 								<p class="font-medium">{{ h.full_name }}</p>
 								<p v-if="h.balance < 0" class="text-xs text-amber-700">
-									Paid {{ money(-h.balance) }} from their own pocket: owed to
-									them
+									{{ $t("Paid") }} {{ money(-h.balance) }} from their own pocket:
+									owed to them
 								</p>
 								<p v-if="h.pending" class="text-xs text-amber-700">
 									{{ money(h.pending) }} handed over, not confirmed
@@ -241,7 +241,7 @@
 				</Field>
 			</form>
 			<template #footer>
-				<Button @click="handover = null">Cancel</Button>
+				<Button @click="handover = null">{{ $t("Cancel") }}</Button>
 				<Button variant="primary" type="submit" form="handover-form" :loading="busy"
 					>Hand over</Button
 				>

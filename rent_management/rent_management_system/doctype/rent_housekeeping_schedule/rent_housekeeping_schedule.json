@@ -1,0 +1,98 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Housekeeping Schedule",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "property",
+  "room",
+  "assigned_to",
+  "frequency",
+  "start_date",
+  "next_due",
+  "active",
+  "require_photo",
+  "checklist"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Title",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "room",
+   "label": "Room",
+   "fieldtype": "Link",
+   "options": "Tenant Space"
+  },
+  {
+   "fieldname": "assigned_to",
+   "label": "Assigned To",
+   "fieldtype": "Link",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "frequency",
+   "label": "Frequency",
+   "fieldtype": "Select",
+   "options": "Daily\nWeekly\nMonthly",
+   "default": "Daily"
+  },
+  {
+   "fieldname": "start_date",
+   "label": "Start Date",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "next_due",
+   "label": "Next Due",
+   "fieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "active",
+   "label": "Active",
+   "fieldtype": "Check",
+   "default": "1"
+  },
+  {
+   "fieldname": "require_photo",
+   "label": "Require Photo",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "checklist",
+   "label": "Checklist",
+   "fieldtype": "Small Text",
+   "reqd": 1,
+   "description": "One task per line."
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

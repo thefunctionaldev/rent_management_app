@@ -19,6 +19,7 @@ from frappe import _
 from frappe.utils import flt, get_url, nowdate
 
 from rent_management import fees, razorpay
+from rent_management.suite.common import note_failure
 
 SETTINGS = "Rent Management Settings"
 INVOICE = "Tenant Rent Invoice"
@@ -274,4 +275,5 @@ def reconcile_payment_links():
 			sync_payment_link(frappe.get_doc(INVOICE, name))
 		except Exception:
 			frappe.db.rollback(save_point="payment_link")
+			note_failure()
 			frappe.log_error(title=f"Could not check payment link of {name}")

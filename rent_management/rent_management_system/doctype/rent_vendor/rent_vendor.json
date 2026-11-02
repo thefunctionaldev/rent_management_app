@@ -1,0 +1,55 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Vendor",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "vendor_name",
+  "phone",
+  "email",
+  "speciality",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "vendor_name",
+   "label": "Vendor Name",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "phone",
+   "label": "Phone",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "email",
+   "label": "Email",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "speciality",
+   "label": "Speciality",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "is_active",
+   "label": "Is Active",
+   "fieldtype": "Check",
+   "default": "1"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

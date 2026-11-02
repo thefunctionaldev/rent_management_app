@@ -346,7 +346,7 @@
 				The name or UPI ID they paid from is remembered, so next time it matches by itself.
 			</p>
 			<template #footer>
-				<Button @click="editing = null">Cancel</Button>
+				<Button @click="editing = null">{{ $t("Cancel") }}</Button>
 				<Button
 					variant="primary"
 					:disabled="!editing.tenant"

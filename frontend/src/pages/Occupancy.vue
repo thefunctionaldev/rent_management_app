@@ -4,7 +4,7 @@
 			title="Occupancy calendar"
 			subtitle="See each bed, current stays and upcoming departures."
 			><Button @click="shift(-14)">← Previous</Button
-			><Button @click="start = boot.today">Today</Button
+			><Button @click="start = boot.today">{{ $t("Today") }}</Button
 			><Button @click="shift(14)">Next →</Button></PageHeader
 		>
 		<div class="mb-5 flex flex-wrap items-end gap-4">
@@ -130,10 +130,10 @@ const start = ref(boot.today),
 	search = ref("");
 const end = computed(() => addDate(start.value, length.value - 1));
 const days = computed(() =>
-	start.value ? Array.from({ length: length.value }, (_, i) => addDate(start.value, i)) : [],
+	start.value ? Array.from({ length: length.value }, (_, i) => addDate(start.value, i)) : []
 );
 const { data, loading, error, reload } = useResource(() =>
-	get("get_occupancy_calendar", { start_date: start.value, end_date: end.value, ...scope() }),
+	get("get_occupancy_calendar", { start_date: start.value, end_date: end.value, ...scope() })
 );
 watch([start, length], () => {
 	if (start.value) reload();
@@ -141,15 +141,15 @@ watch([start, length], () => {
 const beds = computed(() =>
 	(data.value?.rooms || [])
 		.filter((r) =>
-			`${r.room_number} ${r.property}`.toLowerCase().includes(search.value.toLowerCase()),
+			`${r.room_number} ${r.property}`.toLowerCase().includes(search.value.toLowerCase())
 		)
 		.flatMap((room) =>
 			Array.from({ length: Math.max(1, room.capacity || 1) }, (_, i) => ({
 				key: `${room.name}:${i + 1}`,
 				room,
 				number: i + 1,
-			})),
-		),
+			}))
+		)
 );
 const stays = computed(() => {
 	const groups = {};
