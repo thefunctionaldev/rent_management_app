@@ -28,7 +28,7 @@
 			<p class="text-sm text-slate-500">
 				{{
 					$t(
-						"Backup timestamps cover the rent-backup-all command. They do not prove a backup can be restored.",
+						"Backup timestamps cover the rent-backup-all command. They do not prove a backup can be restored."
 					)
 				}}
 			</p>
@@ -46,7 +46,7 @@
 				<p class="mt-3 text-sm text-slate-500">
 					{{
 						$t(
-							"Jobs run in the background. Refresh to see the result. Reminder jobs may send messages.",
+							"Jobs run in the background. Refresh to see the result. Reminder jobs may send messages."
 						)
 					}}
 				</p>
@@ -78,7 +78,7 @@
 				<p class="mt-2 text-sm text-slate-500">
 					{{
 						$t(
-							"Review the invoice or payment before resending. A retry can notify the tenant again.",
+							"Review the invoice or payment before resending. A retry can notify the tenant again."
 						)
 					}}
 				</p>

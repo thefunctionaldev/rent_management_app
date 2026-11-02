@@ -15,7 +15,11 @@
 			</template>
 			<div class="relative mx-auto flex max-w-lg items-center justify-between">
 				<div class="flex items-center gap-3">
-					<Avatar :name="me.full_name" :image="me.picture" class="ring-2 ring-white/40" />
+					<Avatar
+						:name="me.full_name"
+						:image="me.picture"
+						class="ring-2 ring-white/40"
+					/>
 					<div>
 						<p class="text-sm text-white/70">{{ greeting }},</p>
 						<p class="text-xl font-semibold">{{ me.first_name }}</p>

@@ -122,8 +122,8 @@
 							<td class="table-cell">
 								<p class="font-medium">{{ h.full_name }}</p>
 								<p v-if="h.balance < 0" class="text-xs text-amber-700">
-									{{ $t("Paid") }} {{ money(-h.balance) }} from their own pocket: owed to
-									them
+									{{ $t("Paid") }} {{ money(-h.balance) }} from their own pocket:
+									owed to them
 								</p>
 								<p v-if="h.pending" class="text-xs text-amber-700">
 									{{ money(h.pending) }} handed over, not confirmed

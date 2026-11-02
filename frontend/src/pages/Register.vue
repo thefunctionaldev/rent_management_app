@@ -234,9 +234,9 @@
 							<StatusBadge v-if="group.key === 'recent'" :status="l.status" />
 							<template v-if="group.key === 'requested'">
 								<Button size="sm" @click="decide(l, 0)">{{ $t("Reject") }}</Button>
-								<Button size="sm" variant="primary" @click="decide(l, 1)"
-									>{{ $t("Approve") }}</Button
-								>
+								<Button size="sm" variant="primary" @click="decide(l, 1)">{{
+									$t("Approve")
+								}}</Button>
 							</template>
 							<Button
 								v-else-if="group.key !== 'recent'"

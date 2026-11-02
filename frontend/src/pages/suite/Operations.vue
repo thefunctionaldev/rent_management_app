@@ -22,7 +22,9 @@
 				>
 			</div>
 		</header>
-		<p v-if="error" role="alert" class="rounded-xl bg-rose-50 p-4 text-rose-700">{{ error }}</p>
+		<p v-if="error" role="alert" class="rounded-xl bg-rose-50 p-4 text-rose-700">
+			{{ error }}
+		</p>
 		<p v-if="notice" role="status" class="rounded-xl bg-sky-50 p-4 text-sky-800">
 			{{ notice }}
 		</p>
@@ -57,7 +59,7 @@
 				<dl class="grid grid-cols-2 gap-3 text-sm">
 					<template
 						v-for="k in config.details.filter(
-							(k) => r[k] !== null && r[k] !== undefined && r[k] !== '',
+							(k) => r[k] !== null && r[k] !== undefined && r[k] !== ''
 						)"
 						:key="k"
 						><div>
@@ -306,8 +308,8 @@ const filtered = computed(() =>
 			[r.subject, r.title, r.full_name, r.property, r.name]
 				.join(" ")
 				.toLowerCase()
-				.includes(search.value.toLowerCase()),
-	),
+				.includes(search.value.toLowerCase())
+	)
 );
 const today = new Date().toLocaleDateString("en-CA");
 const overdue = (r) =>
@@ -345,7 +347,7 @@ async function load() {
 		rows.value = Array.isArray(data) ? data : data.bills || data.tasks || [];
 		schedules.value = data.schedules || [];
 		checks.value = Object.fromEntries(
-			rows.value.map((r) => [r.name, checklist(r).flatMap((x, i) => (x.done ? [i] : []))]),
+			rows.value.map((r) => [r.name, checklist(r).flatMap((x, i) => (x.done ? [i] : []))])
 		);
 	} catch (e) {
 		if (v === version) error.value = e.message;
@@ -360,7 +362,7 @@ watch(
 		search.value = "";
 		load();
 	},
-	{ immediate: true },
+	{ immediate: true }
 );
 async function run(name, args = {}) {
 	if (busy.value) return;
@@ -401,10 +403,10 @@ function edit(row = {}) {
 			props.kind === "workorders"
 				? "subject"
 				: props.kind === "waitlist"
-					? "full_name"
-					: "title",
+				? "full_name"
+				: "title",
 			"text",
-			true,
+			true
 		),
 		f("property", "text", true, properties),
 	];
@@ -427,14 +429,14 @@ function edit(row = {}) {
 				(opts.requests || []).map((r) => ({
 					value: r.name,
 					label: `${r.property}: ${r.subject}`,
-				})),
+				}))
 			),
 			f("vendor", "text", false, vendors),
 			f("assigned_to", "text", true, users),
 			f("due_date", "date", true),
 			f("quote_amount", "number", true),
 			f("description", "textarea"),
-			f("quote_note", "textarea"),
+			f("quote_note", "textarea")
 		);
 	if (props.kind === "recurring")
 		fields.push(
@@ -445,7 +447,7 @@ function edit(row = {}) {
 			{ ...f("start_date", "date", true), disabled: !!row.name },
 			f("end_date", "date"),
 			f("active", "checkbox"),
-			f("notes", "textarea"),
+			f("notes", "textarea")
 		);
 	if (props.kind === "housekeeping")
 		fields.push(
@@ -455,7 +457,7 @@ function edit(row = {}) {
 			{ ...f("start_date", "date", true), disabled: !!row.name },
 			f("active", "checkbox"),
 			f("require_photo", "checkbox"),
-			f("checklist", "textarea", true),
+			f("checklist", "textarea", true)
 		);
 	if (props.kind === "waitlist")
 		fields.push(
@@ -466,7 +468,7 @@ function edit(row = {}) {
 			]),
 			f("budget", "number", true),
 			f("move_in_date", "date", true),
-			f("notes", "textarea"),
+			f("notes", "textarea")
 		);
 	open(
 		row.name ? "Edit" : config.value.create,
@@ -480,7 +482,7 @@ function edit(row = {}) {
 			...row,
 		},
 		(data) => write(config.value.save, { data }),
-		props.kind === "housekeeping" ? "Enter one checklist item per line." : undefined,
+		props.kind === "housekeeping" ? "Enter one checklist item per line." : undefined
 	);
 }
 function vendor() {
@@ -494,7 +496,7 @@ function vendor() {
 			f("is_active", "checkbox"),
 		],
 		{ is_active: 1 },
-		(data) => write("workorders.save_vendor", { data }),
+		(data) => write("workorders.save_vendor", { data })
 	);
 }
 function orderActions(r) {
@@ -518,7 +520,7 @@ function orderAction(r, action) {
 		if (action === "complete")
 			fields.push({ ...f("actual_cost", "number", true), min: 0, max: r.quote_amount });
 		open(label(action), fields, { actual_cost: r.quote_amount }, (data) =>
-			write("workorders.transition", { name: r.name, action, ...data }),
+			write("workorders.transition", { name: r.name, action, ...data })
 		);
 	} else run("workorders.transition", { name: r.name, action });
 }
@@ -531,11 +533,13 @@ function payment(r, method) {
 		],
 		{ mode_of_payment: "Bank Transfer" },
 		(data) => post(method, { name: r.name, ...data }),
-		"Record a payment only after it has actually been made. Approval rules still apply.",
+		"Record a payment only after it has actually been made. Approval rules still apply."
 	);
 }
 function reason(title, method, r, key) {
-	open(title, [f(key, "textarea", true)], {}, (data) => write(method, { name: r.name, ...data }));
+	open(title, [f(key, "textarea", true)], {}, (data) =>
+		write(method, { name: r.name, ...data })
+	);
 }
 function finishTask(r) {
 	open("Complete", [f("notes", "textarea")], {}, (data) =>
@@ -544,7 +548,7 @@ function finishTask(r) {
 			action: "complete",
 			checked: [...(checks.value[r.name] || [])].sort((a, b) => a - b),
 			...data,
-		}),
+		})
 	);
 }
 async function attach(r, field, event) {
@@ -579,13 +583,13 @@ async function match(r) {
 					matches.map((m) => ({
 						value: m.name,
 						label: `${m.room_number} · ${m.room_type} · ${m.room_rent} · ${m.free_beds} free`,
-					})),
+					}))
 				),
 				{ ...f("expires_in_days", "number", true), min: 1, max: 14 },
 			],
 			{ expires_in_days: 2 },
 			(data) => write("waitlist.offer", { name: r.name, ...data }),
-			"This offer does not reserve a bed or send a message. Contact the applicant separately.",
+			"This offer does not reserve a bed or send a message. Contact the applicant separately."
 		);
 	} catch (e) {
 		error.value = e.message;

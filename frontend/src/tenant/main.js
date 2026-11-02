@@ -11,6 +11,8 @@ import { loadMe } from "./store";
 setupPwa("tenant");
 Promise.all([loadMe(), loadLanguage()])
 	.catch(() => {
-		window.location.href = `/login?redirect-to=${encodeURIComponent(window.location.pathname)}`;
+		window.location.href = `/login?redirect-to=${encodeURIComponent(
+			window.location.pathname
+		)}`;
 	})
 	.finally(() => createApp(App).use(i18n).use(router).mount("#app"));

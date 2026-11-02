@@ -36,9 +36,9 @@
 			<p class="font-medium">WhatsApp and email are both off.</p>
 			<p class="mt-1 text-slate-500">
 				Turn on reminders by WhatsApp or email in
-				<RouterLink to="/settings" class="text-brand-600" @click="$emit('close')"
-					>{{ $t("Settings") }}</RouterLink
-				>
+				<RouterLink to="/settings" class="text-brand-600" @click="$emit('close')">{{
+					$t("Settings")
+				}}</RouterLink>
 				to send them from here.
 			</p>
 		</div>

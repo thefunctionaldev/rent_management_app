@@ -91,7 +91,9 @@
 							<td class="table-cell font-medium text-slate-900">{{ inv.name }}</td>
 							<td class="table-cell">
 								<p class="font-medium">{{ inv.tenant_name }}</p>
-								<p class="text-xs text-slate-500">{{ $t("Room") }} {{ inv.room }}</p>
+								<p class="text-xs text-slate-500">
+									{{ $t("Room") }} {{ inv.room }}
+								</p>
 							</td>
 							<td class="table-cell text-slate-600">
 								{{ inv.billing_month }} {{ inv.billing_year }}

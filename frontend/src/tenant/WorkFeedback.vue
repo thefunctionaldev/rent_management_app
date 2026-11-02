@@ -2,7 +2,11 @@
 	<section v-if="orders.length || error" class="card space-y-4 p-5">
 		<h2 class="font-semibold">{{ $t("Completed repairs") }}</h2>
 		<p v-if="error" role="alert" class="text-rose-600">{{ error }}</p>
-		<article v-for="r in orders" :key="r.name" class="space-y-2 border-t border-slate-100 pt-3">
+		<article
+			v-for="r in orders"
+			:key="r.name"
+			class="space-y-2 border-t border-slate-100 pt-3"
+		>
 			<p class="font-medium">{{ r.subject }}</p>
 			<p class="text-sm text-slate-500">{{ r.completion_note }}</p>
 			<a

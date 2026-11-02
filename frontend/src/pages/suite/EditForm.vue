@@ -15,7 +15,7 @@
 				>
 					<option value="">—</option>
 					<option v-for="o in f.options" :key="o.value ?? o" :value="o.value ?? o">
-						{{ typeof o === 'object' ? o.label : $t(o) }}
+						{{ typeof o === "object" ? o.label : $t(o) }}
 					</option>
 				</select>
 				<textarea

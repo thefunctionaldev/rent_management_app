@@ -5,7 +5,9 @@
 				<h1 class="text-3xl font-semibold">{{ $t("ERPNext integration") }}</h1>
 				<p class="mt-2 text-slate-500">
 					{{
-						$t("Send accounting drafts for review. Nothing is submitted automatically.")
+						$t(
+							"Send accounting drafts for review. Nothing is submitted automatically."
+						)
 					}}
 				</p>
 			</div>
@@ -18,7 +20,11 @@
 				<div class="flex items-center justify-between">
 					<h2 class="font-semibold">
 						{{
-							$t(data.settings.enabled ? "Connection enabled" : "Connection disabled")
+							$t(
+								data.settings.enabled
+									? "Connection enabled"
+									: "Connection disabled"
+							)
 						}}
 					</h2>
 					<Button v-if="data.can_configure" @click="configure">{{
@@ -28,14 +34,14 @@
 				<p class="text-sm text-slate-500">
 					{{
 						$t(
-							"Requires matching currencies and unique custom_rent_sync_key fields on Customer, Sales Invoice, Payment Entry, and Journal Entry in ERPNext. Submit the remote invoice before syncing its payment.",
+							"Requires matching currencies and unique custom_rent_sync_key fields on Customer, Sales Invoice, Payment Entry, and Journal Entry in ERPNext. Submit the remote invoice before syncing its payment."
 						)
 					}}
 				</p>
 				<p class="text-sm text-slate-500">
 					{{
 						$t(
-							"Deposit collections use the configured bank account. Check it before submission. Refunds, transfers, cancellations, taxes, and later source edits require manual reconciliation.",
+							"Deposit collections use the configured bank account. Check it before submission. Refunds, transfers, cancellations, taxes, and later source edits require manual reconciliation."
 						)
 					}}
 				</p>
@@ -59,7 +65,7 @@
 				<p class="text-sm text-slate-500">
 					{{
 						$t(
-							"Queued records run daily or through the erp-sync job in Operational health.",
+							"Queued records run daily or through the erp-sync job in Operational health."
 						)
 					}}
 				</p>

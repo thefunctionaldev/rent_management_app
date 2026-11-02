@@ -27,8 +27,10 @@
 			class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
 		>
 			Set the electricity rate per unit in
-			<RouterLink to="/settings" class="font-medium underline">{{ $t("Settings") }}</RouterLink> so
-			readings can be billed.
+			<RouterLink to="/settings" class="font-medium underline">{{
+				$t("Settings")
+			}}</RouterLink>
+			so readings can be billed.
 		</div>
 
 		<div class="card mb-6">

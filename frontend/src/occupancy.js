@@ -10,7 +10,7 @@ export function occupancyCell(bed, day, stays) {
 		(s) =>
 			s.allotment_date <= day &&
 			(s.status === "Active" ||
-				(s.status === "Vacated" && (!s.vacate_date || s.vacate_date >= day))),
+				(s.status === "Vacated" && (!s.vacate_date || s.vacate_date >= day)))
 	);
 	if (matches.length > 1)
 		return { label: "Conflict — review stays", tone: "bg-rose-100 text-rose-800" };

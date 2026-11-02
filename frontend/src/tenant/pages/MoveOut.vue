@@ -269,9 +269,9 @@
 						placeholder="Name on the account, account number, IFSC"
 					/>
 				</div>
-				<Button variant="primary" type="submit" class="w-full" :loading="saving"
-					>{{ $t("Save") }}</Button
-				>
+				<Button variant="primary" type="submit" class="w-full" :loading="saving">{{
+					$t("Save")
+				}}</Button>
 			</form>
 		</div>
 

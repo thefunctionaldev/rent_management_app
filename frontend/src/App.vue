@@ -273,7 +273,7 @@ const nav = computed(() =>
 			...group,
 			items: group.items.filter((item) => item.everyone || canUse(item.area)),
 		}))
-		.filter((group) => group.items.length),
+		.filter((group) => group.items.length)
 );
 const allNav = computed(() => [
 	{
@@ -294,7 +294,7 @@ const allNav = computed(() => [
 					label: "Your business",
 					items: [{ to: "/saas", label: "Customers", icon: Briefcase }],
 				},
-			]
+		  ]
 		: []),
 	{
 		label: "Overview",
@@ -386,7 +386,7 @@ const banner = computed(() => {
 			tone: "amber",
 			icon: AlertTriangle,
 			text: `Your plan ended on ${date(s.current_period_end)}. Renew by ${date(
-				s.grace_ends_on,
+				s.grace_ends_on
 			)} to keep using the app.`,
 			cta: "Renew",
 		};

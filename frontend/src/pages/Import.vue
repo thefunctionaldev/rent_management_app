@@ -96,7 +96,9 @@
 						:loading="importing"
 						:disabled="!result.ok"
 						@click="runImport"
-						>{{ $t("Import") }} {{ result.ok }} row{{ result.ok === 1 ? "" : "s" }}</Button
+						>{{ $t("Import") }} {{ result.ok }} row{{
+							result.ok === 1 ? "" : "s"
+						}}</Button
 					>
 					<Button v-else variant="primary" :href="doneLink.href">{{
 						doneLink.label

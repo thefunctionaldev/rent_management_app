@@ -1,9 +1,9 @@
 <template>
 	<div>
 		<PageHeader title="Payments" subtitle="Rent received from tenants">
-			<Button variant="primary" :icon="Plus" @click="openDialog('recordPayment')"
-				>{{ $t("Record payment") }}</Button
-			>
+			<Button variant="primary" :icon="Plus" @click="openDialog('recordPayment')">{{
+				$t("Record payment")
+			}}</Button>
 		</PageHeader>
 
 		<!-- reported by tenants in the tenant app -->
@@ -175,11 +175,13 @@ import { date, debounce, money } from "@/utils";
 
 const { loading: reversing, run: reverseAction } = useAction(
 	(name, reason) => post("reverse_payment", { name, reason }),
-	{ success: "Payment reversed in the ledger" },
+	{ success: "Payment reversed in the ledger" }
 );
 async function reverse(p) {
 	const reason = window.prompt(
-		`Reverse ${p.name} (${money(p.amount)}) in the ledger? This does not issue a bank refund. Enter a reason:`,
+		`Reverse ${p.name} (${money(
+			p.amount
+		)}) in the ledger? This does not issue a bank refund. Enter a reason:`
 	);
 	if (reason?.trim()) await reverseAction(p.name, reason);
 }
@@ -199,7 +201,7 @@ const search = ref("");
 const mode = ref("");
 const { data, loading, reload } = useResource(
 	() => get("get_payments", { search: search.value, mode_of_payment: mode.value, ...scope() }),
-	{ initial: [] },
+	{ initial: [] }
 );
 const payments = computed(() => data.value || []);
 
@@ -217,7 +219,7 @@ async function confirm(p) {
 async function reject(p) {
 	const reason = window.prompt(
 		`Why is ${p.tenant_name}'s payment rejected? (optional)`,
-		"Not received",
+		"Not received"
 	);
 	if (reason === null) return;
 	try {
@@ -238,7 +240,7 @@ const byMode = computed(() =>
 				.filter((p) => p.mode_of_payment === m)
 				.reduce((s, p) => s + p.amount, 0),
 		}))
-		.filter((m) => m.amount),
+		.filter((m) => m.amount)
 );
 watch(mode, reload);
 watch(search, debounce(reload, 250));

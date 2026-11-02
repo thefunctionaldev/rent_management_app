@@ -15,7 +15,8 @@
 				<p>
 					The room becomes available right away. The last invoice is charged only up to
 					the move-out date, and the security deposit can then be settled from
-					<b>{{ $t("Deposits") }}</b>.
+					<b>{{ $t("Deposits") }}</b
+					>.
 				</p>
 			</div>
 		</form>

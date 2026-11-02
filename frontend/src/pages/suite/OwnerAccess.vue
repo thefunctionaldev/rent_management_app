@@ -17,7 +17,7 @@
 		<p class="text-sm text-slate-500">
 			{{
 				$t(
-					"Create an enabled User account first. Assigning a property does not send an invitation.",
+					"Create an enabled User account first. Assigning a property does not send an invitation."
 				)
 			}}
 		</p>

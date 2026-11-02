@@ -38,8 +38,8 @@ export function useAction(fn, { success } = {}) {
 			const message = result?.approval_pending
 				? `Approval requested (${result.request}). No financial change has been made.`
 				: typeof success === "function"
-					? success(result)
-					: success;
+				? success(result)
+				: success;
 			if (message) toast(message);
 			bumpData();
 			return result;

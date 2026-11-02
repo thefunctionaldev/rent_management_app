@@ -57,9 +57,9 @@
 						</div>
 					</div>
 					<div class="flex gap-2 sm:pt-3">
-						<Button :icon="Pencil" @click="openDialog('tenant', { tenant })"
-							>{{ $t("Edit") }}</Button
-						>
+						<Button :icon="Pencil" @click="openDialog('tenant', { tenant })">{{
+							$t("Edit")
+						}}</Button>
 						<Button
 							v-if="!current"
 							variant="primary"
@@ -584,7 +584,9 @@
 									"
 								/>
 								<div class="flex items-center gap-2">
-									<p class="text-sm font-medium">{{ $t("Room") }} {{ a.room }}</p>
+									<p class="text-sm font-medium">
+										{{ $t("Room") }} {{ a.room }}
+									</p>
 									<StatusBadge :status="a.status" />
 								</div>
 								<p class="mt-0.5 text-xs text-slate-500">

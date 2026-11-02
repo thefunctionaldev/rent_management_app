@@ -143,7 +143,8 @@
 										>{{ d.tenant_name }}</RouterLink
 									>
 									<p class="text-xs text-slate-500">
-										{{ $t("Room") }} {{ d.room }} · due since {{ date(d.since) }}
+										{{ $t("Room") }} {{ d.room }} · due since
+										{{ date(d.since) }}
 									</p>
 								</div>
 								<span class="tabular font-medium">{{ money(d.amount) }}</span>

@@ -89,9 +89,9 @@
 						<Button size="sm" variant="ghost" :icon="Trash2" @click="remove(n)"
 							>Delete</Button
 						>
-						<Button size="sm" @click="openDialog('announcement', { notice: n })"
-							>{{ $t("Edit") }}</Button
-						>
+						<Button size="sm" @click="openDialog('announcement', { notice: n })">{{
+							$t("Edit")
+						}}</Button>
 						<Button size="sm" variant="primary" :icon="Megaphone" @click="publish(n)"
 							>Publish</Button
 						>

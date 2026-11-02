@@ -29,7 +29,8 @@
 							>{{ inv.tenant_name }}</RouterLink
 						>
 						<p class="text-sm text-slate-500">
-							{{ $t("Room") }} {{ inv.room }} · {{ inv.billing_month }} {{ inv.billing_year }}
+							{{ $t("Room") }} {{ inv.room }} · {{ inv.billing_month }}
+							{{ inv.billing_year }}
 						</p>
 					</div>
 				</div>

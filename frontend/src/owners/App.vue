@@ -58,7 +58,7 @@
 				<p class="text-sm text-slate-500">
 					{{
 						$t(
-							"Collections and expenses cover the selected dates. Outstanding and occupancy show current totals. Deposit collections are excluded from rental cash flow.",
+							"Collections and expenses cover the selected dates. Outstanding and occupancy show current totals. Deposit collections are excluded from rental cash flow."
 						)
 					}}
 				</p>
@@ -106,7 +106,9 @@
 							>{{ d.title }}</a
 						>
 						<p v-else>{{ d.title }} · {{ $t("Upload pending") }}</p>
-						<p class="text-sm text-slate-500">{{ d.property }} · {{ d.description }}</p>
+						<p class="text-sm text-slate-500">
+							{{ d.property }} · {{ d.description }}
+						</p>
 					</div>
 					<p v-if="!data.documents.length">{{ $t("No documents shared yet.") }}</p>
 				</section></template
@@ -129,7 +131,12 @@ const data = ref(null),
 const now = new Date();
 const day = now.toLocaleDateString("en-CA");
 const filter = reactive({ property: "", from_date: day.slice(0, 7) + "-01", to_date: day });
-const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: data.value?.currency || "INR", maximumFractionDigits: 2 }).format(n || 0);
+const money = (n) =>
+	new Intl.NumberFormat(undefined, {
+		style: "currency",
+		currency: data.value?.currency || "INR",
+		maximumFractionDigits: 2,
+	}).format(n || 0);
 async function load() {
 	busy.value = true;
 	error.value = "";
@@ -148,7 +155,8 @@ function review(r, approve) {
 		hint: `${r.subject} · ${money(r.quote_amount)}`,
 		fields: [{ key: "note", type: "textarea", required: !approve }],
 		initial: {},
-		save: (v) => write("owners.review_quote", { name: r.name, approve: approve ? 1 : 0, ...v }),
+		save: (v) =>
+			write("owners.review_quote", { name: r.name, approve: approve ? 1 : 0, ...v }),
 	};
 }
 async function saved() {

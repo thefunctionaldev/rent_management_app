@@ -26,7 +26,7 @@ function copyIndexToWww() {
 			]) {
 				copyFileSync(
 					path.join(appPath, "public/frontend", page),
-					path.join(appPath, "www", route),
+					path.join(appPath, "www", route)
 				);
 			}
 		},
