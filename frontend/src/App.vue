@@ -1,5 +1,6 @@
 <template>
-	<div v-if="boot.loaded" class="min-h-screen lg:pl-64">
+	<div v-if="boot.loaded" class="manager-shell min-h-screen lg:pl-64">
+		<a href="#main-content" class="skip-link">Skip to content</a>
 		<!-- sidebar -->
 		<Transition
 			enter-active-class="duration-200"
@@ -14,15 +15,24 @@
 			/>
 		</Transition>
 		<aside
+			id="primary-navigation"
+			aria-label="Primary navigation"
 			class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200/80 bg-white transition-transform duration-200 lg:translate-x-0"
 			:class="menuOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
-			<div class="flex h-16 items-center gap-3 px-5">
+			<div class="flex h-20 items-center gap-3 px-5">
 				<img :src="logo" alt="" class="size-8" />
 				<div class="leading-tight">
 					<p class="text-sm font-semibold text-slate-900">Rent Management</p>
 					<p class="text-xs text-slate-500">Property console</p>
 				</div>
+				<button
+					class="ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+					aria-label="Close navigation"
+					@click="menuOpen = false"
+				>
+					<X class="size-5" />
+				</button>
 			</div>
 
 			<div v-if="canUse(['rooms', 'payments'])" class="px-3 pb-2">
@@ -48,7 +58,7 @@
 				</label>
 			</div>
 
-			<nav class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
+			<nav aria-label="Main" class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
 				<div v-for="group in nav" :key="group.label">
 					<p
 						class="px-3 pb-2 text-[11px] font-semibold tracking-wider text-slate-400 uppercase"
@@ -59,7 +69,7 @@
 						v-for="item in group.items"
 						:key="item.to"
 						:to="item.to"
-						class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+						class="nav-item group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
 						active-class="!bg-brand-50 !text-brand-700"
 						@click="menuOpen = false"
 					>
@@ -105,6 +115,7 @@
 					<button
 						class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
 						title="Log out"
+						aria-label="Log out"
 						@click="logout"
 					>
 						<LogOut class="size-4" />
@@ -119,16 +130,34 @@
 		>
 			<button
 				class="-ml-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+				aria-label="Open navigation"
+				aria-controls="primary-navigation"
+				:aria-expanded="menuOpen"
 				@click="menuOpen = true"
 			>
 				<Menu class="size-5" />
 			</button>
 			<img :src="logo" alt="" class="size-7" />
-			<p class="flex-1 text-sm font-semibold">Rent Management</p>
+			<p class="flex-1 text-sm font-semibold">{{ currentPage }}</p>
 			<QuickSearch v-if="canUse(['rooms', 'payments'])" compact />
 		</header>
 
-		<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+		<div class="workspace-bar hidden lg:flex">
+			<div class="flex min-w-0 items-center gap-3">
+				<span class="text-sm text-slate-500">Workspace</span>
+				<span aria-hidden="true" class="text-slate-300">/</span>
+				<span class="truncate text-sm font-semibold">{{ currentPage }}</span>
+			</div>
+			<span class="flex items-center gap-2 text-sm text-slate-600"
+				><Building2 class="size-4" />{{ ui.property || "All buildings" }}</span
+			>
+		</div>
+
+		<main
+			id="main-content"
+			tabindex="-1"
+			class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
+		>
 			<OfflineBanner />
 			<div
 				v-if="banner && !boot.access && $route.name !== 'billing'"
@@ -207,8 +236,10 @@ import {
 	Wallet,
 	Wrench,
 	Zap,
+	X,
 } from "lucide-vue-next";
 import { computed, defineAsyncComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 
 import Avatar from "./components/Avatar.vue";
 import InstallSheet from "./components/InstallSheet.vue";
@@ -222,6 +253,15 @@ import { date } from "./utils";
 
 const logo = `${import.meta.env.BASE_URL}favicon.svg`;
 const menuOpen = ref(false);
+const route = useRoute();
+const currentPage = computed(() => {
+	const items = nav.value.flatMap((group) => group.items);
+	return (
+		items.find((item) => item.to === route.path)?.label ||
+		items.find((item) => item.to !== "/" && route.path.startsWith(`${item.to}/`))?.label ||
+		"Rent Management"
+	);
+});
 const buildings = computed(() => activeProperties());
 
 // staff logins see only the pages of their areas
@@ -231,7 +271,7 @@ const nav = computed(() =>
 			...group,
 			items: group.items.filter((item) => item.everyone || canUse(item.area)),
 		}))
-		.filter((group) => group.items.length)
+		.filter((group) => group.items.length),
 );
 const allNav = computed(() => [
 	...(boot.is_control_site
@@ -240,7 +280,7 @@ const allNav = computed(() => [
 					label: "Your business",
 					items: [{ to: "/saas", label: "Customers", icon: Briefcase }],
 				},
-		  ]
+			]
 		: []),
 	{
 		label: "Overview",
@@ -329,7 +369,7 @@ const banner = computed(() => {
 			tone: "amber",
 			icon: AlertTriangle,
 			text: `Your plan ended on ${date(s.current_period_end)}. Renew by ${date(
-				s.grace_ends_on
+				s.grace_ends_on,
 			)} to keep using the app.`,
 			cta: "Renew",
 		};
