@@ -1,15 +1,15 @@
 <template>
-	<div class="card relative overflow-hidden p-5">
+	<div class="card stat-card relative overflow-hidden p-5">
 		<div class="flex items-start justify-between gap-3">
-			<p class="text-sm font-medium text-slate-500">{{ label }}</p>
-			<span class="grid size-9 place-items-center rounded-xl" :class="tones[tone]">
+			<p class="text-xs font-semibold tracking-wide text-slate-500">{{ label }}</p>
+			<span class="grid size-10 place-items-center rounded-xl" :class="tones[tone]">
 				<component :is="icon" class="size-[18px]" :stroke-width="2" />
 			</span>
 		</div>
-		<p class="tabular mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+		<p class="tabular mt-3 text-3xl font-semibold tracking-tight text-slate-900">
 			{{ value }}
 		</p>
-		<p v-if="hint" class="mt-1 text-sm text-slate-500">{{ hint }}</p>
+		<p v-if="hint" class="mt-2 text-xs leading-5 text-slate-500">{{ hint }}</p>
 		<slot />
 	</div>
 </template>

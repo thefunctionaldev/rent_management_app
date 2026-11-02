@@ -4,7 +4,7 @@
 		:href="href"
 		:type="href ? undefined : type"
 		:disabled="disabled || loading"
-		class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap transition focus-visible:ring-4 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+		class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-medium whitespace-nowrap transition focus-visible:ring-4 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 		:class="[variants[variant], sizes[size]]"
 	>
 		<svg v-if="loading" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -51,8 +51,8 @@ const variants = {
 };
 const sizes = {
 	sm: "h-8 px-3 text-xs",
-	md: "h-9 px-3.5 text-sm",
+	md: "h-10 px-4 text-sm",
 	lg: "h-11 px-5 text-sm",
-	icon: "size-9",
+	icon: "size-10",
 };
 </script>
