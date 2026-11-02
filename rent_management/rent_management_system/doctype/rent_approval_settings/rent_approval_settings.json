@@ -1,0 +1,32 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Approval Settings",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "rules"
+ ],
+ "fields": [
+  {
+   "fieldname": "enabled",
+   "label": "Enabled",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "rules",
+   "label": "Rules",
+   "fieldtype": "Table",
+   "options": "Rent Approval Rule"
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1
+  }
+ ],
+ "issingle": 1
+}

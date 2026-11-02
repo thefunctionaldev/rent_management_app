@@ -3,6 +3,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import { boot, canUse } from "./store";
 
 const routes = [
+	{ path: "/setup", name: "setup", component: () => import("./pages/Setup.vue") },
+	{ path: "/occupancy", name: "occupancy", component: () => import("./pages/Occupancy.vue") },
+	{
+		path: "/approvals",
+		name: "approvals",
+		meta: { everyone: true },
+		component: () => import("./pages/Approvals.vue"),
+	},
 	// managers see the dashboard, staff logins their own home page
 	{
 		path: "/",

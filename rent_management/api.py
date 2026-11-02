@@ -18,6 +18,7 @@ from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_las
 from rent_management import (
 	access,
 	activity,
+	approvals,
 	bulk,
 	cash,
 	checkin,
@@ -33,6 +34,7 @@ from rent_management import (
 	move_out,
 	notices,
 	notifications,
+	operations,
 	owner_summary,
 	pdf,
 	pictures,
@@ -968,7 +970,15 @@ def create_invoice(
 	remarks=None,
 	submit=0,
 ):
+	approval_args = dict(locals())
 	check_access()
+	if flt(discount_amount) > 0:
+		target = frappe.get_doc("Tenant Space Allotment", tenant_space_allotment)
+		pending = approvals.stage(
+			"create_invoice", approval_args, flt(discount_amount), target.property, target
+		)
+		if pending:
+			return pending
 	doc = frappe.get_doc(
 		{
 			"doctype": "Tenant Rent Invoice",
@@ -1210,7 +1220,14 @@ def settle_deposit(
 	settlement_date=None,
 	remarks=None,
 ):
+	approval_args = dict(locals())
 	check_access()
+	preview = make_settlement(allotment, deductions, adjust_outstanding_rent)
+	preview.update_amounts()
+	target = frappe.get_doc("Tenant Space Allotment", allotment)
+	pending = approvals.stage("settle_deposit", approval_args, preview.refund_amount, target.property, target)
+	if pending:
+		return pending
 	doc = make_settlement(
 		allotment,
 		deductions,
@@ -1548,7 +1565,18 @@ def get_expenses(property=None, from_date=None, to_date=None, category=None):
 
 @frappe.whitelist(methods=["POST"])
 def save_expense(data):
+	approval_args = dict(locals())
 	check_access()
+	parsed = frappe.parse_json(data)
+	target = frappe.get_doc("Property Expense", parsed["name"]) if parsed.get("name") else None
+	if target:
+		target.check_permission("write")
+	amount = max(flt(parsed.get("amount")), flt(target.amount) if target else 0)
+	pending = approvals.stage(
+		"save_expense", approval_args, amount, parsed.get("property") or get_default_property(), target
+	)
+	if pending:
+		return pending
 	data = frappe.parse_json(data)
 	values = pick(data, EXPENSE_FIELDS)
 	if not values.get("property"):
@@ -1564,7 +1592,13 @@ def save_expense(data):
 
 @frappe.whitelist(methods=["POST"])
 def delete_expense(name):
+	approval_args = dict(locals())
 	check_access()
+	target = frappe.get_doc("Property Expense", name)
+	target.check_permission("delete")
+	pending = approvals.stage("delete_expense", approval_args, target.amount, target.property, target)
+	if pending:
+		return pending
 	frappe.delete_doc("Property Expense", name)
 
 
@@ -2135,25 +2169,49 @@ def save_salary_slip(name, data):
 
 @frappe.whitelist(methods=["POST"])
 def pay_salary(name, paid_on=None, mode_of_payment=None, reference_no=None):
+	approval_args = dict(locals())
 	check_access()
+	target = frappe.get_doc(salaries.SLIP, name)
+	salaries.calculate(target)
+	amount = target.net_pay
+	pending = approvals.stage("pay_salary", approval_args, amount, target.property, target)
+	if pending:
+		return pending
 	salaries.pay(name, paid_on, mode_of_payment, reference_no)
 
 
 @frappe.whitelist(methods=["POST"])
 def undo_salary_payment(name):
+	approval_args = dict(locals())
 	check_access()
+	target = frappe.get_doc(salaries.SLIP, name)
+	amount = frappe.db.get_value("Property Expense", target.expense, "amount") if target.expense else 0
+	pending = approvals.stage("undo_salary_payment", approval_args, amount, target.property, target)
+	if pending:
+		return pending
 	salaries.undo_payment(name)
 
 
 @frappe.whitelist(methods=["POST"])
 def give_advance(staff, amount, advance_date=None, recover_per_month=None, mode_of_payment="Cash", note=None):
+	approval_args = dict(locals())
 	check_access()
+	target = frappe.get_doc(salaries.STAFF, staff)
+	pending = approvals.stage("give_advance", approval_args, amount, target.property, target)
+	if pending:
+		return pending
 	return salaries.give_advance(staff, amount, advance_date, recover_per_month, mode_of_payment, note)
 
 
 @frappe.whitelist(methods=["POST"])
 def delete_advance(name):
+	approval_args = dict(locals())
 	check_access()
+	target = frappe.get_doc(salaries.ADVANCE, name)
+	amount = target.amount
+	pending = approvals.stage("delete_advance", approval_args, amount, target.property, target)
+	if pending:
+		return pending
 	salaries.delete_advance(name)
 
 
@@ -2410,3 +2468,139 @@ def save_tenant_document(tenant, data):
 def delete_tenant_document(tenant, name):
 	check_access()
 	documents.delete(tenant, name)
+
+
+# ---------------------------------------------------------------- setup, occupancy, approvals
+
+
+@frappe.whitelist()
+def get_setup_progress():
+	return operations.setup_status()
+
+
+@frappe.whitelist(methods=["POST"])
+def save_setup_rules(data):
+	operations.manager_only()
+	values = pick(
+		data,
+		(
+			"rent_due_day",
+			"default_notice_days",
+			"default_agreement_months",
+			"landlord_name",
+			"landlord_phone",
+			"upi_id",
+		),
+	)
+	if not 1 <= cint(values.get("rent_due_day")) <= 28:
+		frappe.throw(_("Rent due day must be between 1 and 28."))
+	if cint(values.get("default_notice_days")) < 0 or cint(values.get("default_agreement_months")) < 1:
+		frappe.throw(_("Enter a positive agreement term and a non-negative notice period."))
+	settings = frappe.get_single("Rent Management Settings")
+	settings.update(values)
+	settings.setup_rules_reviewed = 1
+	settings.save()
+	return operations.setup_status()
+
+
+@frappe.whitelist()
+def get_occupancy_calendar(start_date, end_date, property=None):
+	return operations.calendar(start_date, end_date, property)
+
+
+@frappe.whitelist()
+def get_approvals():
+	check_access()
+	filters = {} if access.is_manager() else {"requested_by": frappe.session.user}
+	rows = frappe.get_all(
+		approvals.REQUEST,
+		filters=filters,
+		fields=[
+			"name",
+			"status",
+			"action",
+			"amount",
+			"property",
+			"requested_by",
+			"creation",
+			"approver_role",
+			"payload",
+			"decision_note",
+			"decided_by",
+			"result",
+		],
+		order_by="creation desc",
+		limit_page_length=200,
+	)
+	roles = frappe.get_roles()
+	for row in rows:
+		row.can_decide = (
+			row.status == "Pending"
+			and row.requested_by != frappe.session.user
+			and row.approver_role in roles
+			and access.is_manager()
+		)
+	return {"requests": rows, "can_configure": "System Manager" in roles}
+
+
+@frappe.whitelist(methods=["POST"])
+def decide_approval(name, decision, note=None):
+	return approvals.decide(name, decision, note)
+
+
+@frappe.whitelist(methods=["POST"])
+def withdraw_approval(name):
+	check_access()
+	frappe.db.sql("select name from `tabRent Approval Request` where name=%s for update", name)
+	doc = frappe.get_doc(approvals.REQUEST, name)
+	if doc.requested_by != frappe.session.user or doc.status != "Pending":
+		frappe.throw(_("Only your pending requests can be withdrawn."), frappe.PermissionError)
+	subscription.check_writable(doc)
+	doc.status = "Withdrawn"
+	approvals.write_request(doc)
+
+
+@frappe.whitelist()
+def get_approval_rules():
+	operations.manager_only()
+	settings = frappe.get_single(approvals.SETTINGS)
+	return {
+		"enabled": settings.enabled,
+		"rules": [
+			pick(r.as_dict(), ("action", "requester_role", "threshold", "approver_role"))
+			for r in settings.rules
+		],
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_approval_rules(data):
+	if "System Manager" not in frappe.get_roles():
+		frappe.throw(_("Only System Managers can change approval rules."), frappe.PermissionError)
+	data = frappe.parse_json(data)
+	doc = frappe.get_single(approvals.SETTINGS)
+	doc.enabled = cint(data.get("enabled"))
+	doc.set(
+		"rules",
+		[pick(r, ("action", "requester_role", "threshold", "approver_role")) for r in data.get("rules", [])],
+	)
+	doc.save()
+	return get_approval_rules()
+
+
+@frappe.whitelist(methods=["POST"])
+def reverse_payment(name, reason):
+	approval_args = dict(locals())
+	check_access()
+	if not (reason or "").strip():
+		frappe.throw(_("Enter the reason for reversing this payment."))
+	doc = frappe.get_doc("Rent Payment", name)
+	doc.check_permission("cancel")
+	if doc.docstatus != 1:
+		frappe.throw(_("Only submitted payments can be reversed."))
+	pending = approvals.stage("reverse_payment", approval_args, doc.amount, doc.property, doc)
+	if pending:
+		return pending
+	doc.cancel()
+	doc.add_comment("Comment", frappe.utils.escape_html(reason))
+	return doc.name

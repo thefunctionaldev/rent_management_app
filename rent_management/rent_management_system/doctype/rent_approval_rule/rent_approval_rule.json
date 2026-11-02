@@ -1,0 +1,48 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Approval Rule",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "action",
+  "requester_role",
+  "threshold",
+  "approver_role"
+ ],
+ "fields": [
+  {
+   "fieldname": "action",
+   "label": "Action",
+   "fieldtype": "Select",
+   "options": "Expense\nDeposit refund\nInvoice discount\nPayment reversal",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "requester_role",
+   "label": "Requester Role",
+   "fieldtype": "Select",
+   "options": "Rent Staff\nRent Manager\nSystem Manager",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "threshold",
+   "label": "Threshold",
+   "fieldtype": "Currency",
+   "reqd": 1,
+   "default": "0",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "approver_role",
+   "label": "Approver Role",
+   "fieldtype": "Select",
+   "options": "Rent Manager\nSystem Manager",
+   "reqd": 1,
+   "in_list_view": 1
+  }
+ ],
+ "permissions": [],
+ "istable": 1
+}

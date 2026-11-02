@@ -1,0 +1,144 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Approval Request",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "action",
+  "requested_by",
+  "approver_role",
+  "amount",
+  "property",
+  "method",
+  "payload",
+  "target_doctype",
+  "target_name",
+  "target_modified",
+  "decided_by",
+  "decided_on",
+  "decision_note",
+  "result",
+  "pending_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Pending\nExecuted\nRejected\nWithdrawn",
+   "default": "Pending",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "action",
+   "label": "Action",
+   "fieldtype": "Data",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "requested_by",
+   "label": "Requested By",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_role",
+   "label": "Approver Role",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "label": "Amount",
+   "fieldtype": "Currency",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "read_only": 1
+  },
+  {
+   "fieldname": "method",
+   "label": "Method",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payload",
+   "label": "Payload",
+   "fieldtype": "Long Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_doctype",
+   "label": "Target Doctype",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_name",
+   "label": "Target Name",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_modified",
+   "label": "Target Modified",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decided_by",
+   "label": "Decided By",
+   "fieldtype": "Link",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decided_on",
+   "label": "Decided On",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_note",
+   "label": "Decision Note",
+   "fieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result",
+   "label": "Result",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_key",
+   "label": "Pending Key",
+   "fieldtype": "Data",
+   "unique": 1,
+   "read_only": 1,
+   "hidden": 1
+  }
+ ],
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1
+  },
+  {
+   "role": "Rent Manager",
+   "read": 1
+  }
+ ],
+ "autoname": "RAPR-.YYYY.-.#####",
+ "track_changes": 1
+}

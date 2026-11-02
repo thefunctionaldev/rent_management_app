@@ -803,3 +803,57 @@ This app can use GitHub Actions for CI. The following workflows are configured:
 ### License
 
 mit
+
+### Guided setup, occupancy calendar and approvals
+
+- **Setup guide** (`/rent/setup`, managers): a resumable five-step checklist for the first
+  building, rooms/beds, rent/payment defaults, tenant and room allotment. It uses the same
+  forms and validation as the rest of the app. The dashboard links to unfinished setup.
+  UPI is optional; cash/bank transfer do not require payment-gateway configuration.
+- **Occupancy calendar** (`/rent/occupancy`, managers): a 14- or 31-day bed timeline, filtered
+  by the building switcher and room search. Actual move-out dates are inclusive. Notice
+  dates are marked as expected departures and **do not release a bed**. Overlapping stays
+  appear as conflicts. Open lead bookings are listed separately because they reserve room
+  capacity, not a specific bed. An **Unallotted** cell is not a promise of bookable inventory:
+  consult the open bookings before allocating. This is a read-only planning view; new
+  allotments continue to use the existing availability checks. Current Reserved/Renovation
+  room status is shown across the view; historical maintenance periods are not tracked.
+- **Approvals** (`/rent/approvals`): System Managers configure an inclusive amount threshold
+  per requester role for **Expense**, **Deposit refund**, **Invoice discount**, and
+  **Payment reversal**. Rules start disabled. A zero threshold covers every amount; when
+  multiple requester roles match, the strictest threshold wins. Ensure a second active
+  user has the chosen approver role before enabling rules.
+
+Saving a qualifying action stages its proposed values and returns a request number. No
+financial change occurs until another authorised user chooses **Approve and apply**.
+Rejection requires a reason; requesters can withdraw pending requests. Managers see the
+latest 200 requests; staff see only their own. The queue retains decisions and results.
+Payment reversals cancel the ledger payment; they do **not** refund money through a gateway.
+
+Expense rules cover additions, edits and deletions, including salaries and advances made
+through the Staff page. Invoice discount rules cover the manual `discount_amount` field,
+not automatic referral credits or configured early-payment discounts. For a changed draft
+invoice discount, recreate the draft through the Rent app; direct edits requiring approval
+are blocked. Deposit approval records the settlement/refund; it does not initiate a bank transfer.
+
+Document hooks enforce the configured rules on Desk/REST writes too. Requests cannot be
+self-approved or edited through normal document APIs. Approval executes with the requester's
+current permissions and normal validations, locks the request to prevent repeated execution,
+and refuses changed source records or recalculated financial amounts. If a request becomes
+stale, withdraw it and submit a new one. Existing pending requests still require review even
+if the policy is subsequently disabled.
+
+**Upgrade:** run `bench --site <site> migrate` for the approval DocTypes and setup field,
+then `bench build --app rent_management` and restart the production services as usual.
+Test on a non-production site before enabling approval rules.
+
+**Checks for this release:**
+
+```bash
+node --test frontend/tests/occupancy.test.js
+python -m unittest discover -s tests/unit -v
+bench --site <test-site> run-tests --app rent_management --module rent_management.tests.test_operations
+```
+
+The first two suites run without a Frappe site. The integration suite requires a migrated
+Frappe test site and exercises database writes, permissions, source changes and setup progress.

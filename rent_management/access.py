@@ -48,7 +48,7 @@ PRESETS = {
 
 # api.py endpoints staff may use, by area ("any" for every staff login)
 ENDPOINTS = {
-	"any": ("get_boot", "get_properties", "get_room_types", "get_staff_home"),
+	"any": ("get_boot", "get_properties", "get_room_types", "get_staff_home", "get_approvals", "withdraw_approval"),
 	"rooms": (
 		"get_rooms", "get_room_items", "get_tenants", "quick_search", "get_tenant", "save_tenant", "allot_room",
 		"vacate_room", "give_notice", "withdraw_notice", "get_renewal", "renew_agreement", "get_transfer_options", "transfer_stay",

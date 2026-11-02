@@ -440,3 +440,15 @@ scheduler_events = {
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
+
+# Financial approvals apply to Desk and REST writes as well as the manager app.
+for _doctype, _event in (
+	("Property Expense", "validate"),
+	("Property Expense", "on_trash"),
+	("Security Deposit Settlement", "before_submit"),
+	("Tenant Rent Invoice", "validate"),
+	("Rent Payment", "before_cancel"),
+):
+	_also(_doctype, _event, "rent_management.approvals.guard")
+_also("Rent Approval Settings", "validate", "rent_management.subscription.check_writable")

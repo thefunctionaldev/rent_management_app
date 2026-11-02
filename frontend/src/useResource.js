@@ -35,7 +35,11 @@ export function useAction(fn, { success } = {}) {
 		loading.value = true;
 		try {
 			const result = await fn(...args);
-			const message = typeof success === "function" ? success(result) : success;
+			const message = result?.approval_pending
+				? `Approval requested (${result.request}). No financial change has been made.`
+				: typeof success === "function"
+					? success(result)
+					: success;
 			if (message) toast(message);
 			bumpData();
 			return result;
