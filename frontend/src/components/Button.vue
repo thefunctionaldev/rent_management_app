@@ -4,7 +4,7 @@
 		:href="href"
 		:type="href ? undefined : type"
 		:disabled="disabled || loading"
-		class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-medium whitespace-nowrap transition focus-visible:ring-4 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+		class="inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap transition focus-visible:ring-4 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 		:class="[variants[variant], sizes[size]]"
 	>
 		<svg v-if="loading" class="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -41,7 +41,7 @@ defineProps({
 
 const variants = {
 	primary:
-		"bg-brand-600 text-white shadow-sm shadow-brand-600/20 hover:bg-brand-700 focus-visible:ring-brand-100",
+		"bg-brand-600 text-white shadow-sm shadow-brand-600/10 hover:bg-brand-700 focus-visible:ring-brand-100",
 	secondary:
 		"border border-slate-200 bg-white text-slate-700 shadow-xs hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-slate-100",
 	ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-slate-100",
@@ -51,7 +51,7 @@ const variants = {
 };
 const sizes = {
 	sm: "h-8 px-3 text-xs",
-	md: "h-10 px-4 text-sm",
+	md: "h-10 px-5 text-sm",
 	lg: "h-11 px-5 text-sm",
 	icon: "size-10",
 };

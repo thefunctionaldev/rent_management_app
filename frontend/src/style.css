@@ -1,26 +1,17 @@
 @import "tailwindcss";
 
-@font-face {
-	font-family: "InterVariable";
-	font-style: normal;
-	font-weight: 100 900;
-	font-display: swap;
-	src: url("/assets/frappe/css/fonts/inter/InterVariable.woff2") format("woff2");
-}
-
 @theme {
-	--font-sans:
-		"InterVariable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-	--color-brand-50: var(--color-indigo-50);
-	--color-brand-100: var(--color-indigo-100);
-	--color-brand-200: var(--color-indigo-200);
-	--color-brand-300: var(--color-indigo-300);
-	--color-brand-400: var(--color-indigo-400);
-	--color-brand-500: var(--color-indigo-500);
-	--color-brand-600: var(--color-indigo-600);
-	--color-brand-700: var(--color-indigo-700);
-	--color-brand-800: var(--color-indigo-800);
-	--color-brand-900: var(--color-indigo-900);
+	--font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+	--color-brand-50: var(--color-blue-50);
+	--color-brand-100: var(--color-blue-100);
+	--color-brand-200: var(--color-blue-200);
+	--color-brand-300: var(--color-blue-300);
+	--color-brand-400: var(--color-blue-400);
+	--color-brand-500: var(--color-blue-500);
+	--color-brand-600: var(--color-blue-600);
+	--color-brand-700: var(--color-blue-700);
+	--color-brand-800: var(--color-blue-800);
+	--color-brand-900: var(--color-blue-900);
 }
 
 @layer base {
@@ -29,13 +20,17 @@
 		-webkit-font-smoothing: antialiased;
 	}
 	body {
-		@apply bg-slate-50 text-slate-900;
+		background: #f5f5f7;
+		color: #1d1d1f;
 	}
 }
 
 @layer components {
 	.card {
-		@apply rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)];
+		@apply rounded-3xl border border-black/5 bg-white;
+		box-shadow:
+			0 2px 8px rgb(0 0 0 / 0.025),
+			0 12px 32px rgb(0 0 0 / 0.025);
 	}
 	.input {
 		@apply block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-xs transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none disabled:bg-slate-50 disabled:text-slate-500;
@@ -80,7 +75,7 @@
 
 @layer components {
 	.manager-shell {
-		background: #f5f7fb;
+		background: #f5f5f7;
 	}
 	.workspace-bar {
 		@apply items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-8 py-5;
@@ -89,11 +84,11 @@
 		@apply mb-0.5 border border-transparent;
 	}
 	.nav-item.router-link-active {
-		border-color: var(--color-brand-100);
-		box-shadow: inset 3px 0 0 var(--color-brand-600);
+		border-color: transparent;
+		box-shadow: 0 2px 6px rgb(0 82 180 / 0.16);
 	}
 	.page-header {
-		@apply pb-5 border-b border-slate-200/80;
+		@apply pb-2;
 	}
 	.stat-card {
 		box-shadow:
@@ -120,5 +115,51 @@
 	}
 	.skip-link:focus {
 		transform: translateY(0);
+	}
+}
+
+@layer components {
+	.manager-sidebar {
+		background: rgba(239, 240, 244, 0.94);
+		border-color: rgb(0 0 0 / 0.06);
+		backdrop-filter: blur(24px) saturate(160%);
+		-webkit-backdrop-filter: blur(24px) saturate(160%);
+	}
+	.workspace-bar,
+	.mobile-bar {
+		background: rgba(250, 250, 252, 0.88);
+		backdrop-filter: blur(20px) saturate(160%);
+		-webkit-backdrop-filter: blur(20px) saturate(160%);
+		border-color: rgb(0 0 0 / 0.06);
+	}
+	.workspace-bar {
+		@apply sticky top-0 z-20;
+	}
+	.page-header h1 {
+		letter-spacing: -0.035em;
+		font-weight: 650;
+	}
+	.stat-card {
+		@apply p-6;
+	}
+	.input {
+		background: #fafafb;
+		border-color: #d2d2d7;
+		box-shadow: none;
+	}
+	.input:focus {
+		background: white;
+	}
+	.segmented-control {
+		@apply inline-flex max-w-full gap-1 overflow-x-auto rounded-xl p-1;
+		background: #ebebef;
+	}
+	.segmented-option {
+		@apply shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition;
+	}
+	.segmented-option[aria-pressed="true"] {
+		background: white;
+		color: #1d1d1f;
+		box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
 	}
 }

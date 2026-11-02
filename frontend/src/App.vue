@@ -17,7 +17,7 @@
 		<aside
 			id="primary-navigation"
 			aria-label="Primary navigation"
-			class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200/80 bg-white transition-transform duration-200 lg:translate-x-0"
+			class="manager-sidebar fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200/80 bg-white transition-transform duration-200 lg:translate-x-0"
 			:class="menuOpen ? 'translate-x-0' : '-translate-x-full'"
 		>
 			<div class="flex h-20 items-center gap-3 px-5">
@@ -70,7 +70,7 @@
 						:key="item.to"
 						:to="item.to"
 						class="nav-item group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-						active-class="!bg-brand-50 !text-brand-700"
+						active-class="!bg-brand-600 !text-white"
 						@click="menuOpen = false"
 					>
 						<component
@@ -126,7 +126,7 @@
 
 		<!-- mobile top bar -->
 		<header
-			class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur lg:hidden"
+			class="mobile-bar sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur lg:hidden"
 		>
 			<button
 				class="-ml-1 rounded-lg p-2 text-slate-600 hover:bg-slate-100"

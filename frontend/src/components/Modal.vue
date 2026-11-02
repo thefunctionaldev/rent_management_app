@@ -8,11 +8,11 @@
 		>
 			<div
 				v-if="open"
-				class="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-6"
+				class="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/25 p-0 backdrop-blur-md sm:items-center sm:p-6"
 				@mousedown.self="close"
 			>
 				<div
-					class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl shadow-slate-900/20 sm:rounded-2xl"
+					class="flex max-h-[92vh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl shadow-slate-900/20 sm:rounded-3xl"
 					:class="widths[width]"
 					role="dialog"
 					aria-modal="true"
