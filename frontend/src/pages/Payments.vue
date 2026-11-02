@@ -99,6 +99,7 @@
 							<th class="table-head">Mode</th>
 							<th class="table-head">Reference</th>
 							<th class="table-head text-right">Amount</th>
+							<th v-if="!boot.access" class="table-head">Actions</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100">
@@ -137,6 +138,16 @@
 							>
 								{{ money(p.amount) }}
 							</td>
+							<td v-if="!boot.access" class="table-cell">
+								<Button
+									v-if="p.docstatus === 1"
+									size="sm"
+									variant="ghost"
+									:disabled="reversing"
+									@click="reverse(p)"
+									>Reverse</Button
+								>
+							</td>
 						</tr>
 					</tbody>
 				</table>
@@ -158,10 +169,20 @@ import SearchInput from "@/components/SearchInput.vue";
 import Skeleton from "@/components/Skeleton.vue";
 import StatCard from "@/components/StatCard.vue";
 import { openDialog } from "@/dialogs";
-import { bumpData, scope, toast } from "@/store";
-import { useResource } from "@/useResource";
+import { boot, bumpData, scope, toast } from "@/store";
+import { useAction, useResource } from "@/useResource";
 import { date, debounce, money } from "@/utils";
 
+const { loading: reversing, run: reverseAction } = useAction(
+	(name, reason) => post("reverse_payment", { name, reason }),
+	{ success: "Payment reversed in the ledger" },
+);
+async function reverse(p) {
+	const reason = window.prompt(
+		`Reverse ${p.name} (${money(p.amount)}) in the ledger? This does not issue a bank refund. Enter a reason:`,
+	);
+	if (reason?.trim()) await reverseAction(p.name, reason);
+}
 const colors = {
 	Cash: "bg-emerald-500",
 	UPI: "bg-brand-500",
@@ -178,7 +199,7 @@ const search = ref("");
 const mode = ref("");
 const { data, loading, reload } = useResource(
 	() => get("get_payments", { search: search.value, mode_of_payment: mode.value, ...scope() }),
-	{ initial: [] }
+	{ initial: [] },
 );
 const payments = computed(() => data.value || []);
 
@@ -196,7 +217,7 @@ async function confirm(p) {
 async function reject(p) {
 	const reason = window.prompt(
 		`Why is ${p.tenant_name}'s payment rejected? (optional)`,
-		"Not received"
+		"Not received",
 	);
 	if (reason === null) return;
 	try {
@@ -217,7 +238,7 @@ const byMode = computed(() =>
 				.filter((p) => p.mode_of_payment === m)
 				.reduce((s, p) => s + p.amount, 0),
 		}))
-		.filter((m) => m.amount)
+		.filter((m) => m.amount),
 );
 watch(mode, reload);
 watch(search, debounce(reload, 250));

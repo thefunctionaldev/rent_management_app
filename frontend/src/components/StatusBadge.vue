@@ -23,6 +23,10 @@ const palette = {
 };
 
 const colors = {
+	Pending: "amber",
+	Executed: "green",
+	Rejected: "rose",
+	Withdrawn: "slate",
 	Confirmed: "green",
 	Recorded: "sky",
 	Ignored: "slate",

@@ -423,7 +423,7 @@ const year = computed(() => cursor.value.getFullYear());
 const isCurrentMonth = computed(
 	() =>
 		cursor.value.getFullYear() === today.getFullYear() &&
-		cursor.value.getMonth() === today.getMonth()
+		cursor.value.getMonth() === today.getMonth(),
 );
 function shift(n) {
 	cursor.value = new Date(cursor.value.getFullYear(), cursor.value.getMonth() + n, 1);
@@ -431,14 +431,14 @@ function shift(n) {
 
 // reactive() so the template reads pay.data rather than pay.data.value
 const pay = reactive(
-	useResource(() => get("get_salaries", { month: month.value, year: year.value, ...scope() }))
+	useResource(() => get("get_salaries", { month: month.value, year: year.value, ...scope() })),
 );
 watch(cursor, pay.reload);
 const staff = reactive(useResource(() => get("get_staff", scope())));
 
 const active = computed(() => (staff.data?.staff || []).filter((s) => s.is_active));
 const openAdvances = computed(
-	() => (staff.data?.advances || []).filter((a) => a.status === "Open").length
+	() => (staff.data?.advances || []).filter((a) => a.status === "Open").length,
 );
 const tabs = computed(() => [
 	{ value: "salaries", label: "Salaries" },
@@ -488,8 +488,12 @@ async function save(slip) {
 async function undo(slip) {
 	if (!confirm(`Undo ${slip.staff_name}'s salary payment? Its expense is removed.`)) return;
 	try {
-		await post("undo_salary_payment", { name: slip.name });
-		toast("Payment undone");
+		const result = await post("undo_salary_payment", { name: slip.name });
+		toast(
+			result?.approval_pending
+				? `Approval requested (${result.request}). Payment is unchanged.`
+				: "Payment undone",
+		);
 		bumpData();
 	} catch (e) {
 		toast(e.message, "error");
@@ -499,8 +503,12 @@ async function undo(slip) {
 async function removeAdvance(a) {
 	if (!confirm(`Delete the ${money(a.amount)} advance to ${a.staff_name}?`)) return;
 	try {
-		await post("delete_advance", { name: a.name });
-		toast("Advance deleted");
+		const result = await post("delete_advance", { name: a.name });
+		toast(
+			result?.approval_pending
+				? `Approval requested (${result.request}). Advance is unchanged.`
+				: "Advance deleted",
+		);
 		bumpData();
 	} catch (e) {
 		toast(e.message, "error");
@@ -545,7 +553,7 @@ function payslipLink(s) {
 		s.other_deduction
 			? `Deduction: ${money(s.other_deduction)}${
 					s.deduction_note ? ` (${s.deduction_note})` : ""
-			  }`
+				}`
 			: null,
 		s.advance_recovery ? `Advance recovered: ${money(s.advance_recovery)}` : null,
 		`Paid: ${money(s.net_pay)} on ${date(s.paid_on)}${

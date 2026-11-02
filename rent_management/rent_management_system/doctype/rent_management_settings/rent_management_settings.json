@@ -79,7 +79,8 @@
   "police_verification_days",
   "push_section",
   "vapid_public_key",
-  "vapid_private_key"
+  "vapid_private_key",
+  "setup_rules_reviewed"
  ],
  "fields": [
   {
@@ -505,7 +506,7 @@
    "read_only": 1
   },
   {
-   "description": "On tenants' rent receipts (needed by their employer when the rent is over ₹1,00,000 a year)",
+   "description": "On tenants' rent receipts (needed by their employer when the rent is over \u20b91,00,000 a year)",
    "fieldname": "landlord_pan",
    "fieldtype": "Data",
    "label": "Landlord PAN"
@@ -542,6 +543,13 @@
    "fieldtype": "Int",
    "label": "Refund Deposits Within (Days)",
    "non_negative": 1
+  },
+  {
+   "fieldname": "setup_rules_reviewed",
+   "fieldtype": "Check",
+   "label": "Setup rules reviewed",
+   "read_only": 1,
+   "default": "0"
   }
  ],
  "grid_page_length": 50,
