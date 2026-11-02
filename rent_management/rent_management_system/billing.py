@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import get_last_day, getdate, nowdate
 
 from rent_management.rent_management_system.doctype.tenant_rent_invoice.tenant_rent_invoice import MONTHS
+from rent_management.suite.common import note_failure
 
 
 def generate_monthly_invoices():
@@ -87,6 +88,7 @@ def generate_invoices(
 		except Exception:
 			# skip just this allotment, keep the invoices already created
 			frappe.db.rollback(save_point="rent_invoice")
+			note_failure()
 			frappe.log_error(title=_("Rent Invoice generation failed for {0}").format(allotment))
 	frappe.flags.generating_invoices = False
 

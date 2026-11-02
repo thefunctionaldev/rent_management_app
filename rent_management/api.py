@@ -2604,3 +2604,19 @@ def reverse_payment(name, reason):
 	doc.cancel()
 	doc.add_comment("Comment", frappe.utils.escape_html(reason))
 	return doc.name
+
+
+@frappe.whitelist(methods=["POST"])
+def pay_work_order(name, mode_of_payment="Bank Transfer", reference_no=None):
+	check_access()
+	from rent_management.suite.workorders import pay
+
+	return pay(name, mode_of_payment, reference_no)
+
+
+@frappe.whitelist(methods=["POST"])
+def pay_operating_bill(name, mode_of_payment="Bank Transfer", reference_no=None):
+	check_access()
+	from rent_management.suite.recurring import pay
+
+	return pay(name, mode_of_payment, reference_no)

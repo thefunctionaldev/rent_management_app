@@ -1,7 +1,7 @@
 <template>
 	<div class="space-y-4">
 		<div class="card p-5">
-			<h1 class="font-semibold">Notices</h1>
+			<h1 class="font-semibold">{{ $t("Notices") }}</h1>
 			<p class="text-sm text-slate-500">
 				From the management of {{ me.building?.property_name }}.
 			</p>

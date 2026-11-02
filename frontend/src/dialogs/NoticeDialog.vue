@@ -32,7 +32,7 @@
 			</p>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button variant="primary" type="submit" form="notice-form" :loading="loading"
 				>Save notice</Button
 			>

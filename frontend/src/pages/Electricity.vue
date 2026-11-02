@@ -16,7 +16,7 @@
 				:loading="saving"
 				:disabled="!entered.length || entered.some((r) => preview(r).units < 0)"
 				@click="save"
-				>Save {{ entered.length || "" }} reading{{
+				>{{ $t("Save") }} {{ entered.length || "" }} reading{{
 					entered.length === 1 ? "" : "s"
 				}}</Button
 			>
@@ -27,7 +27,7 @@
 			class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
 		>
 			Set the electricity rate per unit in
-			<RouterLink to="/settings" class="font-medium underline">Settings</RouterLink> so
+			<RouterLink to="/settings" class="font-medium underline">{{ $t("Settings") }}</RouterLink> so
 			readings can be billed.
 		</div>
 
@@ -45,12 +45,12 @@
 				<table class="w-full">
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
-							<th class="table-head">Room</th>
+							<th class="table-head">{{ $t("Room") }}</th>
 							<th class="table-head">Last reading</th>
 							<th class="table-head w-40">New reading</th>
 							<th class="table-head">New meter</th>
 							<th class="table-head text-right">Units</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100">
@@ -122,11 +122,11 @@
 					<thead class="border-b border-slate-100 bg-slate-50/60">
 						<tr>
 							<th class="table-head">Date</th>
-							<th class="table-head">Room</th>
+							<th class="table-head">{{ $t("Room") }}</th>
 							<th class="table-head">Meter</th>
 							<th class="table-head">Split</th>
-							<th class="table-head text-right">Amount</th>
-							<th class="table-head">Status</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
+							<th class="table-head">{{ $t("Status") }}</th>
 							<th class="table-head" />
 						</tr>
 					</thead>

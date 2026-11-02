@@ -1,0 +1,134 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Integration Settings",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "base_url",
+  "api_key",
+  "api_secret",
+  "company",
+  "currency",
+  "rent_item",
+  "income_account",
+  "expense_account",
+  "deposit_account",
+  "receivable_account",
+  "bank_account",
+  "cash_account",
+  "cost_center",
+  "customer_group",
+  "territory",
+  "last_backup_at",
+  "last_remote_backup_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "enabled",
+   "label": "Enabled",
+   "fieldtype": "Check",
+   "default": "0"
+  },
+  {
+   "fieldname": "base_url",
+   "label": "Base Url",
+   "fieldtype": "Data",
+   "description": "HTTPS ERPNext base URL"
+  },
+  {
+   "fieldname": "api_key",
+   "label": "Api Key",
+   "fieldtype": "Password"
+  },
+  {
+   "fieldname": "api_secret",
+   "label": "Api Secret",
+   "fieldtype": "Password"
+  },
+  {
+   "fieldname": "company",
+   "label": "Company",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "currency",
+   "label": "Currency",
+   "fieldtype": "Data",
+   "default": "INR"
+  },
+  {
+   "fieldname": "rent_item",
+   "label": "Rent Item",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "income_account",
+   "label": "Income Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "expense_account",
+   "label": "Expense Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "deposit_account",
+   "label": "Deposit Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "receivable_account",
+   "label": "Receivable Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "bank_account",
+   "label": "Bank Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "cash_account",
+   "label": "Cash Account",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "cost_center",
+   "label": "Cost Center",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "customer_group",
+   "label": "Customer Group",
+   "fieldtype": "Data",
+   "default": "Individual"
+  },
+  {
+   "fieldname": "territory",
+   "label": "Territory",
+   "fieldtype": "Data",
+   "default": "All Territories"
+  },
+  {
+   "fieldname": "last_backup_at",
+   "label": "Last Backup At",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_remote_backup_at",
+   "label": "Last Remote Backup At",
+   "fieldtype": "Datetime",
+   "read_only": 1
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ],
+ "issingle": 1
+}

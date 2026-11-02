@@ -89,7 +89,7 @@
 							<thead class="bg-slate-50/60">
 								<tr>
 									<th class="table-head">Building</th>
-									<th class="table-head text-right">Collected</th>
+									<th class="table-head text-right">{{ $t("Collected") }}</th>
 									<th class="table-head text-right">Spent</th>
 									<th class="table-head text-right">Profit</th>
 									<th class="table-head text-right">Beds</th>
@@ -143,7 +143,7 @@
 										>{{ d.tenant_name }}</RouterLink
 									>
 									<p class="text-xs text-slate-500">
-										Room {{ d.room }} · due since {{ date(d.since) }}
+										{{ $t("Room") }} {{ d.room }} · due since {{ date(d.since) }}
 									</p>
 								</div>
 								<span class="tabular font-medium">{{ money(d.amount) }}</span>

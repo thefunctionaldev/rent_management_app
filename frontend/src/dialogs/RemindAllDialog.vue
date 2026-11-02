@@ -37,7 +37,7 @@
 			<p class="mt-1 text-slate-500">
 				Turn on reminders by WhatsApp or email in
 				<RouterLink to="/settings" class="text-brand-600" @click="$emit('close')"
-					>Settings</RouterLink
+					>{{ $t("Settings") }}</RouterLink
 				>
 				to send them from here.
 			</p>
@@ -50,7 +50,7 @@
 		<!-- who will get one -->
 		<template v-else>
 			<div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
-				<button class="chip" @click="choose((r) => r.overdue)">Overdue</button>
+				<button class="chip" @click="choose((r) => r.overdue)">{{ $t("Overdue") }}</button>
 				<button class="chip" @click="choose(() => true)">Everyone</button>
 				<button class="chip" @click="choose(() => false)">Nobody</button>
 				<span class="ml-auto text-xs text-slate-500">Sent by {{ channelText }}</span>
@@ -119,7 +119,7 @@
 					(data.channels.whatsapp || data.channels.email)
 				"
 			>
-				<Button @click="$emit('close')">Cancel</Button>
+				<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 				<Button
 					variant="primary"
 					:icon="Send"

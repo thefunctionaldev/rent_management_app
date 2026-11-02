@@ -1,0 +1,108 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Operating Bill",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "property",
+  "schedule",
+  "vendor",
+  "category",
+  "amount",
+  "due_date",
+  "status",
+  "generation_key",
+  "expense",
+  "paid_on",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Title",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "schedule",
+   "label": "Schedule",
+   "fieldtype": "Link",
+   "options": "Rent Recurring Bill"
+  },
+  {
+   "fieldname": "vendor",
+   "label": "Vendor",
+   "fieldtype": "Link",
+   "options": "Rent Vendor"
+  },
+  {
+   "fieldname": "category",
+   "label": "Category",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "amount",
+   "label": "Amount",
+   "fieldtype": "Currency"
+  },
+  {
+   "fieldname": "due_date",
+   "label": "Due Date",
+   "fieldtype": "Date",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Due\nPaid\nCancelled",
+   "default": "Due",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "generation_key",
+   "label": "Generation Key",
+   "fieldtype": "Data",
+   "unique": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "expense",
+   "label": "Expense",
+   "fieldtype": "Link",
+   "options": "Property Expense"
+  },
+  {
+   "fieldname": "paid_on",
+   "label": "Paid On",
+   "fieldtype": "Date"
+  },
+  {
+   "fieldname": "notes",
+   "label": "Notes",
+   "fieldtype": "Small Text"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

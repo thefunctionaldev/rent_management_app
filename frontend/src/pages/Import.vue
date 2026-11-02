@@ -96,7 +96,7 @@
 						:loading="importing"
 						:disabled="!result.ok"
 						@click="runImport"
-						>Import {{ result.ok }} row{{ result.ok === 1 ? "" : "s" }}</Button
+						>{{ $t("Import") }} {{ result.ok }} row{{ result.ok === 1 ? "" : "s" }}</Button
 					>
 					<Button v-else variant="primary" :href="doneLink.href">{{
 						doneLink.label
@@ -110,7 +110,7 @@
 								<th class="table-head">
 									{{ kind === "rooms" ? "Room" : "Tenant" }}
 								</th>
-								<th class="table-head">Result</th>
+								<th class="table-head">{{ $t("Result") }}</th>
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-slate-100">

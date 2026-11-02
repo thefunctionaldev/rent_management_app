@@ -77,8 +77,8 @@
 			</Field>
 		</div>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
-			<Button variant="primary" :loading="loading" @click="save">Save</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
+			<Button variant="primary" :loading="loading" @click="save">{{ $t("Save") }}</Button>
 		</template>
 	</Modal>
 </template>

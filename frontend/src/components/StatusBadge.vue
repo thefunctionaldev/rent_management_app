@@ -4,7 +4,7 @@
 		:class="color"
 	>
 		<span class="size-1.5 rounded-full" :class="dot" />
-		{{ status }}
+		{{ $t(status) }}
 	</span>
 </template>
 

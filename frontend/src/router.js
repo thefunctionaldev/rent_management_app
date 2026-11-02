@@ -3,6 +3,41 @@ import { createRouter, createWebHistory } from "vue-router";
 import { boot, canUse } from "./store";
 
 const routes = [
+	{
+		path: "/maintenance",
+		name: "maintenance",
+		meta: { area: "requests" },
+		component: () => import("./pages/suite/Operations.vue"),
+		props: { kind: "workorders" },
+	},
+	{
+		path: "/recurring-bills",
+		name: "recurring-bills",
+		meta: { area: "expenses" },
+		component: () => import("./pages/suite/Operations.vue"),
+		props: { kind: "recurring" },
+	},
+	{
+		path: "/housekeeping",
+		name: "housekeeping",
+		meta: { area: "housekeeping" },
+		component: () => import("./pages/suite/Operations.vue"),
+		props: { kind: "housekeeping" },
+	},
+	{
+		path: "/waitlist",
+		name: "waitlist",
+		meta: { area: "leads" },
+		component: () => import("./pages/suite/Operations.vue"),
+		props: { kind: "waitlist" },
+	},
+	{ path: "/health", name: "health", component: () => import("./pages/suite/Health.vue") },
+	{ path: "/erpnext", name: "erpnext", component: () => import("./pages/suite/Integration.vue") },
+	{
+		path: "/owner-access",
+		name: "owner-access",
+		component: () => import("./pages/suite/OwnerAccess.vue"),
+	},
 	{ path: "/setup", name: "setup", component: () => import("./pages/Setup.vue") },
 	{ path: "/occupancy", name: "occupancy", component: () => import("./pages/Occupancy.vue") },
 	{

@@ -128,6 +128,9 @@ def rent_backup_all(with_files=False, remote=None, keep_days=7):
 			odb = new_backup(
 				older_than=keep_days * 24, ignore_files=not with_files, compress=True, force=True
 			)
+			from rent_management.suite.health import backup_success
+
+			backup_success()
 			target = remote or frappe.conf.get("rent_backup_remote")
 			click.echo(f"{site}: {odb.backup_path_db}")
 			if target:
@@ -138,6 +141,7 @@ def rent_backup_all(with_files=False, remote=None, keep_days=7):
 					["rclone", "copy", backup_dir, f"{target.rstrip('/')}/{site}", "--max-age", "48h"],
 					check=True,
 				)
+				backup_success(remote=True)
 				click.echo(f"{site}: copied to {target}/{site}")
 		except Exception as e:
 			failed.append(site)

@@ -47,7 +47,7 @@
 								<p class="truncate text-sm font-medium">{{ r.full_name }}</p>
 								<p class="truncate text-xs text-slate-500">
 									<template v-if="r.room"
-										>Room {{ r.room
+										>{{ $t("Room") }} {{ r.room
 										}}<template v-if="r.bed_no">
 											· bed {{ r.bed_no }}</template
 										>

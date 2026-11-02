@@ -26,7 +26,7 @@
 				</div>
 			</div>
 			<ul class="space-y-1 text-slate-600">
-				<li>Room {{ data.stay.room_number }} ended the night before the move.</li>
+				<li>{{ $t("Room") }} {{ data.stay.room_number }} ended the night before the move.</li>
 				<li v-if="result.bill">
 					This month's bill for the new room:
 					<RouterLink
@@ -138,7 +138,7 @@
 
 		<template #footer>
 			<template v-if="data && !result">
-				<Button @click="$emit('close')">Cancel</Button>
+				<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 				<Button
 					variant="primary"
 					type="submit"

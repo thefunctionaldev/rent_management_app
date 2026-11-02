@@ -57,7 +57,7 @@
 					</p>
 				</div>
 				<a :href="fileUrl(d)" target="_blank" class="text-brand-600 hover:underline"
-					>Open</a
+					>{{ $t("Open") }}</a
 				>
 				<template v-if="canEdit(d)">
 					<button
@@ -110,9 +110,9 @@
 				</Field>
 			</form>
 			<template #footer>
-				<Button @click="editing = null">Cancel</Button>
+				<Button @click="editing = null">{{ $t("Cancel") }}</Button>
 				<Button variant="primary" type="submit" form="document-form" :loading="busy"
-					>Save</Button
+					>{{ $t("Save") }}</Button
 				>
 			</template>
 		</Modal>

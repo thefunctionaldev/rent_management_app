@@ -2,7 +2,7 @@
 	<div>
 		<PageHeader title="Payments" subtitle="Rent received from tenants">
 			<Button variant="primary" :icon="Plus" @click="openDialog('recordPayment')"
-				>Record payment</Button
+				>{{ $t("Record payment") }}</Button
 			>
 		</PageHeader>
 
@@ -98,7 +98,7 @@
 							<th class="table-head">Invoice</th>
 							<th class="table-head">Mode</th>
 							<th class="table-head">Reference</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 							<th v-if="!boot.access" class="table-head">Actions</th>
 						</tr>
 					</thead>

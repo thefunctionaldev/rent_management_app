@@ -84,7 +84,7 @@
 									>{{ row.tenant_name }}</RouterLink
 								>
 								<p class="text-xs text-slate-500">
-									Room {{ row.room
+									{{ $t("Room") }} {{ row.room
 									}}<template v-if="row.bed_no">
 										· bed {{ row.bed_no }}</template
 									>
@@ -233,9 +233,9 @@
 							</div>
 							<StatusBadge v-if="group.key === 'recent'" :status="l.status" />
 							<template v-if="group.key === 'requested'">
-								<Button size="sm" @click="decide(l, 0)">Reject</Button>
+								<Button size="sm" @click="decide(l, 0)">{{ $t("Reject") }}</Button>
 								<Button size="sm" variant="primary" @click="decide(l, 1)"
-									>Approve</Button
+									>{{ $t("Approve") }}</Button
 								>
 							</template>
 							<Button
@@ -369,7 +369,7 @@
 				</Field>
 			</form>
 			<template #footer>
-				<Button @click="leaveForm = null">Cancel</Button>
+				<Button @click="leaveForm = null">{{ $t("Cancel") }}</Button>
 				<Button variant="primary" type="submit" form="leave-form" :loading="busy"
 					>Add leave</Button
 				>
@@ -424,7 +424,7 @@
 				</label>
 			</form>
 			<template #footer>
-				<Button @click="visitorForm = null">Cancel</Button>
+				<Button @click="visitorForm = null">{{ $t("Cancel") }}</Button>
 				<Button variant="primary" type="submit" form="visitor-form" :loading="busy"
 					>Check in</Button
 				>

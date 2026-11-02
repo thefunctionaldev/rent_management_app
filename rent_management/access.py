@@ -31,6 +31,7 @@ AREAS = {
 	"payments": _("Rent and payments"),
 	"register": _("Night attendance, leave and visitors"),
 	"requests": _("Requests and repairs"),
+	"housekeeping": _("Housekeeping"),
 	"food": _("Food and menu"),
 	"leads": _("Leads and bookings"),
 	"meters": _("Electricity readings"),
@@ -41,7 +42,7 @@ PRESETS = {
 	"Warden": ["rooms", "payments", "register", "requests", "meters", "notices"],
 	"Cook": ["food"],
 	"Security Guard": ["register"],
-	"Cleaner": ["requests"],
+	"Cleaner": ["requests", "housekeeping"],
 	"Maintenance": ["requests", "meters"],
 	"Manager": list(AREAS),
 }

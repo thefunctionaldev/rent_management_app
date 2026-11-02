@@ -19,13 +19,14 @@ function copyIndexToWww() {
 			for (const [page, route] of [
 				["index.html", "rent.html"],
 				["tenant.html", "tenant.html"],
+				["owners.html", "owners.html"],
 				["signup.html", "signup.html"],
 				["stay.html", "stay.html"],
 				["checkin.html", "checkin.html"],
 			]) {
 				copyFileSync(
 					path.join(appPath, "public/frontend", page),
-					path.join(appPath, "www", route)
+					path.join(appPath, "www", route),
 				);
 			}
 		},
@@ -45,6 +46,7 @@ export default defineConfig(({ command }) => ({
 		rollupOptions: {
 			input: {
 				main: path.resolve(root, "index.html"),
+				owners: path.resolve(root, "owners.html"),
 				tenant: path.resolve(root, "tenant.html"), // the tenant app
 				signup: path.resolve(root, "signup.html"), // self-serve signup on the control site
 				stay: path.resolve(root, "stay.html"), // the public listing page

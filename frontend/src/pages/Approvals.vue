@@ -3,7 +3,7 @@
 		<PageHeader
 			title="Approvals"
 			subtitle="Review proposed financial changes before they take effect."
-			><Button @click="reload">Refresh</Button
+			><Button @click="reload">{{ $t("Refresh") }}</Button
 			><Button v-if="data?.can_configure" @click="openRules"
 				>Approval rules</Button
 			></PageHeader
@@ -63,7 +63,7 @@
 				<div v-if="r.can_decide" class="flex flex-wrap gap-2">
 					<Button variant="primary" :disabled="busy" @click="review(r, 'approve')"
 						>Review and approve</Button
-					><Button :disabled="busy" @click="review(r, 'reject')">Reject</Button>
+					><Button :disabled="busy" @click="review(r, 'reject')">{{ $t("Reject") }}</Button>
 				</div>
 				<Button
 					v-if="r.status === 'Pending' && r.requested_by === boot.user"
@@ -161,7 +161,7 @@
 				>Add rule</Button
 			>
 			<template #footer
-				><Button @click="rulesOpen = false">Cancel</Button
+				><Button @click="rulesOpen = false">{{ $t("Cancel") }}</Button
 				><Button variant="primary" :loading="saving" @click="saveRules"
 					>Save rules</Button
 				></template

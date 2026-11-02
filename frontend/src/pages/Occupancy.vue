@@ -4,7 +4,7 @@
 			title="Occupancy calendar"
 			subtitle="See each bed, current stays and upcoming departures."
 			><Button @click="shift(-14)">← Previous</Button
-			><Button @click="start = boot.today">Today</Button
+			><Button @click="start = boot.today">{{ $t("Today") }}</Button
 			><Button @click="shift(14)">Next →</Button></PageHeader
 		>
 		<div class="mb-5 flex flex-wrap items-end gap-4">

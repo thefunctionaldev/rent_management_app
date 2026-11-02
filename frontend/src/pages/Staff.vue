@@ -93,7 +93,7 @@
 					<table class="w-full min-w-[56rem] text-sm">
 						<thead class="bg-slate-50/60">
 							<tr>
-								<th class="table-head">Staff</th>
+								<th class="table-head">{{ $t("Staff") }}</th>
 								<th class="table-head w-24 text-right">Days off</th>
 								<th class="table-head text-right">Salary</th>
 								<th class="table-head w-28 text-right">Bonus</th>
@@ -199,7 +199,7 @@
 									<div class="flex items-center justify-end gap-2">
 										<template v-if="s.status === 'Paid'">
 											<span class="text-xs text-slate-500"
-												>Paid {{ shortDate(s.paid_on) }}</span
+												>{{ $t("Paid") }} {{ shortDate(s.paid_on) }}</span
 											>
 											<a
 												v-if="s.staff_details?.mobile_no"
@@ -338,12 +338,12 @@
 				<table class="w-full min-w-[40rem] text-sm">
 					<thead class="bg-slate-50/60">
 						<tr>
-							<th class="table-head">Staff</th>
+							<th class="table-head">{{ $t("Staff") }}</th>
 							<th class="table-head">Given</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 							<th class="table-head text-right">Per month</th>
 							<th class="table-head text-right">To recover</th>
-							<th class="table-head">Status</th>
+							<th class="table-head">{{ $t("Status") }}</th>
 							<th class="table-head"></th>
 						</tr>
 					</thead>

@@ -125,7 +125,7 @@
 			</div>
 			<dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
 				<div class="rounded-xl bg-slate-50 p-3">
-					<dt class="text-xs text-slate-500">Room</dt>
+					<dt class="text-xs text-slate-500">{{ $t("Room") }}</dt>
 					<dd class="font-semibold">
 						{{ data.stay.room
 						}}<span v-if="data.stay.bed_no" class="font-normal">

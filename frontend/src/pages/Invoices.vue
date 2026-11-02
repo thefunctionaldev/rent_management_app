@@ -65,10 +65,10 @@
 							<th class="table-head">Invoice</th>
 							<th class="table-head">Tenant</th>
 							<th class="table-head">Period</th>
-							<th class="table-head">Due</th>
-							<th class="table-head text-right">Amount</th>
+							<th class="table-head">{{ $t("Due") }}</th>
+							<th class="table-head text-right">{{ $t("Amount") }}</th>
 							<th class="table-head text-right">Balance</th>
-							<th class="table-head">Status</th>
+							<th class="table-head">{{ $t("Status") }}</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-slate-100">
@@ -91,7 +91,7 @@
 							<td class="table-cell font-medium text-slate-900">{{ inv.name }}</td>
 							<td class="table-cell">
 								<p class="font-medium">{{ inv.tenant_name }}</p>
-								<p class="text-xs text-slate-500">Room {{ inv.room }}</p>
+								<p class="text-xs text-slate-500">{{ $t("Room") }} {{ inv.room }}</p>
 							</td>
 							<td class="table-cell text-slate-600">
 								{{ inv.billing_month }} {{ inv.billing_year }}

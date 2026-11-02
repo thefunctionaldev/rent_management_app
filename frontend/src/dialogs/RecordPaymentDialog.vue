@@ -25,7 +25,7 @@
 				class="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
 			>
 				<div>
-					<p class="text-xs text-slate-500">Outstanding</p>
+					<p class="text-xs text-slate-500">{{ $t("Outstanding") }}</p>
 					<p class="tabular text-lg font-semibold">
 						{{ money(selected.outstanding_amount) }}
 					</p>
@@ -60,7 +60,7 @@
 			</p>
 
 			<div>
-				<span class="label">Mode of payment</span>
+				<span class="label">{{ $t("Mode of payment") }}</span>
 				<div class="grid grid-cols-3 gap-2 sm:grid-cols-6">
 					<button
 						v-for="mode in modes"
@@ -92,14 +92,14 @@
 			</Field>
 		</form>
 		<template #footer>
-			<Button @click="$emit('close')">Cancel</Button>
+			<Button @click="$emit('close')">{{ $t("Cancel") }}</Button>
 			<Button
 				variant="success"
 				type="submit"
 				form="payment-form"
 				:loading="loading"
 				:icon="Check"
-				>Record payment</Button
+				>{{ $t("Record payment") }}</Button
 			>
 		</template>
 	</Modal>

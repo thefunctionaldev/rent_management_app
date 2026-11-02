@@ -1,0 +1,128 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Housekeeping Task",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "property",
+  "room",
+  "schedule",
+  "assigned_to",
+  "due_date",
+  "status",
+  "generation_key",
+  "checklist",
+  "require_photo",
+  "photo",
+  "notes",
+  "completed_on",
+  "completed_by",
+  "verified_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "label": "Title",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "room",
+   "label": "Room",
+   "fieldtype": "Link",
+   "options": "Tenant Space"
+  },
+  {
+   "fieldname": "schedule",
+   "label": "Schedule",
+   "fieldtype": "Link",
+   "options": "Rent Housekeeping Schedule"
+  },
+  {
+   "fieldname": "assigned_to",
+   "label": "Assigned To",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "due_date",
+   "label": "Due Date",
+   "fieldtype": "Date",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Open\nCompleted\nVerified",
+   "default": "Open",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "generation_key",
+   "label": "Generation Key",
+   "fieldtype": "Data",
+   "unique": 1,
+   "hidden": 1
+  },
+  {
+   "fieldname": "checklist",
+   "label": "Checklist",
+   "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "require_photo",
+   "label": "Require Photo",
+   "fieldtype": "Check"
+  },
+  {
+   "fieldname": "photo",
+   "label": "Photo",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "fieldname": "notes",
+   "label": "Notes",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "completed_on",
+   "label": "Completed On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "completed_by",
+   "label": "Completed By",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "verified_by",
+   "label": "Verified By",
+   "fieldtype": "Link",
+   "options": "User"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

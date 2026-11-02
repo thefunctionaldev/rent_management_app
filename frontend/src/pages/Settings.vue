@@ -166,7 +166,7 @@
 						Collected, spent, profit, beds taken and who still owes, on WhatsApp and by
 						email. See it any time under
 						<RouterLink to="/summary" class="text-brand-600 hover:underline"
-							>Monthly report</RouterLink
+							>{{ $t("Monthly report") }}</RouterLink
 						>.
 					</p>
 					<div class="mt-2 divide-y divide-slate-100">
@@ -214,7 +214,7 @@
 						Track each new tenant's verification form until the police clear it. See it
 						under
 						<RouterLink to="/verification" class="text-brand-600 hover:underline"
-							>Verification</RouterLink
+							>{{ $t("Verification") }}</RouterLink
 						>.
 					</p>
 					<div class="mt-2 divide-y divide-slate-100">

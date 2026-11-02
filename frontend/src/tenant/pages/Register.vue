@@ -44,7 +44,7 @@
 						<input v-model="leave.reason" class="input" />
 					</Field>
 					<div class="flex gap-2">
-						<Button class="flex-1" @click="leave = null">Cancel</Button>
+						<Button class="flex-1" @click="leave = null">{{ $t("Cancel") }}</Button>
 						<Button class="flex-1" variant="primary" type="submit" :loading="busy"
 							>Ask for leave</Button
 						>
@@ -83,7 +83,7 @@
 							class="text-xs font-medium text-slate-500 hover:text-rose-600"
 							@click="cancelLeave(l)"
 						>
-							Cancel
+							{{ $t("Cancel") }}
 						</button>
 					</li>
 				</ul>
@@ -129,7 +129,7 @@
 						Staying overnight
 					</label>
 					<div class="flex gap-2">
-						<Button class="flex-1" @click="visitor = null">Cancel</Button>
+						<Button class="flex-1" @click="visitor = null">{{ $t("Cancel") }}</Button>
 						<Button class="flex-1" variant="primary" type="submit" :loading="busy"
 							>Tell the warden</Button
 						>
@@ -171,7 +171,7 @@
 							class="text-xs font-medium text-slate-500 hover:text-rose-600"
 							@click="cancelVisitor(v)"
 						>
-							Cancel
+							{{ $t("Cancel") }}
 						</button>
 					</li>
 				</ul>

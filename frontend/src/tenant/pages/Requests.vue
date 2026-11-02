@@ -1,7 +1,8 @@
 <template>
 	<div class="space-y-4">
+<WorkFeedback />
 		<div class="card p-5">
-			<h1 class="text-lg font-semibold">Requests</h1>
+			<h1 class="text-lg font-semibold">{{ $t("Requests") }}</h1>
 			<p class="text-sm text-slate-500">
 				Repairs, cleaning, WiFi... your landlord gets it right away.
 			</p>
@@ -64,6 +65,7 @@
 </template>
 
 <script setup>
+import WorkFeedback from "../WorkFeedback.vue";
 import { reactive, ref } from "vue";
 
 import { get, post } from "@/api";

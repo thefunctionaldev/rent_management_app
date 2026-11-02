@@ -53,7 +53,7 @@
 				<div class="mt-5 grid grid-cols-3 gap-3 text-center">
 					<div class="rounded-xl bg-slate-50 py-3">
 						<p class="tabular text-lg font-semibold">{{ p.rooms }}</p>
-						<p class="text-xs text-slate-500">Rooms</p>
+						<p class="text-xs text-slate-500">{{ $t("Rooms") }}</p>
 					</div>
 					<div class="rounded-xl bg-slate-50 py-3">
 						<p class="tabular text-lg font-semibold">{{ p.beds }}</p>
@@ -83,7 +83,7 @@
 						size="sm"
 						variant="ghost"
 						@click="openDialog('property', { property: p })"
-						>Edit</Button
+						>{{ $t("Edit") }}</Button
 					>
 				</div>
 			</div>

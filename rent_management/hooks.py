@@ -316,9 +316,10 @@ _also("Security Deposit Settlement", "on_submit", "rent_management.move_out.on_s
 
 scheduler_events = {
 	"daily": [
+		"rent_management.suite.health.daily",
 		"rent_management.rent_management_system.billing.mark_overdue_invoices",
 		"rent_management.subscription.daily",
-		"rent_management.rent_collection.reconcile_payment_links",
+		"rent_management.suite.health.payments",
 		"rent_management.leads.reconcile_token_links",
 		"rent_management.salaries.remind_due",
 		"rent_management.fees.apply_late_fees",
@@ -327,11 +328,11 @@ scheduler_events = {
 		"rent_management.documents.remind_expiring",
 		"rent_management.move_out.remind",
 		"rent_management.renewals.remind",
-		"rent_management.notifications.send_due_reminders",
+		"rent_management.suite.health.reminders",
 		"rent_management.saas.send_heartbeat",
 		"rent_management.rent_management_system.doctype.tenant_space_allotment.tenant_space_allotment.apply_rent_increases",
 	],
-	"monthly": ["rent_management.rent_management_system.billing.generate_monthly_invoices"],
+	"monthly": ["rent_management.suite.health.monthly_invoices"],
 }
 
 # scheduler_events = {
@@ -452,3 +453,6 @@ for _doctype, _event in (
 ):
 	_also(_doctype, _event, "rent_management.approvals.guard")
 _also("Rent Approval Settings", "validate", "rent_management.subscription.check_writable")
+
+_also("Property Expense", "validate", "rent_management.suite.ledger.protect_expense")
+_also("Property Expense", "on_trash", "rent_management.suite.ledger.protect_expense")

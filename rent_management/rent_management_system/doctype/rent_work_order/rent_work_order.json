@@ -1,0 +1,187 @@
+{
+ "doctype": "DocType",
+ "name": "Rent Work Order",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "subject",
+  "property",
+  "room",
+  "request",
+  "tenant",
+  "vendor",
+  "assigned_to",
+  "due_date",
+  "status",
+  "description",
+  "quote_amount",
+  "actual_cost",
+  "quote_note",
+  "requested_by",
+  "approved_by",
+  "approved_on",
+  "completed_by",
+  "completed_on",
+  "completion_note",
+  "confirmed_by",
+  "confirmed_on",
+  "expense",
+  "before_photo",
+  "after_photo"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "label": "Subject",
+   "fieldtype": "Data",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "property",
+   "label": "Property",
+   "fieldtype": "Link",
+   "options": "Rent Property",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "room",
+   "label": "Room",
+   "fieldtype": "Link",
+   "options": "Tenant Space"
+  },
+  {
+   "fieldname": "request",
+   "label": "Request",
+   "fieldtype": "Link",
+   "options": "Maintenance Request"
+  },
+  {
+   "fieldname": "tenant",
+   "label": "Tenant",
+   "fieldtype": "Link",
+   "options": "Tenant"
+  },
+  {
+   "fieldname": "vendor",
+   "label": "Vendor",
+   "fieldtype": "Link",
+   "options": "Rent Vendor"
+  },
+  {
+   "fieldname": "assigned_to",
+   "label": "Assigned To",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "due_date",
+   "label": "Due Date",
+   "fieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Draft\nPending Approval\nApproved\nIn Progress\nCompleted\nConfirmed\nCancelled",
+   "default": "Draft",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "description",
+   "label": "Description",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "quote_amount",
+   "label": "Quote Amount",
+   "fieldtype": "Currency",
+   "default": "0"
+  },
+  {
+   "fieldname": "actual_cost",
+   "label": "Actual Cost",
+   "fieldtype": "Currency",
+   "default": "0"
+  },
+  {
+   "fieldname": "quote_note",
+   "label": "Quote Note",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "requested_by",
+   "label": "Requested By",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "approved_by",
+   "label": "Approved By",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "approved_on",
+   "label": "Approved On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "completed_by",
+   "label": "Completed By",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "completed_on",
+   "label": "Completed On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "completion_note",
+   "label": "Completion Note",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "confirmed_by",
+   "label": "Confirmed By",
+   "fieldtype": "Link",
+   "options": "User"
+  },
+  {
+   "fieldname": "confirmed_on",
+   "label": "Confirmed On",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "expense",
+   "label": "Expense",
+   "fieldtype": "Link",
+   "options": "Property Expense"
+  },
+  {
+   "fieldname": "before_photo",
+   "label": "Before Photo",
+   "fieldtype": "Attach Image"
+  },
+  {
+   "fieldname": "after_photo",
+   "label": "After Photo",
+   "fieldtype": "Attach Image"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

@@ -27,6 +27,7 @@ from frappe import _
 from frappe.utils import cint, date_diff, flt, fmt_money, formatdate, getdate, nowdate
 
 from rent_management import rent_collection, subscription
+from rent_management.suite.common import note_failure
 
 SETTINGS = "Rent Management Settings"
 LOG = "Rent Message Log"
@@ -82,8 +83,15 @@ def whatsapp_number(mobile) -> str | None:
 	return digits if 11 <= len(digits) <= 15 else None
 
 
-def send_whatsapp(to: str, template: str, params: list[str]) -> str:
+def send_whatsapp(to: str, template: str, params: list[str], language=None) -> str:
 	phone_number_id, token = get_whatsapp_account()
+	if language == "hi":
+		configured = frappe.conf.get("whatsapp_templates_hi") or {}
+		if not configured.get(template):
+			raise frappe.ValidationError("Configure an approved Hindi WhatsApp template before sending.")
+		template_name = configured[template]
+	else:
+		template_name = (frappe.conf.get("whatsapp_templates") or {}).get(template, template)
 	response = requests.post(
 		f"{GRAPH_URL}/{frappe.conf.get('whatsapp_api_version') or 'v21.0'}/{phone_number_id}/messages",
 		json={
@@ -91,8 +99,8 @@ def send_whatsapp(to: str, template: str, params: list[str]) -> str:
 			"to": to,
 			"type": "template",
 			"template": {
-				"name": (frappe.conf.get("whatsapp_templates") or {}).get(template, template),
-				"language": {"code": frappe.conf.get("whatsapp_language") or "en"},
+				"name": template_name,
+				"language": {"code": language or frappe.conf.get("whatsapp_language") or "en"},
 				"components": [
 					{"type": "body", "parameters": [{"type": "text", "text": str(p)[:1000]} for p in params]}
 				],
@@ -159,6 +167,15 @@ def send(
 	message_type, tenant, text, params, invoice=None, payment=None, subject=None, html=None
 ) -> list[str]:
 	"""Send one message on every enabled channel and log each attempt."""
+	from rent_management.suite.language import tenant_language
+	from rent_management.suite.messages import HINDI, render_hindi
+
+	language = tenant_language(tenant.name)
+	if language == "hi" and message_type in HINDI:
+		text, params = render_hindi(message_type, params)
+		subject, html = text[:120], None
+	else:
+		language = "en"
 	settings = frappe.get_single(SETTINGS)
 	statuses = []
 	channels = []
@@ -183,14 +200,19 @@ def send(
 		}
 		try:
 			if channel == "WhatsApp":
-				log["provider_message_id"] = send_whatsapp(recipient, TEMPLATES[message_type], params)
+				log["provider_message_id"] = send_whatsapp(
+					recipient, TEMPLATES[message_type], params, language=language
+				)
 			else:
 				frappe.sendmail(
-					recipients=[recipient], subject=subject or text[:120], message=html or f"<p>{text}</p>"
+					recipients=[recipient],
+					subject=subject or text[:120],
+					message=html or f"<p>{frappe.utils.escape_html(text)}</p>",
 				)
 			log["status"] = "Sent"
 		except Exception as e:
 			log.update(status="Failed", error=str(e)[:1000])
+			note_failure()
 		frappe.get_doc(log).insert(ignore_permissions=True)
 		statuses.append(log["status"])
 	return statuses
@@ -278,6 +300,7 @@ def send_due_reminders():
 			send_reminder(invoice, message_type)
 		except Exception:
 			frappe.db.rollback(save_point="rent_reminder")
+			note_failure()
 			frappe.log_error(title=f"Rent reminder for {name} failed")
 
 

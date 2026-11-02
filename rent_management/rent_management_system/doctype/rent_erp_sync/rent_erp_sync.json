@@ -1,0 +1,103 @@
+{
+ "doctype": "DocType",
+ "name": "Rent ERP Sync",
+ "module": "Rent Management System",
+ "engine": "InnoDB",
+ "field_order": [
+  "source_doctype",
+  "source_name",
+  "sync_key",
+  "source_modified",
+  "status",
+  "remote_doctype",
+  "remote_name",
+  "attempts",
+  "last_attempt",
+  "error",
+  "payload",
+  "requested_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "source_doctype",
+   "label": "Source Doctype",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_name",
+   "label": "Source Name",
+   "fieldtype": "Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_key",
+   "label": "Sync Key",
+   "fieldtype": "Data",
+   "unique": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "source_modified",
+   "label": "Source Modified",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "status",
+   "label": "Status",
+   "fieldtype": "Select",
+   "options": "Queued\nSynced\nFailed",
+   "default": "Queued",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "remote_doctype",
+   "label": "Remote Doctype",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "remote_name",
+   "label": "Remote Name",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "attempts",
+   "label": "Attempts",
+   "fieldtype": "Int",
+   "default": "0"
+  },
+  {
+   "fieldname": "last_attempt",
+   "label": "Last Attempt",
+   "fieldtype": "Datetime"
+  },
+  {
+   "fieldname": "error",
+   "label": "Error",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "payload",
+   "label": "Payload",
+   "fieldtype": "Long Text"
+  },
+  {
+   "fieldname": "requested_by",
+   "label": "Requested By",
+   "fieldtype": "Link",
+   "options": "User"
+  }
+ ],
+ "track_changes": 1,
+ "autoname": "hash",
+ "permissions": [
+  {
+   "role": "Rent Manager",
+   "read": 1
+  },
+  {
+   "role": "System Manager",
+   "read": 1
+  }
+ ]
+}

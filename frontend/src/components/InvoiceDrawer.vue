@@ -29,7 +29,7 @@
 							>{{ inv.tenant_name }}</RouterLink
 						>
 						<p class="text-sm text-slate-500">
-							Room {{ inv.room }} · {{ inv.billing_month }} {{ inv.billing_year }}
+							{{ $t("Room") }} {{ inv.room }} · {{ inv.billing_month }} {{ inv.billing_year }}
 						</p>
 					</div>
 				</div>
@@ -115,7 +115,7 @@
 						<dd>{{ money(inv.final_amount) }}</dd>
 					</div>
 					<div v-if="inv.paid_amount" class="flex justify-between px-4 py-3">
-						<dt class="text-slate-600">Paid</dt>
+						<dt class="text-slate-600">{{ $t("Paid") }}</dt>
 						<dd class="text-emerald-600">− {{ money(inv.paid_amount) }}</dd>
 					</div>
 					<div
@@ -180,7 +180,7 @@
 			</div>
 
 			<div v-if="data.payments.length" class="mt-6">
-				<h3 class="text-sm font-semibold">Payments</h3>
+				<h3 class="text-sm font-semibold">{{ $t("Payments") }}</h3>
 				<ul class="mt-2 space-y-2">
 					<li
 						v-for="p in data.payments"
@@ -300,7 +300,7 @@
 					variant="success"
 					:icon="Wallet"
 					@click="openDialog('recordPayment', { invoice: inv })"
-					>Record payment</Button
+					>{{ $t("Record payment") }}</Button
 				>
 				<Button
 					v-if="inv.outstanding_amount > 0"

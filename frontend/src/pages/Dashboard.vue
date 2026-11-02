@@ -9,7 +9,7 @@
 				:icon="Plus"
 				class="max-sm:hidden"
 				@click="openDialog('recordPayment')"
-				>Record payment</Button
+				>{{ $t("Record payment") }}</Button
 			>
 		</PageHeader>
 
@@ -131,7 +131,7 @@
 			</div>
 
 			<div class="card p-5">
-				<h2 class="font-semibold text-slate-900">Rooms</h2>
+				<h2 class="font-semibold text-slate-900">{{ $t("Rooms") }}</h2>
 				<p class="min-h-5 text-sm text-slate-500">
 					{{ d ? `${d.rooms.total} rooms, ${d.tenants} tenants staying` : "" }}
 				</p>
@@ -185,7 +185,7 @@
 						<div class="min-w-0 flex-1">
 							<p class="truncate text-sm font-medium">{{ inv.tenant_name }}</p>
 							<p class="text-xs text-slate-500">
-								Room {{ inv.room }} · {{ inv.billing_month }} ·
+								{{ $t("Room") }} {{ inv.room }} · {{ inv.billing_month }} ·
 								<span class="text-rose-600"
 									>{{ daysBetween(inv.due_date) }}d late</span
 								>

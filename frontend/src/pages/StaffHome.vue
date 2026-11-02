@@ -208,7 +208,7 @@
 								<div class="min-w-0 flex-1">
 									<p class="truncate font-medium">{{ r.subject }}</p>
 									<p class="text-xs text-slate-500">
-										Room {{ r.room || "–" }} · {{ r.priority }} priority
+										{{ $t("Room") }} {{ r.room || "–" }} · {{ r.priority }} priority
 									</p>
 								</div>
 								<StatusBadge :status="r.status" />
